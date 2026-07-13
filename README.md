@@ -1,23 +1,25 @@
-# opensen
+# OpenSen
+
+**Open Sentence** — a language learning ecosystem for memorizing English through sentence and phrase **chunking**.
+
+Learners internalize whole sentences and native pre-assembled phrases so language is retrieved automatically, not built word-by-word at speaking time.
+
+## Features
+
+- **Dialog Builder** — memorization-ready dialogs and speeches
+- **Chunk Library** — high-frequency native phrases with swap patterns
+- **Situation Coverage** — real-world scenarios (small talk, ordering, travel, …)
+- **Practice Plan** — spaced repetition schedules
+- **Anki export** — study chunks outside the app
+
+Full product docs: [`docs/`](docs/).
 
 ## Mobile app
 
-The Flutter mobile app lives in [`mobile/`](mobile/).
+The Flutter app lives in [`mobile/`](mobile/).
 
 ```bash
 cd mobile
 flutter pub get
 flutter run
 ```
-
-## Getting Started
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
