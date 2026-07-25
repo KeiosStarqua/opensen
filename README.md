@@ -1,15 +1,17 @@
 # OpenSen
 
-**Open Sentence** — a language learning ecosystem for memorizing English through sentence and phrase **chunking**.
+**Open Sentence** — speak English without translating in your head.
 
-Learners internalize whole sentences and native pre-assembled phrases so language is retrieved automatically, not built word-by-word at speaking time.
+OpenSen turns conversations you actually need into reusable sentence patterns you can remember, adapt, and speak automatically. **Chunking** is the mechanism: whole sentences and native pre-assembled phrases with swappable slots, retrieved automatically instead of built word-by-word while speaking.
 
 ## Features
 
 - **Dialog Builder** — memorization-ready dialogs and speeches
 - **Chunk Library** — high-frequency native phrases with swap patterns
 - **Situation Coverage** — real-world scenarios (small talk, ordering, travel, …)
-- **Practice Plan** — spaced repetition schedules
+- **Substitution Drills** — keep the frame, swap the slot
+- **Recall Practice** — produce the sentence, not just recognize it
+- **Practice Plan** — spaced repetition schedules (FSRS, per chunk)
 - **Anki export** — study chunks outside the app
 
 Full product docs: [`docs/`](docs/).
@@ -22,4 +24,14 @@ The Flutter app lives in [`mobile/`](mobile/).
 cd mobile
 flutter pub get
 flutter run
+```
+
+## Backend API
+
+Hono on Vercel lives in [`backend/`](backend/).
+
+```bash
+cd backend
+npm install
+npm run dev
 ```

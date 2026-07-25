@@ -1,6 +1,6 @@
 # OpenSen
 
-**OpenSen** (Open Sentence) is a language learning ecosystem that helps learners memorize English through the **chunking method**: memorizing whole sentences and pre-assembled phrases so they retrieve language automatically rather than constructing it word-by-word.
+**OpenSen** (Open Sentence) is a situational speaking-reflex system for English: learners turn conversations they actually need into sentence patterns they can speak automatically. The **chunking method** is the mechanism — whole sentences and pre-assembled phrases with swappable slots, retrieved automatically rather than constructed word-by-word.
 
 ## Product features
 
@@ -9,7 +9,9 @@
 | Dialog Builder | Generate memorization-ready dialogs and speeches |
 | Chunk Library | High-frequency native phrases with swap patterns |
 | Situation Coverage | Real-world scenarios (small talk, ordering, travel, etc.) |
-| Practice Plan | Spaced repetition based practice schedules |
+| Substitution Drills | Keep the frame, swap the slot |
+| Recall Practice | Produce the sentence instead of recognizing it |
+| Practice Plan | Spaced repetition schedules (FSRS, per chunk) |
 | Anki export | Take your chunks anywhere |
 
 Durable product detail: [`docs/`](docs/).
@@ -20,6 +22,7 @@ Durable product detail: [`docs/`](docs/).
 |------|------|
 | [`docs/`](docs/) | Product documentation |
 | [`mobile/`](mobile/) | Flutter mobile app |
+| [`backend/`](backend/) | Hono API on Vercel |
 
 ---
 
@@ -109,3 +112,4 @@ When the user requests a durable behavior change, record it here or in the relev
 |------|-------|
 | [`docs/AGENTS.md`](docs/AGENTS.md) | Product and project documentation |
 | [`mobile/AGENTS.md`](mobile/AGENTS.md) | Flutter mobile client |
+| [`backend/AGENTS.md`](backend/AGENTS.md) | Hono API (Vercel) |

@@ -1,0 +1,6 @@
+codedb.snapshot
+
+# env
+.env
+.env.*
+!.env.example

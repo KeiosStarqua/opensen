@@ -1,0 +1,23 @@
+import type { Context } from 'hono'
+import { HTTPException } from 'hono/http-exception'
+
+export function notImplemented(feature: string): never {
+  throw new HTTPException(501, {
+    message: `${feature} is not implemented yet`,
+  })
+}
+
+export function errorHandler(err: Error, c: Context) {
+  if (err instanceof HTTPException) {
+    return c.json(
+      {
+        error: err.message,
+        status: err.status,
+      },
+      err.status,
+    )
+  }
+
+  console.error(err)
+  return c.json({ error: 'Internal Server Error', status: 500 }, 500)
+}
