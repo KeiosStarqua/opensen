@@ -105,7 +105,18 @@ Default section order:
 
 ## User Preferences
 
-When the user requests a durable behavior change, record it here or in the relevant child AGENTS.md
+When the user requests a durable behavior change, record it here or in the relevant child AGENTS.md.
+
+### Coding principles
+
+Apply these on all product code (`backend/`, `mobile/`, `web/`). Prefer depth and clear boundaries over ceremony; do not invent layers or patterns that the problem does not need.
+
+- **Clean Architecture** — Depend inward: domain and use-cases must not import frameworks, HTTP, DB, or UI. Push I/O and vendors to the edges; wire them at composition roots (routes, app bootstrap, DI). New features keep business rules testable without Vercel, Flutter, or OpenRouter.
+- **SOLID** — Single responsibility per module; open for extension via seams, closed for casual rewrite; subtype/interface contracts that do not surprise callers; prefer focused interfaces; inject abstractions at boundaries (providers, repositories, clocks) instead of hardcoding concretes.
+- **Design patterns** — When a recurring structure fits, pick from the [Refactoring Guru catalog](https://refactoring.guru/design-patterns/catalog) (creational / structural / behavioral). Use a pattern only when it reduces coupling or clarifies intent; never add Factory/Strategy/Observer “because Clean Architecture.” Name the pattern in a short comment only if the code alone is unclear.
+- **Deep modules** — Follow [Modules Should Be Deep](https://softengbook.org/articles/deep-modules) (Ousterhout via Valente): a module’s **interface should be much simpler than its implementation**. Prefer few, powerful operations with clear contracts over many shallow wrappers that leak internals. Avoid shallow modules whose API is almost as complex as the body. Hide complexity behind stable, small surfaces (functions, classes, packages).
+
+Child `AGENTS.md` files may add stack-specific seams (e.g. AI only via `backend/src/ai/`); they must not weaken these principles.
 
 ## Child DOX Index
 
