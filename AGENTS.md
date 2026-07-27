@@ -23,6 +23,7 @@ Durable product detail: [`docs/`](docs/).
 | [`docs/`](docs/) | Product documentation |
 | [`mobile/`](mobile/) | Flutter mobile app |
 | [`backend/`](backend/) | Hono API on Vercel |
+| [`web/`](web/) | Next.js landing + web app |
 
 ---
 
@@ -113,3 +114,4 @@ When the user requests a durable behavior change, record it here or in the relev
 | [`docs/AGENTS.md`](docs/AGENTS.md) | Product and project documentation |
 | [`mobile/AGENTS.md`](mobile/AGENTS.md) | Flutter mobile client |
 | [`backend/AGENTS.md`](backend/AGENTS.md) | Hono API (Vercel) |
+| [`web/AGENTS.md`](web/AGENTS.md) | Next.js landing + web app |

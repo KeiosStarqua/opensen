@@ -35,3 +35,13 @@ cd backend
 npm install
 npm run dev
 ```
+
+## Web
+
+Next.js landing + web app lives in [`web/`](web/).
+
+```bash
+cd web
+npm install
+npm run dev
+```
