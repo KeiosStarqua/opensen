@@ -29,17 +29,33 @@ Open `http://localhost:3000` — root returns the API index; `GET /health` is th
 | `npm run build` | `vercel build` |
 | `npm run deploy` | `vercel deploy` |
 
-## Routes (stubs)
+## AI (OpenRouter first)
+
+Multi-provider surface under `src/ai/`. Set in `.env`:
+
+```bash
+AI_PROVIDER=openrouter
+AI_MODEL=openai/gpt-4o-mini
+OPENROUTER_API_KEY=sk-or-...
+```
+
+Generate a pack (Chinese crash defaults: `vi` → `zh`):
+
+```bash
+curl -s http://localhost:3000/api/dialogues/generate \
+  -H 'content-type: application/json' \
+  -d '{"situation":"Gặp sếp lần đầu ở Thâm Quyến","nativeLanguage":"vi","targetLanguage":"zh","level":"beginner"}'
+```
+
+## Routes
 
 | Prefix | Feature |
 |--------|---------|
 | `/health` | Liveness |
-| `/api/situations` | Situation Coverage |
-| `/api/chunks` | Chunk Library |
-| `/api/dialogues` | Dialog Builder |
-| `/api/practice` | Practice Plan (SRS) |
-| `/api/export` | Anki export |
-
-List endpoints return empty collections; detail/mutation routes return `501` until implemented.
+| `/api/situations` | Situation Coverage (stub) |
+| `/api/chunks` | Chunk Library (stub) |
+| `/api/dialogues` | Dialog Builder — `POST /generate` live |
+| `/api/practice` | Practice Plan (SRS, stub) |
+| `/api/export` | Anki export (stub) |
 
 Schema contract: [`docs/database-architecture.md`](../docs/database-architecture.md).

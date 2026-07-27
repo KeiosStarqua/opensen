@@ -18,13 +18,15 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 - Package name: `opensen-backend` (see `package.json`)
 - Route prefixes match product surfaces: `/api/situations`, `/api/chunks`, `/api/dialogues`, `/api/practice`, `/api/export`
 - Prefer Web Standards APIs (Request/Response); avoid Node-only APIs that break Vercel Functions unless required
-- Keep stubs returning empty lists or `501` until persistence/AI layers land — do not fake domain data as if production-ready
+- List/detail stubs may return empty collections or `501` until persistence lands; `POST /api/dialogues/generate` is live via the AI layer
+- AI calls go through `src/ai/` only — never hardcode a vendor HTTP client in a route
 
 ## Work Guidance
 
 - Map new endpoints to tables/layers in `docs/database-architecture.md`
 - Env vars: document in `.env.example`; never commit secrets
 - CORS origins via `CORS_ORIGINS` (comma-separated)
+- AI: `AI_PROVIDER` + `AI_MODEL`; OpenRouter needs `OPENROUTER_API_KEY`
 
 ## Verification
 
@@ -32,4 +34,6 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 
 ## Child DOX Index
 
-No nested AGENTS.md yet. Add under `src/` when a module boundary gains its own rules (e.g. db/, ai/, auth/).
+| Path | Scope |
+|------|-------|
+| [`src/ai/AGENTS.md`](src/ai/AGENTS.md) | AI providers + dialogue generate pipeline |

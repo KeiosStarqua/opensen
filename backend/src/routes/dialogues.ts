@@ -1,4 +1,9 @@
 import { Hono } from 'hono'
+import { HTTPException } from 'hono/http-exception'
+import { createAiProvider } from '../ai/create-provider.js'
+import { generateDialoguePack } from '../ai/pipeline/generate-dialogue.js'
+import { generateDialogueRequestSchema } from '../ai/pipeline/schemas.js'
+import { loadEnv } from '../lib/env.js'
 import { notImplemented } from '../lib/errors.js'
 
 /**
@@ -16,6 +21,25 @@ dialogues.get('/:id', (c) => {
   notImplemented(`GET /api/dialogues/${id}`)
 })
 
-dialogues.post('/generate', (c) => {
-  notImplemented('POST /api/dialogues/generate')
+dialogues.post('/generate', async (c) => {
+  let body: unknown
+  try {
+    body = await c.req.json()
+  } catch {
+    throw new HTTPException(400, { message: 'Invalid JSON body' })
+  }
+
+  const parsed = generateDialogueRequestSchema.safeParse(body)
+  if (!parsed.success) {
+    throw new HTTPException(400, {
+      message: parsed.error.issues
+        .map((issue) => `${issue.path.join('.') || 'body'}: ${issue.message}`)
+        .join('; '),
+    })
+  }
+
+  const env = loadEnv()
+  const provider = createAiProvider(env)
+  const result = await generateDialoguePack(provider, parsed.data)
+  return c.json(result, 201)
 })
