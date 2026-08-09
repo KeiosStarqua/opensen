@@ -57,7 +57,7 @@ Split into two Next.js projects only when there is a measured reason: separate t
 
 ## Examples
 
-**Do:** one package at `web/` with App Router files under `web/app/` (today: root `page.tsx` / `layout.tsx`). When marketing and authenticated UI diverge, add sibling route-group folders under `web/app/` rather than a second Next package. Package name in `web/package.json` is `opensen-web`.
+**Do:** one package at `web/` with App Router files under `web/app/`. Marketing and trial entry now use route groups: `(marketing)/page.tsx` for `/` and `(app)/onboarding/page.tsx` for `/onboarding` — see [`nextjs-marketing-landing-route-groups.md`](./nextjs-marketing-landing-route-groups.md) for the concrete KEI-146 layout. Package name in `web/package.json` is `opensen-web`.
 
 Local workflow (from `web/AGENTS.md`): `npm run dev`; verify with `npm run lint` and `npm run build`.
 
