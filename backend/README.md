@@ -11,6 +11,8 @@ cp .env.example .env
 ```
 
 Uses [Vercel CLI](https://vercel.com/docs/cli) via `npx` (or install globally).
+Keep `typescript` on the pinned 6.x release: Vercel's Node builder requires
+the JavaScript compiler API, which the native TypeScript 7 package does not provide.
 
 ## Develop
 
