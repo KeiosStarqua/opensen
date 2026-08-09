@@ -18,21 +18,28 @@ import { chunks, situations } from './content.js'
 import { users } from './users.js'
 
 /** Phase 2 adds `audio_asset_id` FK when `audio_assets` exists. */
-export const dialogues = pgTable('dialogues', {
-  id: uuid('id').primaryKey(),
-  situationId: uuid('situation_id')
-    .notNull()
-    .references(() => situations.id, { onDelete: 'cascade' }),
-  title: text('title').notNull(),
-  level: text('level').notNull(),
-  createdBy: text('created_by').notNull(),
-  ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'set null' }),
-  visibility: visibilityEnum('visibility').notNull().default('private'),
-  sourceTemplateId: uuid('source_template_id').references(
-    (): AnyPgColumn => dialogues.id,
-    { onDelete: 'set null' },
-  ),
-})
+export const dialogues = pgTable(
+  'dialogues',
+  {
+    id: uuid('id').primaryKey(),
+    situationId: uuid('situation_id')
+      .notNull()
+      .references(() => situations.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    level: text('level').notNull(),
+    createdBy: text('created_by').notNull(),
+    requestId: uuid('request_id'),
+    ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'set null' }),
+    visibility: visibilityEnum('visibility').notNull().default('private'),
+    sourceTemplateId: uuid('source_template_id').references(
+      (): AnyPgColumn => dialogues.id,
+      { onDelete: 'set null' },
+    ),
+  },
+  (table) => [
+    uniqueIndex('dialogues_request_id_uidx').on(table.requestId),
+  ],
+)
 
 /** Phase 2 adds `audio_asset_id` FK when `audio_assets` exists. */
 export const dialogueLines = pgTable(
@@ -69,19 +76,28 @@ export const lineChunks = pgTable(
   ],
 )
 
-export const aiGenerations = pgTable('ai_generations', {
-  id: uuid('id').primaryKey(),
-  requestId: uuid('request_id').notNull(),
-  step: text('step').notNull(),
-  model: text('model').notNull(),
-  promptVersion: text('prompt_version').notNull(),
-  schemaVersion: text('schema_version').notNull(),
-  input: jsonb('input').notNull(),
-  output: jsonb('output').notNull(),
-  validationVerdict: validationVerdictEnum('validation_verdict').notNull(),
-  cost: doublePrecision('cost'),
-  latencyMs: integer('latency_ms'),
-})
+export const aiGenerations = pgTable(
+  'ai_generations',
+  {
+    id: uuid('id').primaryKey(),
+    requestId: uuid('request_id').notNull(),
+    step: text('step').notNull(),
+    model: text('model').notNull(),
+    promptVersion: text('prompt_version').notNull(),
+    schemaVersion: text('schema_version').notNull(),
+    input: jsonb('input').notNull(),
+    output: jsonb('output').notNull(),
+    validationVerdict: validationVerdictEnum('validation_verdict').notNull(),
+    cost: doublePrecision('cost'),
+    latencyMs: integer('latency_ms'),
+  },
+  (table) => [
+    uniqueIndex('ai_generations_request_id_step_uidx').on(
+      table.requestId,
+      table.step,
+    ),
+  ],
+)
 
 export const embeddings = pgTable('embeddings', {
   id: uuid('id').primaryKey(),

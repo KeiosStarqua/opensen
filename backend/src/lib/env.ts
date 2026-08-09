@@ -36,6 +36,9 @@ const envSchema = z.object({
     .transform((value) => (value?.trim() ? value.trim() : undefined))
     .pipe(z.string().url().optional()),
   OPENROUTER_APP_NAME: z.string().min(1).default('OpenSen'),
+  DIALOGUE_PERSISTENCE_MODE: z
+    .enum(['disabled', 'internal', 'ephemeral'])
+    .default('disabled'),
 })
 
 const databaseEnvSchema = z.object({
@@ -99,6 +102,13 @@ function extractDatabaseName(url: string): string {
   return pathname.split('/')[0] ?? ''
 }
 
-function isDesignatedTestDatabase(databaseName: string): boolean {
+export function isDesignatedTestDatabase(databaseName: string): boolean {
   return databaseName === 'opensen_test' || databaseName.endsWith('_test')
+}
+
+export function isDialoguePersistenceAllowed(env: Env): boolean {
+  return (
+    env.DIALOGUE_PERSISTENCE_MODE === 'internal' ||
+    env.DIALOGUE_PERSISTENCE_MODE === 'ephemeral'
+  )
 }

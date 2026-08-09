@@ -11,7 +11,7 @@ export type Database =
 
 let databaseInstance: Database | undefined
 
-function isNeonHostedDatabaseUrl(databaseUrl: string): boolean {
+export function isNeonHostedDatabaseUrl(databaseUrl: string): boolean {
   try {
     return new URL(databaseUrl).hostname.endsWith('.neon.tech')
   } catch {
