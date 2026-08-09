@@ -4,3 +4,4 @@ codedb.snapshot
 .env
 .env.*
 !.env.example
+.claude
