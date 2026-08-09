@@ -81,12 +81,12 @@ The Phase 1 schema already stores FSRS state, but no API reads it, applies a rat
 
 ### Key Technical Decisions
 
-- KTD1. **Use the current `ts-fsrs` package as the only scheduler.** The practice domain adapts database rows to TS-FSRS cards and ratings rather than recreating interval, stability, or difficulty formulas. This satisfies R4–R7 and the product requirement to not hand-roll FSRS.
+- KTD1. **Use the current `ts-fsrs` package as the only scheduler.** The practice domain adapts database rows to TS-FSRS cards and ratings rather than recreating interval, stability, or difficulty formulas. The public Forgot rating maps to `Rating.Again`; Hard, Good, and Easy map directly. This satisfies R4–R7 and the product requirement to not hand-roll FSRS.
 - KTD2. **Keep scheduling state mutable on `user_chunks` and treat `review_history` as append-only evidence.** Derive elapsed and scheduled days from the persisted review timestamps when creating the card and log entry. Do not introduce a stored interval. This satisfies R5–R7.
 - KTD3. **Put FSRS mapping and practice orchestration behind pure domain interfaces.** The Hono route resolves the actor and request data. A database adapter owns Drizzle queries and atomic writes. The scheduler adapter and use cases remain independent of Hono and Drizzle.
 - KTD4. **Require an injected trusted practice principal and fail closed in default route composition.** Unit and integration tests inject a known principal. Production activation waits for the authentication issue to install a resolver. A request body, query string, or arbitrary header cannot select another user's state. This satisfies R3, R8, and R10.
 - KTD5. **Use an opaque cursor derived from the ordered due boundary.** Stable ordering by effective due timestamp and chunk ID prevents duplicate or missing rows between normal page requests without exposing database query structure.
-- KTD6. **Encapsulate the review write in one driver-aware repository operation.** The adapter must prove that `user_chunks` update and `review_history` insert commit or fail together for each enabled database driver. This follows the established Neon/postgres.js persistence boundary.
+- KTD6. **Encapsulate the review write in one driver-aware repository operation.** The adapter must prove that `user_chunks` update and `review_history` insert commit or fail together for each enabled database driver. It must condition the write on the persisted scheduling revision so duplicate or concurrent submissions cannot append history for a stale state. This follows the established Neon/postgres.js persistence boundary.
 
 ### Assumptions
 
@@ -183,7 +183,7 @@ sequenceDiagram
   2. Treat `new` rows without a next-review timestamp as due, then order due entries and cursor boundaries deterministically.
   3. Compute the progress projection through learner-scoped state and review-history aggregates without denormalizing counters.
   4. Hide driver-specific atomic-write mechanics behind one repository operation that updates `user_chunks` and inserts `review_history`.
-  5. Detect absent enrollment or an invalid concurrent state transition before writing history.
+  5. Detect absent enrollment, duplicate submission, or an invalid concurrent state transition before writing history.
 - **Patterns to follow:** `backend/src/db/client.ts` for lazy typed database creation; `backend/src/db/dialogue-pack-writer.ts` for a database writer boundary and transaction investigation.
 - **Test scenarios:**
   - Due selection includes a new unscheduled enrollment and overdue enrollment, excludes a future enrollment, and never returns a different learner's rows.
@@ -192,6 +192,7 @@ sequenceDiagram
   - A valid scheduled transition changes the mutable row and creates one history row whose rating, state-before, elapsed days, and scheduled days match the pre-transition state.
   - A forced history insert or state-update failure leaves neither the changed scheduling state nor a partial history row committed.
   - An unknown or unowned chunk cannot create a review-history row.
+  - Two submissions based on the same persisted schedule cannot both append history; the losing request returns a conflict without mutating either table.
 - **Verification:** The disposable PostgreSQL suite proves scoped reads, aggregate values, foreign keys, and review atomicity after migrations.
 
 ### U3. Implement and test the three Hono practice endpoints
@@ -241,7 +242,7 @@ sequenceDiagram
 | Dependency and type check | U1–U4 | `npm run typecheck` passes from `backend/` after adding `ts-fsrs`. |
 | Domain and route units | U1, U3 | `npm run test` passes with FSRS mappings, validation, pagination, and ownership cases. |
 | Database integration | U2–U4 | `npm run test:db` passes with `TEST_DATABASE_URL` targeting the disposable pgvector-enabled database. |
-| Atomicity proof | U2 | A forced review write failure leaves the schedule row and review history unchanged. |
+| Atomicity and concurrency proof | U2 | A forced review write failure leaves the schedule row and review history unchanged, and a stale concurrent submission cannot append a second history row. |
 | Isolation proof | U2–U3 | A learner cannot read, aggregate, or review another learner's enrollment. |
 | Rollout guard | U3–U4 | The default app rejects practice requests without a trusted principal and documentation states the production dependency. |
 
