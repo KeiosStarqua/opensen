@@ -39,8 +39,8 @@ The Phase 1 schema already stores FSRS state, but no API reads it, applies a rat
 **Due queue**
 
 - R1. `GET /api/practice/due` returns the caller's enrolled chunks whose `next_review` is at or before the request time, including enrolled chunks in the `new` state with no scheduled review.
-- R2. The due queue orders items deterministically by due time and stable chunk identity, and returns an opaque cursor for a following page when more rows exist.
-- R3. The due queue never returns another learner's scheduling state or content.
+- R2. The due queue orders items deterministically by due time and stable chunk identity, returns an opaque cursor for a following page when more rows exist, and enforces a default page size of 20 with a maximum of 100.
+- R3. The due queue never returns another learner's scheduling state or content, and returns chunk content only when it is public or owned by the authenticated learner.
 
 **Review scheduling**
 
@@ -86,7 +86,8 @@ The Phase 1 schema already stores FSRS state, but no API reads it, applies a rat
 - KTD3. **Put FSRS mapping and practice orchestration behind pure domain interfaces.** The Hono route resolves the actor and request data. A database adapter owns Drizzle queries and atomic writes. The scheduler adapter and use cases remain independent of Hono and Drizzle.
 - KTD4. **Require an injected trusted practice principal and fail closed in default route composition.** Unit and integration tests inject a known principal. Production activation waits for the authentication issue to install a resolver. A request body, query string, or arbitrary header cannot select another user's state. This satisfies R3, R8, and R10.
 - KTD5. **Use an opaque cursor derived from the ordered due boundary.** Stable ordering by effective due timestamp and chunk ID prevents duplicate or missing rows between normal page requests without exposing database query structure.
-- KTD6. **Encapsulate the review write in one driver-aware repository operation.** The adapter must prove that `user_chunks` update and `review_history` insert commit or fail together for each enabled database driver. It must condition the write on the persisted scheduling revision so duplicate or concurrent submissions cannot append history for a stale state. This follows the established Neon/postgres.js persistence boundary.
+- KTD6. **Cap due pages at 100 items.** The API defaults to 20 items and validates the client limit before querying. This bounds the joined response while keeping the existing cursor shape.
+- KTD7. **Encapsulate the review write in one driver-aware repository operation.** The adapter must prove that `user_chunks` update and `review_history` insert commit or fail together for each enabled database driver. It must condition the write on the persisted scheduling revision so duplicate or concurrent submissions cannot append history for a stale state. This follows the established Neon/postgres.js persistence boundary.
 
 ### Assumptions
 
@@ -179,15 +180,18 @@ sequenceDiagram
 - **Dependencies:** U1.
 - **Files:** `backend/src/db/practice-repository.ts`, `backend/src/db/practice-repository.test.ts`, `backend/src/db/practice-repository.integration.test.ts`, `backend/src/db/client.ts`.
 - **Approach:**
-  1. Query only by the resolved learner ID and join the enrolled chunk fields required by the due response.
+  1. Query only by the resolved learner ID and join chunk fields only when the chunk is public or owned by that learner.
   2. Treat `new` rows without a next-review timestamp as due, then order due entries and cursor boundaries deterministically.
   3. Compute the progress projection through learner-scoped state and review-history aggregates without denormalizing counters.
-  4. Hide driver-specific atomic-write mechanics behind one repository operation that updates `user_chunks` and inserts `review_history`.
-  5. Detect absent enrollment, duplicate submission, or an invalid concurrent state transition before writing history.
+  4. Apply the validated page limit before loading due rows.
+  5. Hide driver-specific atomic-write mechanics behind one repository operation that updates `user_chunks` and inserts `review_history`.
+  6. Detect absent enrollment, duplicate submission, or an invalid concurrent state transition before writing history.
 - **Patterns to follow:** `backend/src/db/client.ts` for lazy typed database creation; `backend/src/db/dialogue-pack-writer.ts` for a database writer boundary and transaction investigation.
 - **Test scenarios:**
   - Due selection includes a new unscheduled enrollment and overdue enrollment, excludes a future enrollment, and never returns a different learner's rows.
+  - An enrollment that points to another learner's private chunk cannot disclose that chunk's content.
   - Cursor pagination preserves due-time and chunk-ID order across adjacent pages without repeating an item.
+  - An absent, non-positive, or oversized limit resolves to the default or maximum page size and cannot expand the due response beyond 100 items.
   - The progress projection separates all four statuses, counts due items, and counts only review-history rows in the current UTC day.
   - A valid scheduled transition changes the mutable row and creates one history row whose rating, state-before, elapsed days, and scheduled days match the pre-transition state.
   - A forced history insert or state-update failure leaves neither the changed scheduling state nor a partial history row committed.
@@ -204,13 +208,13 @@ sequenceDiagram
 - **Files:** `backend/src/routes/practice.ts`, `backend/src/routes/practice.test.ts`, `backend/src/routes/practice.integration.test.ts`, `backend/src/index.ts`.
 - **Approach:**
   1. Turn the practice router into an injectable factory so tests supply a clock, trusted principal resolver, service, and repository.
-  2. Validate rating bodies and cursor input at the HTTP boundary before invoking the service.
+  2. Validate rating bodies, cursor input, and due-page limits at the HTTP boundary before invoking the service.
   3. Keep response DTOs limited to learner-visible chunk, schedule, review-result, and progress data rather than exposing database records.
   4. Compose the default application router with a fail-closed principal resolver until authentication supplies a production identity.
   5. Preserve the `/api/practice` route registration and central error-handler convention.
 - **Patterns to follow:** `backend/src/routes/dialogues.ts`, `backend/src/routes/dialogues.test.ts`, and `backend/src/lib/errors.ts`.
 - **Test scenarios:**
-  - A trusted learner receives a due response with deterministic pagination and an opaque next cursor when more items remain.
+  - A trusted learner receives a due response with deterministic pagination, an opaque next cursor when more items remain, and no more than the enforced page maximum.
   - A valid review body invokes one domain review command and returns the updated scheduling projection.
   - Invalid JSON, invalid rating, malformed cursor, missing principal, and unowned chunk do not invoke persistence.
   - The plan response exposes only the requesting learner's state counts, due count, and UTC-day completed-review count.
