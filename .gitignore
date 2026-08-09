@@ -5,3 +5,4 @@ codedb.snapshot
 .env.*
 !.env.example
 .claude
+.neon
