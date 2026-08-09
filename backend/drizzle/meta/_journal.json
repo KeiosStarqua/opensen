@@ -15,6 +15,13 @@
       "when": 1786268042022,
       "tag": "0001_phase1_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786268045000,
+      "tag": "0002_dialogue_request_provenance",
+      "breakpoints": true
     }
   ]
 }

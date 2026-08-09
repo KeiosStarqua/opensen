@@ -20,7 +20,7 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 - Keep `typescript` pinned to the 6.x line until Vercel's Node builder supports TypeScript 7's native compiler API.
 - Route prefixes match product surfaces: `/api/situations`, `/api/chunks`, `/api/dialogues`, `/api/practice`, `/api/export`
 - Prefer Web Standards APIs (Request/Response); avoid Node-only APIs that break Vercel Functions unless required
-- List/detail stubs may return empty collections or `501` until persistence lands; `POST /api/dialogues/generate` is live via the AI layer
+- List/detail stubs may return empty collections or `501` until persistence lands; `POST /api/dialogues/generate` is live via the AI layer and can persist when `DIALOGUE_PERSISTENCE_MODE` is `internal` or `ephemeral`
 - AI calls go through `src/ai/` only — never hardcode a vendor HTTP client in a route
 - Runtime database access: lazy `getDatabase()` in `src/db/client.ts` — Neon hosts use `drizzle-orm/neon-http`; local `postgresql://` URLs use postgres.js. Routes that do not persist data must not require `DATABASE_URL` at startup.
 - Migrations: checked-in SQL under `drizzle/`; apply with `npm run db:migrate` using `MIGRATION_DATABASE_URL` or `DATABASE_URL`
@@ -30,6 +30,7 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 - Map new endpoints to tables/layers in `docs/database-architecture.md`
 - Env vars: document in `.env.example`; never commit secrets
 - CORS origins via `CORS_ORIGINS` (comma-separated)
+- `DIALOGUE_PERSISTENCE_MODE` — `disabled` (default), `internal`, or `ephemeral`; persistence runs only in the latter two until authenticated ownership ships
 - AI: `AI_PROVIDER` + `AI_MODEL`; OpenRouter needs `OPENROUTER_API_KEY`
 - Database env: `DATABASE_URL` (runtime), optional `MIGRATION_DATABASE_URL` (DDL), `TEST_DATABASE_URL` (integration tests only — must target `opensen_test` or `*_test`)
 

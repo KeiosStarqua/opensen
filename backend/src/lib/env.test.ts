@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  isDialoguePersistenceAllowed,
   loadDatabaseEnv,
   loadEnv,
   loadMigrationEnv,
@@ -17,6 +18,7 @@ describe('loadEnv', () => {
 
     expect(env.AI_PROVIDER).toBe('openrouter')
     expect(env.CORS_ORIGINS).toContain('http://localhost:3000')
+    expect(env.DIALOGUE_PERSISTENCE_MODE).toBe('disabled')
   })
 })
 
@@ -54,6 +56,29 @@ describe('loadMigrationEnv', () => {
       DATABASE_URL: env.DATABASE_URL,
       MIGRATION_DATABASE_URL: env.MIGRATION_DATABASE_URL,
     })).toBe('postgresql://user:pass@localhost:5432/opensen_direct')
+  })
+})
+
+describe('isDialoguePersistenceAllowed', () => {
+  it('allows internal and ephemeral modes only', () => {
+    expect(
+      isDialoguePersistenceAllowed({
+        ...loadEnv({ OPENROUTER_APP_NAME: 'OpenSen' }),
+        DIALOGUE_PERSISTENCE_MODE: 'internal',
+      }),
+    ).toBe(true)
+    expect(
+      isDialoguePersistenceAllowed({
+        ...loadEnv({ OPENROUTER_APP_NAME: 'OpenSen' }),
+        DIALOGUE_PERSISTENCE_MODE: 'ephemeral',
+      }),
+    ).toBe(true)
+    expect(
+      isDialoguePersistenceAllowed({
+        ...loadEnv({ OPENROUTER_APP_NAME: 'OpenSen' }),
+        DIALOGUE_PERSISTENCE_MODE: 'disabled',
+      }),
+    ).toBe(false)
   })
 })
 
