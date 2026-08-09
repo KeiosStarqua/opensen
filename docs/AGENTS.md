@@ -9,6 +9,7 @@ Owns durable **product and project documentation** for OpenSen: positioning, lea
 - Positioning, scope boundaries, metrics, and roadmap live in [`product-strategy.md`](product-strategy.md)
 - Learning model and feature descriptions live in [`product.md`](product.md) and [`features.md`](features.md)
 - Data model and content-graph architecture contracts live in [`database-architecture.md`](database-architecture.md)
+- Documented solutions to past problems (architecture decisions, tooling, patterns) live in [`solutions/`](solutions/), organized by category with YAML frontmatter
 - Repository entry [`README.md`](../README.md) stays short and links here for depth
 - Root [`AGENTS.md`](../AGENTS.md) holds repo-wide DOX rules and the top-level Child DOX Index
 
@@ -34,3 +35,4 @@ Owns durable **product and project documentation** for OpenSen: positioning, lea
 | [`product.md`](product.md) | Learning model and chunking rationale |
 | [`features.md`](features.md) | Feature catalog and relationships |
 | [`database-architecture.md`](database-architecture.md) | Content graph + learning engine data model |
+| [`solutions/`](solutions/) | Documented solutions to past problems (architecture patterns, tooling decisions) |
