@@ -1,5 +1,11 @@
 import type { AiProvider } from '../types.js'
 import {
+  buildGeneratedPack,
+  buildPipelineTraces,
+  type GeneratedPack,
+  type PipelineTrace,
+} from '../../dialogue-packs/generated-pack.js'
+import {
   extractedChunksSchema,
   generatedDialogueSchema,
   normalizedSituationSchema,
@@ -18,6 +24,8 @@ export type GenerateDialogueResult = {
     model: string
     steps: Array<{ step: string; model: string }>
   }
+  pack: GeneratedPack
+  traces: PipelineTrace[]
 }
 
 function langLabel(code: string): string {
@@ -42,6 +50,14 @@ export async function generateDialoguePack(
   input: GenerateDialogueRequest,
 ): Promise<GenerateDialogueResult> {
   const steps: Array<{ step: string; model: string }> = []
+  const models: Record<
+    'situation_normalization' | 'dialogue_generation' | 'chunk_extraction',
+    string
+  > = {
+    situation_normalization: '',
+    dialogue_generation: '',
+    chunk_extraction: '',
+  }
   const l1 = langLabel(input.nativeLanguage)
   const l2 = langLabel(input.targetLanguage)
 
@@ -75,6 +91,7 @@ export async function generateDialoguePack(
     ],
   })
   steps.push({ step: 'situation_normalization', model: normalized.model })
+  models.situation_normalization = normalized.model
 
   const dialogue = await provider.completeJson({
     schemaName: 'generated_dialogue',
@@ -100,6 +117,7 @@ export async function generateDialoguePack(
     ],
   })
   steps.push({ step: 'dialogue_generation', model: dialogue.model })
+  models.dialogue_generation = dialogue.model
 
   const chunks = await provider.completeJson({
     schemaName: 'extracted_chunks',
@@ -128,6 +146,21 @@ export async function generateDialoguePack(
     ],
   })
   steps.push({ step: 'chunk_extraction', model: chunks.model })
+  models.chunk_extraction = chunks.model
+
+  const pack = buildGeneratedPack(
+    input,
+    normalized.data,
+    dialogue.data,
+    chunks.data.chunks,
+  )
+  const traces = buildPipelineTraces(
+    input,
+    normalized.data,
+    dialogue.data,
+    chunks.data.chunks,
+    models,
+  )
 
   return {
     situation: normalized.data,
@@ -138,5 +171,7 @@ export async function generateDialoguePack(
       model: provider.model,
       steps,
     },
+    pack,
+    traces,
   }
 }
