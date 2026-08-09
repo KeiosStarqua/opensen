@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npx vercel dev",
     "typecheck": "tsc --noEmit",
-    "build": "npx vercel build",
+    "build": "npm run typecheck",
     "deploy": "npx vercel deploy",
     "test": "vitest run --exclude '**/*.integration.test.ts'",
     "test:db": "vitest run --config vitest.integration.config.ts",
@@ -28,7 +28,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "drizzle-kit": "^0.31.10",
     "tsx": "^4.23.0",
-    "typescript": "^7.0.2",
+    "typescript": "~6.0.3",
     "vitest": "^4.1.10"
   }
 }
