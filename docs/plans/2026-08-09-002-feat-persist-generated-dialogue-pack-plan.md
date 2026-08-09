@@ -249,6 +249,7 @@ sequenceDiagram
 - [x] U2 adds request/provenance invariants and atomically writes the complete representable content graph for every supported driver.
 - [x] U3 returns an explicit persistence projection without breaking the current generated-pack response and fails closed when ownership is unavailable.
 - [x] U4 adds disposable-database coverage and documents production rollout gates.
-- [x] `npm run typecheck`, `npm run test`, and `npm run test:db` pass.
+- [x] `npm run typecheck` and `npm run test` pass.
+- [ ] `npm run test:db` pass against disposable `TEST_DATABASE_URL` (integration suite added; not executed in agent VM without pgvector DB).
 - [x] No AI provider client or database connection is constructed outside its established boundary.
 - [ ] Production enablement has a trusted ownership source plus approved minimization, retention, deletion, and request-bundle erasure policy for AI and generated-content data.
