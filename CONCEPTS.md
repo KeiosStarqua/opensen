@@ -51,5 +51,8 @@ An append-only log of grading events for a user chunk. Feeds analytics and audit
 ### Embedding
 A vector representation of a chunk, pattern, or situation used for near-duplicate detection before insert. Phase 1 fixes one model dimension contract for compatibility across the corpus.
 
+### Dialogue Pack
+The complete artifact produced by the dialog generator for one request — situation, dialogue with ordered lines, extracted chunks (each with its sentence pattern, slots, and variants), plus the minimized provenance traces for every pipeline step. When persistence is enabled (`DIALOGUE_PERSISTENCE_MODE` is `internal` or `ephemeral`), the pack is the unit written atomically after successful generation.
+
 ### AI Generation
-A recorded AI pipeline step with inputs, outputs, validation verdict, and cost metadata. Provenance for generated dialogues and extracted chunks.
+A recorded AI pipeline step with inputs, outputs, validation verdict, and cost metadata. Provenance for generated dialogues and extracted chunks. All provenance rows from one generation request share a request identifier with the dialogue row so audit data can be correlated.
