@@ -21,6 +21,7 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 - Route prefixes match product surfaces: `/api/situations`, `/api/chunks`, `/api/dialogues`, `/api/practice`, `/api/export`
 - Prefer Web Standards APIs (Request/Response); avoid Node-only APIs that break Vercel Functions unless required
 - List/detail stubs may return empty collections or `501` until persistence lands; `POST /api/dialogues/generate` is live via the AI layer and can persist when `DIALOGUE_PERSISTENCE_MODE` is `internal` or `ephemeral`
+- Practice review routes (`GET /api/practice/due`, `POST /api/practice/reviews`, `GET /api/practice/plan`) require `DATABASE_URL` and an `X-User-Id` header until authenticated ownership ships
 - AI calls go through `src/ai/` only — never hardcode a vendor HTTP client in a route
 - Runtime database access: lazy `getDatabase()` in `src/db/client.ts` — Neon hosts use `drizzle-orm/neon-http`; local `postgresql://` URLs use postgres.js. Routes that do not persist data must not require `DATABASE_URL` at startup.
 - Migrations: checked-in SQL under `drizzle/`; apply with `npm run db:migrate` using `MIGRATION_DATABASE_URL` or `DATABASE_URL`
