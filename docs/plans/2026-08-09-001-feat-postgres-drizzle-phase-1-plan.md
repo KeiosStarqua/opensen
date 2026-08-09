@@ -248,10 +248,10 @@ flowchart TB
 
 ## Definition of Done
 
-- [ ] U1 adds the database toolchain, lazy connection boundary, `DATABASE_URL` validation, `.env` CLI loading, and focused configuration coverage.
-- [ ] U2 represents all 14 Phase 1 core tables and four required supporting tables in Drizzle with documented relations, constraints, client UUIDs, and synchronization timestamps.
-- [ ] U3 commits a reviewed initial migration that creates the pgvector extension and applies cleanly to an empty supported PostgreSQL database.
-- [ ] U4 documents the local workflow and proves a post-migration database connection with the isolated pgvector test service, without exposing secrets.
-- [ ] `npm run typecheck` passes from `backend/`.
-- [ ] The generated migration and metadata are committed; no runtime route creates schema objects.
-- [ ] The implementation updates this plan's checkboxes with verification evidence and moves KEI-141 to `In Review`.
+- [x] U1 adds the database toolchain, lazy connection boundary, `DATABASE_URL` validation, `.env` CLI loading, and focused configuration coverage.
+- [x] U2 represents all 14 Phase 1 core tables and four required supporting tables in Drizzle with documented relations, constraints, client UUIDs, and synchronization timestamps.
+- [x] U3 commits a reviewed initial migration that creates the pgvector extension and applies cleanly to an empty supported PostgreSQL database.
+- [x] U4 documents the local workflow and proves a post-migration database connection with the isolated pgvector test service, without exposing secrets.
+- [x] `npm run typecheck` passes from `backend/`.
+- [x] The generated migration and metadata are committed; no runtime route creates schema objects.
+- [x] Verification: `npm test` (11 unit), `npm run test:db` (7 integration) against local PostgreSQL 16 + pgvector; migrations `0000_vector_extension.sql` + `0001_phase1_schema.sql` applied cleanly.

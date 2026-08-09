@@ -6,15 +6,29 @@
     "dev": "npx vercel dev",
     "typecheck": "tsc --noEmit",
     "build": "npx vercel build",
-    "deploy": "npx vercel deploy"
+    "deploy": "npx vercel deploy",
+    "test": "vitest run --exclude '**/*.integration.test.ts'",
+    "test:db": "vitest run --config vitest.integration.config.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:generate:custom": "drizzle-kit generate --custom",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:preflight": "tsx src/db/preflight.ts",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
     "hono": "^4.12.32",
+    "postgres": "^3.4.8",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "drizzle-kit": "^0.31.10",
     "tsx": "^4.23.0",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   }
 }
