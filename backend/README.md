@@ -67,7 +67,9 @@ Local development may use a single superuser for both roles. Production must sep
 
 ### Personal data note
 
-This schema stores categories that will require a retention/deletion policy before production writers ship: AI generation inputs/outputs, learner-created content, practice transcripts, and review history. This issue adds schema only — no production write path.
+This schema stores categories that will require a retention/deletion policy before production writers ship: AI generation inputs/outputs, learner-created content, practice transcripts, and review history.
+
+`POST /api/dialogues/generate` can persist generated packs only when `DIALOGUE_PERSISTENCE_MODE` is `internal` or `ephemeral`. Production enablement still requires trusted ownership, approved minimization, retention/deletion policy, and request-bundle erasure before learner traffic uses the writer.
 
 ### Local pgvector with Docker Compose
 

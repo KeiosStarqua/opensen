@@ -245,10 +245,10 @@ sequenceDiagram
 
 ## Definition of Done
 
-- [ ] U1 exposes a complete mapping contract and minimized, versioned trace for every successful AI pipeline step.
-- [ ] U2 adds request/provenance invariants and atomically writes the complete representable content graph for every supported driver.
-- [ ] U3 returns an explicit persistence projection without breaking the current generated-pack response and fails closed when ownership is unavailable.
-- [ ] U4 adds disposable-database coverage and documents production rollout gates.
-- [ ] `npm run typecheck`, `npm run test`, and `npm run test:db` pass.
-- [ ] No AI provider client or database connection is constructed outside its established boundary.
+- [x] U1 exposes a complete mapping contract and minimized, versioned trace for every successful AI pipeline step.
+- [x] U2 adds request/provenance invariants and atomically writes the complete representable content graph for every supported driver.
+- [x] U3 returns an explicit persistence projection without breaking the current generated-pack response and fails closed when ownership is unavailable.
+- [x] U4 adds disposable-database coverage and documents production rollout gates.
+- [x] `npm run typecheck`, `npm run test`, and `npm run test:db` pass.
+- [x] No AI provider client or database connection is constructed outside its established boundary.
 - [ ] Production enablement has a trusted ownership source plus approved minimization, retention, deletion, and request-bundle erasure policy for AI and generated-content data.
