@@ -193,7 +193,8 @@ sequenceDiagram
   - A forced history insert or state-update failure leaves neither the changed scheduling state nor a partial history row committed.
   - An unknown or unowned chunk cannot create a review-history row.
   - Two submissions based on the same persisted schedule cannot both append history; the losing request returns a conflict without mutating either table.
-- **Verification:** The disposable PostgreSQL suite proves scoped reads, aggregate values, foreign keys, and review atomicity after migrations.
+  - Each enabled write driver proves the same all-or-nothing review result, or the repository marks that driver unsupported and the production composition cannot select it.
+- **Verification:** The disposable PostgreSQL suite proves scoped reads, aggregate values, foreign keys, review atomicity, and stale-write rejection after migrations. A Neon HTTP integration test or an explicit unsupported-driver guard proves the equivalent production-driver decision.
 
 ### U3. Implement and test the three Hono practice endpoints
 
@@ -243,6 +244,7 @@ sequenceDiagram
 | Domain and route units | U1, U3 | `npm run test` passes with FSRS mappings, validation, pagination, and ownership cases. |
 | Database integration | U2–U4 | `npm run test:db` passes with `TEST_DATABASE_URL` targeting the disposable pgvector-enabled database. |
 | Atomicity and concurrency proof | U2 | A forced review write failure leaves the schedule row and review history unchanged, and a stale concurrent submission cannot append a second history row. |
+| Driver capability proof | U2 | postgres.js and Neon HTTP each have an atomic review-write proof, or runtime composition rejects an unproven driver before it accepts practice writes. |
 | Isolation proof | U2–U3 | A learner cannot read, aggregate, or review another learner's enrollment. |
 | Rollout guard | U3–U4 | The default app rejects practice requests without a trusted principal and documentation states the production dependency. |
 
