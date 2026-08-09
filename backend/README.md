@@ -28,7 +28,7 @@ Open `http://localhost:3000` — root returns the API index; `GET /health` is th
 | `npm run typecheck` | TypeScript check |
 | `npm run test` | Unit tests (no database) |
 | `npm run test:db` | Database integration tests (`TEST_DATABASE_URL` required) |
-| `npm run build` | `vercel build` |
+| `npm run build` | TypeScript check (Vercel runs this at deploy; do not call `vercel build` here) |
 | `npm run deploy` | `vercel deploy` |
 | `npm run db:preflight` | Report PostgreSQL version and pgvector readiness (no secrets printed) |
 | `npm run db:generate` | Generate SQL migration from Drizzle schema |

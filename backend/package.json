@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npx vercel dev",
     "typecheck": "tsc --noEmit",
-    "build": "npx vercel build",
+    "build": "npm run typecheck",
     "deploy": "npx vercel deploy",
     "test": "vitest run --exclude '**/*.integration.test.ts'",
     "test:db": "vitest run --config vitest.integration.config.ts",
