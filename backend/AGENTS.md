@@ -17,6 +17,7 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 - Framework: [Hono on Vercel](https://hono.dev/docs/getting-started/vercel) — default-export the app from `src/index.ts`
 - Run from this directory: `npm install`, `npm run dev` (`npx vercel dev`), `npm run typecheck`, `npm run test`, `npm run deploy`
 - Package name: `opensen-backend` (see `package.json`)
+- Keep `typescript` pinned to the 6.x line until Vercel's Node builder supports TypeScript 7's native compiler API.
 - Route prefixes match product surfaces: `/api/situations`, `/api/chunks`, `/api/dialogues`, `/api/practice`, `/api/export`
 - Prefer Web Standards APIs (Request/Response); avoid Node-only APIs that break Vercel Functions unless required
 - List/detail stubs may return empty collections or `501` until persistence lands; `POST /api/dialogues/generate` is live via the AI layer
