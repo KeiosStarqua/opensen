@@ -93,6 +93,7 @@ Without a typed schema and executable migration, the content graph, practice eng
 - `TEST_DATABASE_URL` points only to a disposable `opensen_test` database (or a isolated Neon test branch/database). Integration tests never infer it from `DATABASE_URL`.
 - Before implementation, the intended deployment database owner verifies PostgreSQL version, `pgvector` availability, and permission to create the `vector` extension. That environment prerequisite is separate from local test success.
 - Phase 1 does not need an approximate-nearest-neighbor index until an embedding query workload and selected distance metric are defined.
+- Neon agent tooling comes from the **Neon Cursor Plugin** (MCP/skills bundled in Cursor). Do not commit repo-local `.agents/skills` or `skills-lock.json` for Neon — manual skill installation is not required.
 
 ### High-Level Technical Design
 
