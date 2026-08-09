@@ -16,7 +16,7 @@ linear_issues:
 
 - **Objective:** Add a PostgreSQL data boundary, Drizzle schema, and reproducible Phase 1 migration for the OpenSen content graph and learning engine.
 - **Authority:** `docs/database-architecture.md` defines the data model. This plan defines the backend integration and migration shape.
-- **Execution profile:** Data-model and migration work. Verify against an empty PostgreSQL database with `pgvector` enabled through `DATABASE_URL`.
+- **Execution profile:** Data-model and migration work. Verify against an empty Neon PostgreSQL database with `pgvector` enabled through `DATABASE_URL`.
 - **Stop conditions:** Stop if the target PostgreSQL service cannot create the `vector` extension, or if the chosen embedding dimension is required but not available from product configuration.
 - **Tail ownership:** The implementation updates this plan's Definition of Done after verification and moves KEI-141 to review.
 
@@ -37,8 +37,8 @@ Without a typed schema and executable migration, the content graph, practice eng
 
 **Database boundary**
 
-- R1. The backend accepts a non-empty `DATABASE_URL` and exposes one typed Drizzle database module for server-side use.
-- R2. The migration workflow creates the Phase 1 schema on PostgreSQL from checked-in Drizzle definitions and migration artifacts.
+- R1. The backend accepts a non-empty `DATABASE_URL` (Neon PostgreSQL) and exposes one typed Drizzle database module using `@neondatabase/serverless` (`drizzle-orm/neon-http`) for serverless runtime.
+- R2. The migration workflow creates the Phase 1 schema on Neon PostgreSQL from checked-in Drizzle definitions and migration artifacts.
 - R3. The migration enables `pgvector` before creating the `embeddings.vector` column.
 
 **Content graph**
@@ -74,23 +74,23 @@ Without a typed schema and executable migration, the content graph, practice eng
 
 ### Key Technical Decisions
 
-- KTD1. **Use `pg` with Drizzle's `node-postgres` driver and a generic `DATABASE_URL`.** The backend runs in Vercel Node.js Functions but its declared contract is PostgreSQL rather than a Vercel-only database product. Runtime code uses a small pool (maximum two connections), respects provider TLS requirements, and integrates Vercel's connection lifecycle support when that runtime exposes it.
+- KTD1. **Use `@neondatabase/serverless` with Drizzle's `neon-http` driver and a Neon `DATABASE_URL`.** The backend runs in Vercel Node.js Functions. Connecting to Neon over HTTP (`drizzle-orm/neon-http`) eliminates TCP connection pooling overhead in serverless environments. If interactive transactions or WebSocket connections are required, `drizzle-orm/neon-websockets` / `neon-serverless` can be used as a seamless extension.
 - KTD2. **Make UUID the primary-key strategy for Phase 1 entities and use explicit foreign keys plus uniqueness constraints for join and per-user state tables.** This follows the offline contract and makes relational cardinality enforceable by PostgreSQL.
 - KTD3. **Commit an initial custom extension migration before the generated schema migration.** The first migration contains `CREATE EXTENSION IF NOT EXISTS vector`; the next is generated and reviewed from the final Drizzle schema. Drizzle does not create PostgreSQL extensions from TypeScript schema definitions.
 - KTD4. **Use Drizzle's native PostgreSQL `vector` column support with 1,536 dimensions and one embedding model in Phase 1.** This fixes compatibility to `text-embedding-3-small`. A provider or dimension change requires an explicit versioned embedding-table/backfill migration; Phase 1 does not mix dimensions in one column.
 - KTD5. **Keep database construction lazy and fail configuration validation only when a database consumer initializes it.** Existing routes that do not persist data continue to run without a local database, while migration and database smoke checks require `DATABASE_URL`.
-- KTD6. **Load `backend/.env` for Drizzle CLI configuration through `dotenv/config`.** Runtime configuration remains owned by `src/lib/env.ts`. Local generation and migration use `DATABASE_URL`; deployed migrations prefer `MIGRATION_DATABASE_URL` so DDL credentials are not available to the application runtime.
+- KTD6. **Load `backend/.env` for Drizzle CLI configuration through `dotenv/config`.** Runtime configuration remains owned by `src/lib/env.ts`. Local generation and migration use `DATABASE_URL`; deployed migrations prefer a direct Neon connection URL (`MIGRATION_DATABASE_URL`) so DDL operations bypass transaction poolers.
 - KTD7. **Use Vitest and an explicit `TEST_DATABASE_URL` for database integration checks.** A local Docker Compose pgvector service is the reproducible default. Database tests fail closed when that variable is absent or does not identify the designated test database.
 - KTD8. **Keep the database private to the backend service role until authorization work ships.** The migration setup revokes default public schema privileges and grants DML only to the application role. Row-level security and user-specific policies are deferred with the authentication and CRUD work; no direct client database connection is permitted.
 - KTD9. **Classify Phase 1 personal data before any production writer is enabled.** AI inputs and outputs, learner-created content, transcripts, and review history require a retention/deletion policy in the future persistence issue. This schema-only issue creates no production write path.
 
 ### Assumptions
 
-- The development and deployment PostgreSQL services permit the `vector` extension. A managed service that does not expose `pgvector` is a blocker rather than a silent fallback to a non-vector column.
-- `DATABASE_URL` is the canonical runtime connection variable in every environment, as already documented in `backend/.env.example`.
-- `MIGRATION_DATABASE_URL` is an optional deployment-only direct connection for the migration role. Local development uses `DATABASE_URL` when separate roles are unnecessary.
-- Migration credentials use a direct PostgreSQL connection when the selected provider distinguishes direct and pooled endpoints. Application traffic uses the provider's serverless-safe endpoint; local development may use one `DATABASE_URL` for both.
-- `TEST_DATABASE_URL` points only to a disposable `opensen_test` database. Integration tests never infer it from `DATABASE_URL`.
+- The Neon PostgreSQL host permits the `vector` extension. A managed database that does not expose `pgvector` is a blocker rather than a silent fallback to a non-vector column.
+- `DATABASE_URL` is the canonical runtime connection variable pointing to Neon in every environment, as documented in `backend/.env.example`.
+- `MIGRATION_DATABASE_URL` is an optional deployment-only direct Neon connection for DDL migrations. Local development may use `DATABASE_URL` for both.
+- Migration credentials use a direct Neon PostgreSQL connection string when the pooled HTTP/WebSocket endpoint does not support raw DDL migrations.
+- `TEST_DATABASE_URL` points only to a disposable `opensen_test` database (or a isolated Neon test branch/database). Integration tests never infer it from `DATABASE_URL`.
 - Before implementation, the intended deployment database owner verifies PostgreSQL version, `pgvector` availability, and permission to create the `vector` extension. That environment prerequisite is separate from local test success.
 - Phase 1 does not need an approximate-nearest-neighbor index until an embedding query workload and selected distance metric are defined.
 
@@ -130,6 +130,7 @@ flowchart TB
 
 - `docs/database-architecture.md` owns table inventory, relations, ownership semantics, synchronization constraints, and later-phase exclusions.
 - `docs/solutions/tooling-decisions/hono-vercel-over-nestjs.md` requires a thin Hono API that remains compatible with Vercel Functions.
+- [Drizzle Neon guide](https://orm.drizzle.team/docs/get-started/neon-new) describes connecting Drizzle to Neon DB via `@neondatabase/serverless` and `drizzle-orm/neon-http`.
 - [Drizzle pgvector guide](https://orm.drizzle.team/docs/guides/vector-similarity-search) requires manually managed extension DDL and supports native vector columns.
 - [Drizzle PostgreSQL guide](https://orm.drizzle.team/docs/get-started/postgresql-new) describes schema-driven migration generation and application using a connection URL.
 
@@ -137,19 +138,19 @@ flowchart TB
 
 ## Implementation Units
 
-### U1. Establish the Drizzle runtime and migration toolchain
+### U1. Establish the Drizzle runtime and Neon DB migration toolchain
 
-- **Goal:** Add the PostgreSQL/Drizzle dependencies, migration configuration, and a lazy typed database composition module.
+- **Goal:** Add `@neondatabase/serverless` and Drizzle ORM dependencies, migration configuration, and a lazy typed database composition module using `drizzle-orm/neon-http`.
 - **Requirements:** R1, R2, R11.
 - **Dependencies:** None.
 - **Files:** `backend/package.json`, `backend/package-lock.json`, `backend/drizzle.config.ts`, `backend/src/lib/env.ts`, `backend/src/db/client.ts`, `backend/.env.example`, `backend/src/lib/env.test.ts`.
 - **Approach:**
-  1. Add current compatible Drizzle ORM, Drizzle Kit, `pg`, `dotenv`, and Vitest with package scripts for custom migration generation, schema generation, migration application, unit tests, and database integration tests.
+  1. Add `@neondatabase/serverless`, compatible `drizzle-orm`, `drizzle-kit`, `dotenv`, and Vitest with package scripts for custom migration generation, schema generation, migration application, unit tests, and database integration tests.
   2. Extend the existing Zod environment contract with trimmed `DATABASE_URL` validation without making unrelated route startup require it.
-  3. Centralize runtime client construction in `src/db/client.ts`; expose schema-aware Drizzle access without creating route-specific clients and use Vercel connection lifecycle support when available.
-  4. Load `dotenv/config` in migration configuration and point it at the schema entrypoint, generated migration directory, PostgreSQL dialect, and validated `MIGRATION_DATABASE_URL` or local `DATABASE_URL`.
-  5. Add a preflight command that reports PostgreSQL version, installed `vector` extension state, and extension-creation capability for the target migration URL without printing credentials.
-  6. Document the application and migration database roles, their minimum privileges, and the local single-role exception without committing credentials.
+  3. Centralize runtime client construction in `src/db/client.ts` using `drizzle-orm/neon-http` (via `drizzle(process.env.DATABASE_URL)` or `drizzle({ client: neon(...) })`); expose schema-aware Drizzle access optimized for Vercel serverless execution.
+  4. Load `dotenv/config` in migration configuration (`drizzle.config.ts`) and point it at the schema entrypoint, generated migration directory, `postgresql` dialect, and validated `MIGRATION_DATABASE_URL` or local `DATABASE_URL`.
+  5. Add a preflight command that reports PostgreSQL version, installed `vector` extension state, and extension-creation capability for the target Neon database URL without printing credentials.
+  6. Document the application and migration database roles, direct vs pooled connection URLs for Neon, and local single-role execution without committing credentials.
 - **Patterns to follow:** `backend/src/lib/env.ts` owns environment parsing; `backend/src/index.ts` keeps framework composition thin.
 - **Test scenarios:**
   - A missing or whitespace-only `DATABASE_URL` is rejected when database configuration is requested.
