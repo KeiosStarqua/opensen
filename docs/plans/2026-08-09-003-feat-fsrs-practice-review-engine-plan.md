@@ -39,7 +39,7 @@ The Phase 1 schema already stores FSRS state, but no API reads it, applies a rat
 **Due queue**
 
 - R1. `GET /api/practice/due` returns the caller's enrolled chunks whose `next_review` is at or before the request time, including enrolled chunks in the `new` state with no scheduled review.
-- R2. The due queue orders items deterministically by due time and stable chunk identity, returns an opaque cursor for a following page when more rows exist, and enforces a default page size of 20 with a maximum of 100.
+- R2. The due queue orders scheduled items by due time and chunk identity. Unscheduled `new` items sort before scheduled items by chunk identity. It returns an opaque cursor for a following page when more rows exist, and enforces a default page size of 20 with a maximum of 100.
 - R3. The due queue never returns another learner's scheduling state or content, and returns chunk content only when it is public or owned by the authenticated learner.
 
 **Review scheduling**
@@ -85,9 +85,9 @@ The Phase 1 schema already stores FSRS state, but no API reads it, applies a rat
 - KTD2. **Keep scheduling state mutable on `user_chunks` and treat `review_history` as append-only evidence.** Derive elapsed and scheduled days from the persisted review timestamps when creating the card and log entry. Do not introduce a stored interval. This satisfies R5–R7.
 - KTD3. **Put FSRS mapping and practice orchestration behind pure domain interfaces.** The Hono route resolves the actor and request data. A database adapter owns Drizzle queries and atomic writes. The scheduler adapter and use cases remain independent of Hono and Drizzle.
 - KTD4. **Require an injected trusted practice principal and fail closed in default route composition.** Unit and integration tests inject a known principal. Production activation waits for the authentication issue to install a resolver. A request body, query string, or arbitrary header cannot select another user's state. This satisfies R3, R8, and R10.
-- KTD5. **Use an opaque cursor derived from the ordered due boundary.** Stable ordering by effective due timestamp and chunk ID prevents duplicate or missing rows between normal page requests without exposing database query structure.
+- KTD5. **Use an opaque cursor derived from the ordered due boundary.** The cursor encodes the unscheduled-versus-scheduled rank, due timestamp when present, and chunk ID. This gives unscheduled new rows a stable synthetic boundary without a schema migration.
 - KTD6. **Cap due pages at 100 items.** The API defaults to 20 items and validates the client limit before querying. This bounds the joined response while keeping the existing cursor shape.
-- KTD7. **Encapsulate the review write in one driver-aware repository operation.** The adapter must prove that `user_chunks` update and `review_history` insert commit or fail together for each enabled database driver. It must condition the write on the persisted scheduling revision so duplicate or concurrent submissions cannot append history for a stale state. This follows the established Neon/postgres.js persistence boundary.
+- KTD7. **Use compare-and-swap for review serialization.** The repository conditionally updates `user_chunks` using its pre-read `updated_at` value, inserts history only after exactly one matching update succeeds, and rejects the loser as a stale review. The surrounding driver-aware operation proves both statements commit or fail together for each enabled database driver. This follows the established Neon/postgres.js persistence boundary.
 
 ### Assumptions
 
@@ -159,7 +159,7 @@ sequenceDiagram
 - **Dependencies:** None.
 - **Files:** `backend/package.json`, `backend/package-lock.json`, `backend/src/practice/AGENTS.md`, `backend/src/practice/fsrs-scheduler.ts`, `backend/src/practice/fsrs-scheduler.test.ts`, `backend/src/practice/practice-service.ts`, `backend/src/practice/practice-service.test.ts`.
 - **Approach:**
-  1. Install `ts-fsrs` at its current compatible release and confirm the backend runtime requirement.
+  1. Install `ts-fsrs` at its current compatible release, add its Node.js 20-or-later requirement to `package.json` engines, and verify the deployed Vercel runtime complies.
   2. Define domain request, result, clock, principal, and repository contracts without importing Hono or Drizzle.
   3. Map `new`, `learning`, `review`, and `relearning`, timestamps, stability, difficulty, repetitions, and lapses between the database model and TS-FSRS.
   4. Convert the four public rating names to the package rating enum at the adapter boundary.
@@ -178,27 +178,27 @@ sequenceDiagram
 - **Goal:** Read due rows and queue aggregates from PostgreSQL, and commit the state transition plus immutable review record as one operation.
 - **Requirements:** R1, R2, R3, R5, R6, R8, R9.
 - **Dependencies:** U1.
-- **Files:** `backend/src/db/practice-repository.ts`, `backend/src/db/practice-repository.test.ts`, `backend/src/db/practice-repository.integration.test.ts`, `backend/src/db/client.ts`.
+- **Files:** `backend/src/db/practice-repository.ts`, `backend/src/db/practice-repository.test.ts`, `backend/src/db/practice-repository.integration.test.ts`, `backend/src/db/practice-repository.neon.integration.test.ts`, `backend/src/db/client.ts`.
 - **Approach:**
   1. Query only by the resolved learner ID and join chunk fields only when the chunk is public or owned by that learner.
-  2. Treat `new` rows without a next-review timestamp as due, then order due entries and cursor boundaries deterministically.
+  2. Treat `new` rows without a next-review timestamp as due, sort them ahead of scheduled rows by chunk ID, then order scheduled rows by next-review timestamp and chunk ID.
   3. Compute the progress projection through learner-scoped state and review-history aggregates without denormalizing counters.
   4. Apply the validated page limit before loading due rows.
   5. Hide driver-specific atomic-write mechanics behind one repository operation that updates `user_chunks` and inserts `review_history`.
-  6. Detect absent enrollment, duplicate submission, or an invalid concurrent state transition before writing history.
+  6. Perform a compare-and-swap update against the pre-read `updated_at` timestamp, insert history only when that update succeeds, and reject duplicate or concurrent stale submissions.
 - **Patterns to follow:** `backend/src/db/client.ts` for lazy typed database creation; `backend/src/db/dialogue-pack-writer.ts` for a database writer boundary and transaction investigation.
 - **Test scenarios:**
   - Due selection includes a new unscheduled enrollment and overdue enrollment, excludes a future enrollment, and never returns a different learner's rows.
   - An enrollment that points to another learner's private chunk cannot disclose that chunk's content.
-  - Cursor pagination preserves due-time and chunk-ID order across adjacent pages without repeating an item.
+  - Cursor pagination places unscheduled new rows first by chunk ID, then scheduled rows by due time and chunk ID, without repeating an item across pages.
   - An absent, non-positive, or oversized limit resolves to the default or maximum page size and cannot expand the due response beyond 100 items.
   - The progress projection separates all four statuses, counts due items, and counts only review-history rows in the current UTC day.
   - A valid scheduled transition changes the mutable row and creates one history row whose rating, state-before, elapsed days, and scheduled days match the pre-transition state.
   - A forced history insert or state-update failure leaves neither the changed scheduling state nor a partial history row committed.
   - An unknown or unowned chunk cannot create a review-history row.
-  - Two submissions based on the same persisted schedule cannot both append history; the losing request returns a conflict without mutating either table.
+  - Two submissions based on the same persisted schedule cannot both append history; a compare-and-swap update admits one request and the loser returns a conflict without mutating either table.
   - Each enabled write driver proves the same all-or-nothing review result, or the repository marks that driver unsupported and the production composition cannot select it.
-- **Verification:** The disposable PostgreSQL suite proves scoped reads, aggregate values, foreign keys, review atomicity, and stale-write rejection after migrations. A Neon HTTP integration test or an explicit unsupported-driver guard proves the equivalent production-driver decision.
+- **Verification:** The disposable PostgreSQL suite proves scoped reads, aggregate values, foreign keys, review atomicity, and stale-write rejection after migrations. The Neon suite uses `NEON_TEST_DATABASE_URL` to prove successful and induced-failure atomic writes over the deployed HTTP driver; without that proof, runtime composition rejects Neon practice writes.
 
 ### U3. Implement and test the three Hono practice endpoints
 
@@ -226,16 +226,17 @@ sequenceDiagram
 - **Goal:** Prove the end-to-end database contract and record the authentication and scheduler constraints that prevent unsafe rollout.
 - **Requirements:** R3, R6, R8, R10.
 - **Dependencies:** U2, U3.
-- **Files:** `backend/README.md`, `backend/AGENTS.md`.
+- **Files:** `backend/README.md`, `backend/AGENTS.md`, `backend/.env.example`.
 - **Approach:**
   1. Add the practice API contract, pagination behavior, ratings, and database-test prerequisite to backend documentation.
   2. State that a trusted authenticated principal is required before production activation and that reviews must not accept caller-selected user IDs.
   3. Document the initial TS-FSRS parameter and UTC-day assumptions as implementation constraints rather than user-configurable behavior.
+  4. Document Node.js 20-or-later for `ts-fsrs` and the optional `NEON_TEST_DATABASE_URL` required to prove the deployed driver before enabling it.
 - **Patterns to follow:** `backend/AGENTS.md` for route prefixes, environment handling, and verification commands.
 - **Test scenarios:**
   - The integration suite refuses a missing or non-designated `TEST_DATABASE_URL` before practicing against persisted data.
   - A migrated disposable database supports a due read, one review write, and a plan aggregate for the same seeded learner.
-  - Documentation describes the rating vocabulary, trusted-principal gate, and no-client-user-ID rule without including credentials.
+  - Documentation describes the rating vocabulary, trusted-principal gate, no-client-user-ID rule, Node runtime requirement, and Neon test prerequisite without including credentials.
 - **Verification:** Integration coverage passes against the designated disposable database and documentation contains the current rollout gate.
 
 ---
@@ -248,7 +249,7 @@ sequenceDiagram
 | Domain and route units | U1, U3 | `npm run test` passes with FSRS mappings, validation, pagination, and ownership cases. |
 | Database integration | U2–U4 | `npm run test:db` passes with `TEST_DATABASE_URL` targeting the disposable pgvector-enabled database. |
 | Atomicity and concurrency proof | U2 | A forced review write failure leaves the schedule row and review history unchanged, and a stale concurrent submission cannot append a second history row. |
-| Driver capability proof | U2 | postgres.js and Neon HTTP each have an atomic review-write proof, or runtime composition rejects an unproven driver before it accepts practice writes. |
+| Driver capability proof | U2 | postgres.js and Neon HTTP each have successful and induced-failure atomic review-write coverage. If `NEON_TEST_DATABASE_URL` is unavailable, runtime composition rejects Neon practice writes. |
 | Isolation proof | U2–U3 | A learner cannot read, aggregate, or review another learner's enrollment. |
 | Rollout guard | U3–U4 | The default app rejects practice requests without a trusted principal and documentation states the production dependency. |
 
