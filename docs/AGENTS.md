@@ -35,4 +35,5 @@ Owns durable **product and project documentation** for OpenSen: positioning, lea
 | [`product.md`](product.md) | Learning model and chunking rationale |
 | [`features.md`](features.md) | Feature catalog and relationships |
 | [`database-architecture.md`](database-architecture.md) | Content graph + learning engine data model |
+| [`plans/`](plans/) | Implementation plans linked to Linear issues |
 | [`solutions/`](solutions/) | Documented solutions to past problems (architecture patterns, tooling decisions) |
