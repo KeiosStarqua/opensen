@@ -46,6 +46,12 @@ Per-learner FSRS state for a chunk — stability, difficulty, due dates, and sta
 ### Review History
 An append-only log of grading events for a user chunk. Feeds analytics and audit; does not replace FSRS state on the user chunk row.
 
+### Practice Plan
+The learner's spaced-repetition schedule surface: which chunks are due now, status breakdown across the deck, and how many reviews happened today. Backed by due-queue and plan-stats APIs rather than a separate schedule table.
+
+### Review Rating
+The learner's grade on a recall attempt, expressed as forgot, hard, good, or easy for the public API. Each rating drives FSRS interval updates when recorded; forgot is the learner-facing label for an again-grade at the scheduling boundary.
+
 ## Generation & Retrieval
 
 ### Embedding
