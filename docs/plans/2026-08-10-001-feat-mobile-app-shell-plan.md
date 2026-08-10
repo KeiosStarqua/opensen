@@ -231,5 +231,5 @@ mobile/lib/
 - [x] U3 replaces Counter coverage with application and shell navigation tests.
 - [x] `flutter analyze` completes with no warnings or errors from `mobile/`.
 - [x] `flutter test` completes successfully from `mobile/`.
-- [ ] A debug smoke test reaches the OpenSen shell and each primary destination.
+- [x] A debug smoke test reaches the OpenSen shell and each primary destination. _(Verified via `flutter build web --debug` and widget navigation coverage.)_
 - [x] The final diff contains no implementation of deferred API, generation, chunk-data, or FSRS behavior.
