@@ -226,10 +226,10 @@ mobile/lib/
 
 ## Definition of Done
 
-- [ ] U1 removes the Counter starter composition and establishes router, theme, and Riverpod application boundaries.
-- [ ] U2 provides route-driven OpenSen primary navigation and feature-owned placeholders.
-- [ ] U3 replaces Counter coverage with application and shell navigation tests.
-- [ ] `flutter analyze` completes with no warnings or errors from `mobile/`.
-- [ ] `flutter test` completes successfully from `mobile/`.
+- [x] U1 removes the Counter starter composition and establishes router, theme, and Riverpod application boundaries.
+- [x] U2 provides route-driven OpenSen primary navigation and feature-owned placeholders.
+- [x] U3 replaces Counter coverage with application and shell navigation tests.
+- [x] `flutter analyze` completes with no warnings or errors from `mobile/`.
+- [x] `flutter test` completes successfully from `mobile/`.
 - [ ] A debug smoke test reaches the OpenSen shell and each primary destination.
-- [ ] The final diff contains no implementation of deferred API, generation, chunk-data, or FSRS behavior.
+- [x] The final diff contains no implementation of deferred API, generation, chunk-data, or FSRS behavior.
