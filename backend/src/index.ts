@@ -20,7 +20,7 @@ app.use(
   cors({
     origin: env.CORS_ORIGINS,
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-User-Id'],
   }),
 )
 
