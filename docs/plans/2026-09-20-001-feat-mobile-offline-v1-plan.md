@@ -206,8 +206,10 @@ Linear MCP requires interactive authentication in the Cursor desktop IDE and cou
 - [x] U2 SQLite data layer, seed importer and validated seed content (9 situations, 41 frames, 47 chunks, 9 dialogues).
 - [x] U3 composition root, router, shell and all v1 screens.
 - [x] U4 CI workflow and DOX docs updated.
-- [ ] `flutter analyze` completes with no errors or warnings from `mobile/` (CI evidence).
-- [ ] `flutter test` completes successfully from `mobile/` (CI evidence).
-- [ ] CI builds `app-release.apk`.
+- [x] `flutter analyze` completes with no errors or warnings from `mobile/` — CI run [35512287961](https://github.com/KeiosStarqua/opensen/actions/runs/35512287961) on Flutter 3.47.5 stable (`dart format` advisory step lists 57 files to reformat; run `dart format .` in `mobile/`).
+- [x] `flutter test` completes successfully from `mobile/` — 73 tests passed in the same run.
+- [x] CI builds `app-release.apk` — artifact `opensen-android-apk` (27.6 MB) on the same run.
 - [ ] Linear issues created, linked to the PR, `linear_issues:` filled in above.
 - [ ] Manual smoke AE1–AE4 on a device.
+
+PR: [KeiosStarqua/opensen#17](https://github.com/KeiosStarqua/opensen/pull/17)
