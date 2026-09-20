@@ -15,6 +15,6 @@ OpenSen (Open Sentence) turns conversations a learner actually needs into senten
 
 | Path | Role |
 |------|------|
-| [`mobile/`](../mobile/) | Flutter mobile app (primary client) |
+| [`mobile/`](../mobile/) | Flutter mobile app (primary client; offline-first v1) |
 | [`backend/`](../backend/) | Hono API on Vercel |
 | [`docs/`](.) | Product and project documentation |
