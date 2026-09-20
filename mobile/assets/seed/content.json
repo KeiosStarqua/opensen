@@ -1,0 +1,1314 @@
+{
+  "version": 1,
+  "intents": [
+    { "id": "int_greet", "name": "greet", "description": "Open or close a conversation" },
+    { "id": "int_small_talk", "name": "small_talk", "description": "Keep a light conversation going" },
+    { "id": "int_ask_info", "name": "ask_for_information", "description": "Ask for details or directions" },
+    { "id": "int_request", "name": "make_request", "description": "Politely ask someone to do something" },
+    { "id": "int_order", "name": "order", "description": "Order food, drinks or services" },
+    { "id": "int_problem", "name": "describe_problem", "description": "Explain a problem or symptom" },
+    { "id": "int_interest", "name": "express_interest", "description": "Say what you are interested in" },
+    { "id": "int_present", "name": "present_yourself", "description": "Talk about your background" },
+    { "id": "int_suggest", "name": "suggest", "description": "Propose a time, place or activity" },
+    { "id": "int_confirm", "name": "confirm", "description": "Check or confirm details" },
+    { "id": "int_thank", "name": "thank", "description": "Thank someone" },
+    { "id": "int_apologize", "name": "apologize", "description": "Apologise or decline" }
+  ],
+  "situations": [
+    {
+      "id": "sit_small_talk",
+      "name": "Small talk with a new colleague",
+      "description": "Break the ice with someone at work without freezing: ask about their weekend, share what you have been up to, and close warmly.",
+      "category": "work",
+      "roleSelf": "New team member",
+      "roleOther": "Colleague",
+      "goal": "Have a relaxed two-minute chat and leave a friendly impression",
+      "tone": "casual",
+      "level": "A2",
+      "prompts": [
+        { "slot": "event", "question": "What could you ask your colleague about?", "hint": "weekend, trip, first week" },
+        { "slot": "activity", "question": "What have you been up to lately?", "hint": "learning to cook, going to the gym" },
+        { "slot": "place", "question": "A place near work you could mention", "hint": "the new café downstairs" }
+      ]
+    },
+    {
+      "id": "sit_restaurant",
+      "name": "Ordering at a restaurant",
+      "description": "Get a table, ask what is good, order, mention an allergy and ask for the bill.",
+      "category": "daily",
+      "roleSelf": "Customer",
+      "roleOther": "Waiter",
+      "goal": "Order a meal confidently and handle the small questions that come with it",
+      "tone": "polite",
+      "level": "A2",
+      "prompts": [
+        { "slot": "number", "question": "How many people?", "hint": "two, three" },
+        { "slot": "dish", "question": "What do you want to order?", "hint": "the grilled salmon, a bowl of pho" },
+        { "slot": "allergen", "question": "Anything you are allergic to?", "hint": "peanuts, shellfish" }
+      ]
+    },
+    {
+      "id": "sit_directions",
+      "name": "Asking for directions",
+      "description": "Stop a stranger, ask the way, understand the answer and check how far it is.",
+      "category": "travel",
+      "roleSelf": "Traveller",
+      "roleOther": "Local",
+      "goal": "Find out how to reach a place and how long it takes",
+      "tone": "polite",
+      "level": "A2",
+      "prompts": [
+        { "slot": "place", "question": "Where do you need to go?", "hint": "the train station, the airport, my hotel" }
+      ]
+    },
+    {
+      "id": "sit_hotel",
+      "name": "Checking into a hotel",
+      "description": "Give your booking, ask for the room you want, and find out what is included.",
+      "category": "travel",
+      "roleSelf": "Guest",
+      "roleOther": "Receptionist",
+      "goal": "Check in smoothly and get your questions answered",
+      "tone": "polite",
+      "level": "B1",
+      "prompts": [
+        { "slot": "name", "question": "Your surname on the booking", "hint": "Nguyen" },
+        { "slot": "feature", "question": "Any room preference?", "hint": "with a view, on a higher floor" },
+        { "slot": "destination", "question": "Where will you go when you leave?", "hint": "the airport" }
+      ]
+    },
+    {
+      "id": "sit_professor",
+      "name": "Meeting a professor",
+      "description": "Introduce yourself to a professor, say what you are interested in, and ask about research directions in the lab.",
+      "category": "study",
+      "roleSelf": "New student",
+      "roleOther": "Professor",
+      "goal": "Introduce yourself and ask about research directions",
+      "tone": "polite",
+      "level": "B1",
+      "prompts": [
+        { "slot": "interest", "question": "What are you interested in?", "hint": "robotics, generative AI" },
+        { "slot": "skill", "question": "What experience do you have?", "hint": "Python, data analysis" },
+        { "slot": "topic", "question": "What do you want to know more about?", "hint": "your research, the program" },
+        { "slot": "request", "question": "What would you like to ask for?", "hint": "join your lab meetings" }
+      ]
+    },
+    {
+      "id": "sit_interview",
+      "name": "Job interview",
+      "description": "Present your experience and strengths, explain why you want the role, and ask good questions back.",
+      "category": "work",
+      "roleSelf": "Candidate",
+      "roleOther": "Interviewer",
+      "goal": "Present yourself clearly and leave with your questions answered",
+      "tone": "formal",
+      "level": "B1",
+      "prompts": [
+        { "slot": "years", "question": "How many years of experience?", "hint": "three" },
+        { "slot": "field", "question": "Your field", "hint": "software development" },
+        { "slot": "strength", "question": "One of your strengths", "hint": "problem-solving" },
+        { "slot": "responsibility", "question": "Something you were responsible for", "hint": "managing a small team" },
+        { "slot": "goal", "question": "What do you want from the next role?", "hint": "grow as an engineer" },
+        { "slot": "topic", "question": "What do you want to ask about?", "hint": "the team, the next steps" }
+      ]
+    },
+    {
+      "id": "sit_customer_call",
+      "name": "Calling a customer",
+      "description": "Open a work call, check it is a good time, handle a complaint calmly and promise a follow-up.",
+      "category": "work",
+      "roleSelf": "Account manager",
+      "roleOther": "Customer",
+      "goal": "Sort out the issue and agree on the next step",
+      "tone": "formal",
+      "level": "B1",
+      "prompts": [
+        { "slot": "matter", "question": "What are you calling about?", "hint": "your recent order" },
+        { "slot": "purpose", "question": "What do you want to do on this call?", "hint": "go over the details" },
+        { "slot": "deadline", "question": "When will you follow up?", "hint": "the end of the day" }
+      ]
+    },
+    {
+      "id": "sit_doctor",
+      "name": "At the doctor's",
+      "description": "Describe what is wrong, say when it hurts, mention allergies and understand the treatment.",
+      "category": "daily",
+      "roleSelf": "Patient",
+      "roleOther": "Doctor",
+      "goal": "Explain your symptoms and leave knowing what to do",
+      "tone": "neutral",
+      "level": "A2",
+      "prompts": [
+        { "slot": "symptom", "question": "What is wrong?", "hint": "a headache, a sore throat" },
+        { "slot": "movement", "question": "When does it hurt?", "hint": "swallow, bend down" },
+        { "slot": "allergen", "question": "Any allergies?", "hint": "penicillin" }
+      ]
+    },
+    {
+      "id": "sit_friends",
+      "name": "Making plans with friends",
+      "description": "Suggest meeting up, agree on a time and place, and cancel gracefully when you have to.",
+      "category": "social",
+      "roleSelf": "You",
+      "roleOther": "Friend",
+      "goal": "Fix a time and place to meet without a long back-and-forth",
+      "tone": "casual",
+      "level": "A2",
+      "prompts": [
+        { "slot": "meal", "question": "What do you want to do together?", "hint": "coffee, dinner" },
+        { "slot": "suggestion", "question": "When would you suggest?", "hint": "Saturday afternoon" },
+        { "slot": "place", "question": "Where will you meet?", "hint": "the café near the station" }
+      ]
+    }
+  ],
+  "patterns": [
+    {
+      "id": "pat_how_was",
+      "template": "How was your {event}?",
+      "meaning": "Open a chat by asking about something they did.",
+      "difficulty": 1,
+      "level": "A1",
+      "register": "casual",
+      "intents": ["small_talk"],
+      "situations": ["sit_small_talk"],
+      "slots": [
+        {
+          "name": "event",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "weekend" },
+            { "text": "trip" },
+            { "text": "first week" },
+            { "text": "holiday" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_been_lately",
+      "template": "I've been {activity} lately.",
+      "meaning": "Share what you have been up to.",
+      "difficulty": 2,
+      "level": "A2",
+      "register": "casual",
+      "intents": ["small_talk"],
+      "situations": ["sit_small_talk"],
+      "slots": [
+        {
+          "name": "activity",
+          "expectedPos": "-ing verb phrase",
+          "variants": [
+            { "text": "working on a new project" },
+            { "text": "learning to cook" },
+            { "text": "going to the gym" },
+            { "text": "exploring the city" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_have_you_been",
+      "template": "Have you been to {place}?",
+      "meaning": "Ask if they have tried or visited somewhere.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "casual",
+      "intents": ["small_talk", "ask_for_information"],
+      "situations": ["sit_small_talk"],
+      "slots": [
+        {
+          "name": "place",
+          "expectedPos": "place",
+          "variants": [
+            { "text": "the new café downstairs" },
+            { "text": "the night market" },
+            { "text": "the museum" },
+            { "text": "Japan" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_plans_for",
+      "template": "Do you have any plans for {time}?",
+      "meaning": "Ask about upcoming plans.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "casual",
+      "intents": ["small_talk"],
+      "situations": ["sit_small_talk"],
+      "slots": [
+        {
+          "name": "time",
+          "expectedPos": "time expression",
+          "variants": [
+            { "text": "the weekend" },
+            { "text": "the holidays" },
+            { "text": "tonight" },
+            { "text": "the summer" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_nice_talking",
+      "template": "It was nice {closing}.",
+      "meaning": "Close a chat warmly.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "casual",
+      "intents": ["greet"],
+      "situations": ["sit_small_talk"],
+      "slots": [
+        {
+          "name": "closing",
+          "expectedPos": "-ing verb phrase",
+          "variants": [
+            { "text": "talking to you" },
+            { "text": "meeting you" },
+            { "text": "catching up" },
+            { "text": "getting to know you" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_table_for",
+      "template": "Could I get a table for {number}, please?",
+      "meaning": "Ask for a table.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "polite",
+      "intents": ["make_request"],
+      "situations": ["sit_restaurant"],
+      "slots": [
+        {
+          "name": "number",
+          "expectedPos": "number",
+          "variants": [
+            { "text": "two" },
+            { "text": "three" },
+            { "text": "four" },
+            { "text": "one" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_id_like",
+      "template": "I'd like {dish}, please.",
+      "meaning": "Order something politely.",
+      "difficulty": 1,
+      "level": "A1",
+      "register": "polite",
+      "intents": ["order"],
+      "situations": ["sit_restaurant"],
+      "slots": [
+        {
+          "name": "dish",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "the grilled salmon" },
+            { "text": "a bowl of pho" },
+            { "text": "the chicken curry" },
+            { "text": "the mushroom risotto" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_come_with",
+      "template": "Does this come with {side}?",
+      "meaning": "Check what is included with a dish.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "neutral",
+      "intents": ["ask_for_information"],
+      "situations": ["sit_restaurant"],
+      "slots": [
+        {
+          "name": "side",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "rice" },
+            { "text": "a salad" },
+            { "text": "fries" },
+            { "text": "bread" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_allergic",
+      "template": "I'm allergic to {allergen}.",
+      "meaning": "State an allergy.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "neutral",
+      "intents": ["describe_problem"],
+      "situations": ["sit_restaurant", "sit_doctor"],
+      "slots": [
+        {
+          "name": "allergen",
+          "expectedPos": "noun",
+          "variants": [
+            { "text": "peanuts" },
+            { "text": "shellfish" },
+            { "text": "dairy" },
+            { "text": "gluten" },
+            { "text": "penicillin" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_could_we_have",
+      "template": "Could we have the {item}, please?",
+      "meaning": "Ask the waiter to bring something.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "polite",
+      "intents": ["make_request"],
+      "situations": ["sit_restaurant"],
+      "slots": [
+        {
+          "name": "item",
+          "expectedPos": "noun",
+          "variants": [
+            { "text": "bill" },
+            { "text": "menu" },
+            { "text": "wine list" },
+            { "text": "check" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_how_get_to",
+      "template": "Excuse me, how do I get to {place}?",
+      "meaning": "Ask the way to a place.",
+      "difficulty": 1,
+      "level": "A1",
+      "register": "polite",
+      "intents": ["ask_for_information"],
+      "situations": ["sit_directions"],
+      "slots": [
+        {
+          "name": "place",
+          "expectedPos": "place",
+          "variants": [
+            { "text": "the train station" },
+            { "text": "the airport" },
+            { "text": "the city center" },
+            { "text": "the nearest pharmacy" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_is_far",
+      "template": "Is {place} far from here?",
+      "meaning": "Check the distance.",
+      "difficulty": 1,
+      "level": "A1",
+      "register": "neutral",
+      "intents": ["ask_for_information"],
+      "situations": ["sit_directions"],
+      "slots": [
+        {
+          "name": "place",
+          "expectedPos": "place",
+          "variants": [
+            { "text": "the station" },
+            { "text": "the museum" },
+            { "text": "the hotel" },
+            { "text": "the bus stop" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_which_take",
+      "template": "Which {transport} should I take?",
+      "meaning": "Ask which option to take.",
+      "difficulty": 2,
+      "level": "A2",
+      "register": "neutral",
+      "intents": ["ask_for_information"],
+      "situations": ["sit_directions"],
+      "slots": [
+        {
+          "name": "transport",
+          "expectedPos": "noun",
+          "variants": [
+            { "text": "bus" },
+            { "text": "line" },
+            { "text": "exit" },
+            { "text": "platform" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_how_long",
+      "template": "How long does it take to get to {place}?",
+      "meaning": "Ask about travel time.",
+      "difficulty": 2,
+      "level": "A2",
+      "register": "neutral",
+      "intents": ["ask_for_information"],
+      "situations": ["sit_directions"],
+      "slots": [
+        {
+          "name": "place",
+          "expectedPos": "place",
+          "variants": [
+            { "text": "the train station" },
+            { "text": "the airport" },
+            { "text": "downtown" },
+            { "text": "the beach" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_reservation_under",
+      "template": "I have a reservation under the name {name}.",
+      "meaning": "Check in with your booking.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "polite",
+      "intents": ["present_yourself"],
+      "situations": ["sit_hotel"],
+      "slots": [
+        {
+          "name": "name",
+          "expectedPos": "surname",
+          "variants": [
+            { "text": "Nguyen" },
+            { "text": "Tran" },
+            { "text": "Le" },
+            { "text": "Smith" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_room_with",
+      "template": "Could I have a room {feature}?",
+      "meaning": "Ask for a room preference.",
+      "difficulty": 2,
+      "level": "B1",
+      "register": "polite",
+      "intents": ["make_request"],
+      "situations": ["sit_hotel"],
+      "slots": [
+        {
+          "name": "feature",
+          "expectedPos": "prepositional phrase",
+          "variants": [
+            { "text": "with a view" },
+            { "text": "on a higher floor" },
+            { "text": "away from the elevator" },
+            { "text": "with twin beds" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_what_time_is",
+      "template": "What time is {service}?",
+      "meaning": "Ask when something happens.",
+      "difficulty": 1,
+      "level": "A1",
+      "register": "neutral",
+      "intents": ["ask_for_information"],
+      "situations": ["sit_hotel"],
+      "slots": [
+        {
+          "name": "service",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "breakfast" },
+            { "text": "checkout" },
+            { "text": "the pool open" },
+            { "text": "the gym open" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_is_included",
+      "template": "Is {amenity} included?",
+      "meaning": "Check whether something is part of the price.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "neutral",
+      "intents": ["ask_for_information"],
+      "situations": ["sit_hotel"],
+      "slots": [
+        {
+          "name": "amenity",
+          "expectedPos": "noun",
+          "variants": [
+            { "text": "breakfast" },
+            { "text": "Wi-Fi" },
+            { "text": "parking" },
+            { "text": "airport pickup" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_call_taxi",
+      "template": "Could you call me a taxi to {destination}?",
+      "meaning": "Ask reception to arrange a ride.",
+      "difficulty": 2,
+      "level": "A2",
+      "register": "polite",
+      "intents": ["make_request"],
+      "situations": ["sit_hotel"],
+      "slots": [
+        {
+          "name": "destination",
+          "expectedPos": "place",
+          "variants": [
+            { "text": "the airport" },
+            { "text": "the station" },
+            { "text": "downtown" },
+            { "text": "the old town" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_interested_in",
+      "template": "I'm particularly interested in {interest}.",
+      "meaning": "Say what you care about most.",
+      "difficulty": 2,
+      "level": "B1",
+      "register": "polite",
+      "intents": ["express_interest"],
+      "situations": ["sit_professor", "sit_interview"],
+      "slots": [
+        {
+          "name": "interest",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "robotics" },
+            { "text": "generative AI" },
+            { "text": "renewable energy" },
+            { "text": "language acquisition" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_tell_me_more",
+      "template": "Could you tell me more about {topic}?",
+      "meaning": "Ask for more detail.",
+      "difficulty": 2,
+      "level": "B1",
+      "register": "polite",
+      "intents": ["ask_for_information"],
+      "situations": ["sit_professor", "sit_interview", "sit_customer_call"],
+      "slots": [
+        {
+          "name": "topic",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "your research" },
+            { "text": "the program" },
+            { "text": "the application process" },
+            { "text": "the lab's current projects" },
+            { "text": "the team" },
+            { "text": "the next steps" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_experience_with",
+      "template": "I have some experience with {skill}.",
+      "meaning": "Mention relevant experience.",
+      "difficulty": 2,
+      "level": "B1",
+      "register": "neutral",
+      "intents": ["present_yourself"],
+      "situations": ["sit_professor", "sit_interview"],
+      "slots": [
+        {
+          "name": "skill",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "Python" },
+            { "text": "data analysis" },
+            { "text": "lab work" },
+            { "text": "academic writing" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_would_it_be_possible",
+      "template": "Would it be possible to {request}?",
+      "meaning": "Make a careful, polite request.",
+      "difficulty": 3,
+      "level": "B1",
+      "register": "formal",
+      "intents": ["make_request"],
+      "situations": ["sit_professor"],
+      "slots": [
+        {
+          "name": "request",
+          "expectedPos": "verb phrase",
+          "variants": [
+            { "text": "join your lab meetings" },
+            { "text": "sit in on your lecture" },
+            { "text": "schedule a follow-up" },
+            { "text": "get a reading list" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_thank_time",
+      "template": "Thank you for taking the time to {action}.",
+      "meaning": "Thank someone for their time.",
+      "difficulty": 2,
+      "level": "B1",
+      "register": "formal",
+      "intents": ["thank"],
+      "situations": ["sit_professor", "sit_interview"],
+      "slots": [
+        {
+          "name": "action",
+          "expectedPos": "verb phrase",
+          "variants": [
+            { "text": "meet with me" },
+            { "text": "answer my questions" },
+            { "text": "explain the program" },
+            { "text": "talk to me" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_years_experience",
+      "template": "I have {years} years of experience in {field}.",
+      "meaning": "Summarise your background.",
+      "difficulty": 2,
+      "level": "B1",
+      "register": "formal",
+      "intents": ["present_yourself"],
+      "situations": ["sit_interview"],
+      "slots": [
+        {
+          "name": "years",
+          "expectedPos": "number",
+          "variants": [
+            { "text": "three" },
+            { "text": "two" },
+            { "text": "five" },
+            { "text": "over ten" }
+          ]
+        },
+        {
+          "name": "field",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "software development" },
+            { "text": "customer support" },
+            { "text": "digital marketing" },
+            { "text": "project management" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_strength",
+      "template": "One of my strengths is {strength}.",
+      "meaning": "Name a strength.",
+      "difficulty": 2,
+      "level": "B1",
+      "register": "formal",
+      "intents": ["present_yourself"],
+      "situations": ["sit_interview"],
+      "slots": [
+        {
+          "name": "strength",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "problem-solving" },
+            { "text": "communication" },
+            { "text": "staying calm under pressure" },
+            { "text": "attention to detail" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_responsible_for",
+      "template": "In my previous role, I was responsible for {responsibility}.",
+      "meaning": "Describe what you did in your last job.",
+      "difficulty": 3,
+      "level": "B1",
+      "register": "formal",
+      "intents": ["present_yourself"],
+      "situations": ["sit_interview"],
+      "slots": [
+        {
+          "name": "responsibility",
+          "expectedPos": "-ing verb phrase or noun phrase",
+          "variants": [
+            { "text": "managing a small team" },
+            { "text": "handling customer complaints" },
+            { "text": "building the mobile app" },
+            { "text": "weekly reporting" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_looking_for_role",
+      "template": "I'm looking for a role where I can {goal}.",
+      "meaning": "Explain what you want from the job.",
+      "difficulty": 3,
+      "level": "B1",
+      "register": "formal",
+      "intents": ["express_interest"],
+      "situations": ["sit_interview"],
+      "slots": [
+        {
+          "name": "goal",
+          "expectedPos": "verb phrase",
+          "variants": [
+            { "text": "grow as an engineer" },
+            { "text": "work with international clients" },
+            { "text": "take on more responsibility" },
+            { "text": "learn from a strong team" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_calling_about",
+      "template": "I'm calling about {matter}.",
+      "meaning": "Say why you are calling.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "formal",
+      "intents": ["present_yourself"],
+      "situations": ["sit_customer_call"],
+      "slots": [
+        {
+          "name": "matter",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "your recent order" },
+            { "text": "the invoice from last month" },
+            { "text": "the issue you reported" },
+            { "text": "our meeting next week" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_good_time",
+      "template": "Is now a good time to {purpose}?",
+      "meaning": "Check that the other person can talk.",
+      "difficulty": 2,
+      "level": "B1",
+      "register": "polite",
+      "intents": ["confirm"],
+      "situations": ["sit_customer_call"],
+      "slots": [
+        {
+          "name": "purpose",
+          "expectedPos": "verb phrase",
+          "variants": [
+            { "text": "talk" },
+            { "text": "go over the details" },
+            { "text": "walk you through the update" },
+            { "text": "answer a few questions" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_send_by",
+      "template": "I'll send you the details by {deadline}.",
+      "meaning": "Promise a follow-up with a deadline.",
+      "difficulty": 2,
+      "level": "B1",
+      "register": "formal",
+      "intents": ["confirm"],
+      "situations": ["sit_customer_call"],
+      "slots": [
+        {
+          "name": "deadline",
+          "expectedPos": "time expression",
+          "variants": [
+            { "text": "the end of the day" },
+            { "text": "tomorrow morning" },
+            { "text": "Friday" },
+            { "text": "next week" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_confirm",
+      "template": "Could you confirm {detail}?",
+      "meaning": "Double-check a detail.",
+      "difficulty": 2,
+      "level": "B1",
+      "register": "polite",
+      "intents": ["confirm"],
+      "situations": ["sit_customer_call"],
+      "slots": [
+        {
+          "name": "detail",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "your email address" },
+            { "text": "the delivery date" },
+            { "text": "the order number" },
+            { "text": "your phone number" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_had_symptom",
+      "template": "I've had {symptom} for a few days.",
+      "meaning": "Describe what is wrong and since when.",
+      "difficulty": 2,
+      "level": "A2",
+      "register": "neutral",
+      "intents": ["describe_problem"],
+      "situations": ["sit_doctor"],
+      "slots": [
+        {
+          "name": "symptom",
+          "expectedPos": "noun phrase with article",
+          "variants": [
+            { "text": "a headache" },
+            { "text": "a sore throat" },
+            { "text": "a bad cough" },
+            { "text": "a fever" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_hurts_when",
+      "template": "It hurts when I {movement}.",
+      "meaning": "Say when the pain appears.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "neutral",
+      "intents": ["describe_problem"],
+      "situations": ["sit_doctor"],
+      "slots": [
+        {
+          "name": "movement",
+          "expectedPos": "verb",
+          "variants": [
+            { "text": "swallow" },
+            { "text": "bend down" },
+            { "text": "walk" },
+            { "text": "breathe deeply" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_do_i_need",
+      "template": "Do I need {treatment}?",
+      "meaning": "Ask what treatment is required.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "neutral",
+      "intents": ["ask_for_information"],
+      "situations": ["sit_doctor"],
+      "slots": [
+        {
+          "name": "treatment",
+          "expectedPos": "noun phrase or to-infinitive",
+          "variants": [
+            { "text": "a prescription" },
+            { "text": "any tests" },
+            { "text": "to come back" },
+            { "text": "to rest" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_how_often_take",
+      "template": "How often should I take {medicine}?",
+      "meaning": "Ask about dosage.",
+      "difficulty": 2,
+      "level": "A2",
+      "register": "neutral",
+      "intents": ["ask_for_information"],
+      "situations": ["sit_doctor"],
+      "slots": [
+        {
+          "name": "medicine",
+          "expectedPos": "noun phrase",
+          "variants": [
+            { "text": "this" },
+            { "text": "the antibiotics" },
+            { "text": "the painkillers" },
+            { "text": "these tablets" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_grab",
+      "template": "Do you want to grab {meal} this weekend?",
+      "meaning": "Suggest meeting up casually.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "casual",
+      "intents": ["suggest"],
+      "situations": ["sit_friends"],
+      "slots": [
+        {
+          "name": "meal",
+          "expectedPos": "noun",
+          "variants": [
+            { "text": "coffee" },
+            { "text": "lunch" },
+            { "text": "dinner" },
+            { "text": "a drink" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_how_about",
+      "template": "How about {suggestion}?",
+      "meaning": "Propose a time.",
+      "difficulty": 1,
+      "level": "A1",
+      "register": "casual",
+      "intents": ["suggest"],
+      "situations": ["sit_friends"],
+      "slots": [
+        {
+          "name": "suggestion",
+          "expectedPos": "time expression",
+          "variants": [
+            { "text": "Saturday afternoon" },
+            { "text": "after work" },
+            { "text": "around seven" },
+            { "text": "Sunday brunch" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_im_free",
+      "template": "I'm free {availability}.",
+      "meaning": "Say when you are available.",
+      "difficulty": 1,
+      "level": "A1",
+      "register": "casual",
+      "intents": ["suggest"],
+      "situations": ["sit_friends"],
+      "slots": [
+        {
+          "name": "availability",
+          "expectedPos": "time expression",
+          "variants": [
+            { "text": "tonight" },
+            { "text": "on Sunday" },
+            { "text": "after six" },
+            { "text": "all weekend" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_lets_meet_at",
+      "template": "Let's meet at {place}.",
+      "meaning": "Propose a meeting place.",
+      "difficulty": 1,
+      "level": "A1",
+      "register": "casual",
+      "intents": ["suggest"],
+      "situations": ["sit_friends"],
+      "slots": [
+        {
+          "name": "place",
+          "expectedPos": "place",
+          "variants": [
+            { "text": "the café near the station" },
+            { "text": "my place" },
+            { "text": "the park entrance" },
+            { "text": "the usual spot" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pat_cant_make_it",
+      "template": "Sorry, I can't make it {when}.",
+      "meaning": "Cancel or decline politely.",
+      "difficulty": 1,
+      "level": "A2",
+      "register": "casual",
+      "intents": ["apologize"],
+      "situations": ["sit_friends"],
+      "slots": [
+        {
+          "name": "when",
+          "expectedPos": "time expression",
+          "variants": [
+            { "text": "tonight" },
+            { "text": "this weekend" },
+            { "text": "on Friday" },
+            { "text": "tomorrow" }
+          ]
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    { "id": "chk_st_im_new", "text": "I'm new on the team, by the way.", "meaning": "Introduce yourself lightly.", "level": "A2", "register": "casual", "situationId": "sit_small_talk" },
+    { "id": "chk_how_was", "text": "How was your weekend?", "meaning": "Open a chat by asking about something they did.", "patternId": "pat_how_was", "situationId": "sit_small_talk" },
+    { "id": "chk_been_lately", "text": "I've been working on a new project lately.", "meaning": "Share what you have been up to.", "patternId": "pat_been_lately", "situationId": "sit_small_talk" },
+    { "id": "chk_have_you_been", "text": "Have you been to the new café downstairs?", "meaning": "Ask if they have tried or visited somewhere.", "patternId": "pat_have_you_been", "situationId": "sit_small_talk" },
+    { "id": "chk_plans_for", "text": "Do you have any plans for the weekend?", "meaning": "Ask about upcoming plans.", "patternId": "pat_plans_for", "situationId": "sit_small_talk" },
+    { "id": "chk_nice_talking", "text": "It was nice talking to you.", "meaning": "Close a chat warmly.", "patternId": "pat_nice_talking", "situationId": "sit_small_talk" },
+
+    { "id": "chk_table_for", "text": "Could I get a table for two, please?", "meaning": "Ask for a table.", "patternId": "pat_table_for", "situationId": "sit_restaurant" },
+    { "id": "chk_rs_recommend", "text": "What would you recommend?", "meaning": "Ask the waiter for a suggestion.", "level": "A2", "register": "polite", "situationId": "sit_restaurant" },
+    { "id": "chk_id_like", "text": "I'd like the grilled salmon, please.", "meaning": "Order something politely.", "patternId": "pat_id_like", "situationId": "sit_restaurant" },
+    { "id": "chk_come_with", "text": "Does this come with rice?", "meaning": "Check what is included with a dish.", "patternId": "pat_come_with", "situationId": "sit_restaurant" },
+    { "id": "chk_allergic", "text": "I'm allergic to peanuts.", "meaning": "State an allergy.", "patternId": "pat_allergic", "situationId": "sit_restaurant" },
+    { "id": "chk_could_we_have", "text": "Could we have the bill, please?", "meaning": "Ask the waiter to bring something.", "patternId": "pat_could_we_have", "situationId": "sit_restaurant" },
+
+    { "id": "chk_how_get_to", "text": "Excuse me, how do I get to the train station?", "meaning": "Ask the way to a place.", "patternId": "pat_how_get_to", "situationId": "sit_directions" },
+    { "id": "chk_dr_show_map", "text": "Could you show me on the map?", "meaning": "Ask them to point it out.", "level": "A2", "register": "polite", "situationId": "sit_directions" },
+    { "id": "chk_is_far", "text": "Is the station far from here?", "meaning": "Check the distance.", "patternId": "pat_is_far", "situationId": "sit_directions" },
+    { "id": "chk_which_take", "text": "Which bus should I take?", "meaning": "Ask which option to take.", "patternId": "pat_which_take", "situationId": "sit_directions" },
+    { "id": "chk_how_long", "text": "How long does it take to get to the train station?", "meaning": "Ask about travel time.", "patternId": "pat_how_long", "situationId": "sit_directions" },
+    { "id": "chk_dr_thanks_help", "text": "Thanks so much for your help!", "meaning": "Thank someone for helping you.", "level": "A1", "register": "casual", "situationId": "sit_directions" },
+
+    { "id": "chk_reservation_under", "text": "I have a reservation under the name Nguyen.", "meaning": "Check in with your booking.", "patternId": "pat_reservation_under", "situationId": "sit_hotel" },
+    { "id": "chk_room_with", "text": "Could I have a room with a view?", "meaning": "Ask for a room preference.", "patternId": "pat_room_with", "situationId": "sit_hotel" },
+    { "id": "chk_what_time_is", "text": "What time is breakfast?", "meaning": "Ask when something happens.", "patternId": "pat_what_time_is", "situationId": "sit_hotel" },
+    { "id": "chk_is_included", "text": "Is breakfast included?", "meaning": "Check whether something is part of the price.", "patternId": "pat_is_included", "situationId": "sit_hotel" },
+    { "id": "chk_call_taxi", "text": "Could you call me a taxi to the airport?", "meaning": "Ask reception to arrange a ride.", "patternId": "pat_call_taxi", "situationId": "sit_hotel" },
+
+    { "id": "chk_interested_in", "text": "I'm particularly interested in robotics.", "meaning": "Say what you care about most.", "patternId": "pat_interested_in", "situationId": "sit_professor" },
+    { "id": "chk_experience_with", "text": "I have some experience with Python.", "meaning": "Mention relevant experience.", "patternId": "pat_experience_with", "situationId": "sit_professor" },
+    { "id": "chk_tell_me_more", "text": "Could you tell me more about your research?", "meaning": "Ask for more detail.", "patternId": "pat_tell_me_more", "situationId": "sit_professor" },
+    { "id": "chk_would_it_be_possible", "text": "Would it be possible to join your lab meetings?", "meaning": "Make a careful, polite request.", "patternId": "pat_would_it_be_possible", "situationId": "sit_professor" },
+    { "id": "chk_thank_time", "text": "Thank you for taking the time to meet with me.", "meaning": "Thank someone for their time.", "patternId": "pat_thank_time", "situationId": "sit_professor" },
+
+    { "id": "chk_years_experience", "text": "I have three years of experience in software development.", "meaning": "Summarise your background.", "patternId": "pat_years_experience", "situationId": "sit_interview" },
+    { "id": "chk_strength", "text": "One of my strengths is problem-solving.", "meaning": "Name a strength.", "patternId": "pat_strength", "situationId": "sit_interview" },
+    { "id": "chk_responsible_for", "text": "In my previous role, I was responsible for managing a small team.", "meaning": "Describe what you did in your last job.", "patternId": "pat_responsible_for", "situationId": "sit_interview" },
+    { "id": "chk_looking_for_role", "text": "I'm looking for a role where I can grow as an engineer.", "meaning": "Explain what you want from the job.", "patternId": "pat_looking_for_role", "situationId": "sit_interview" },
+
+    { "id": "chk_calling_about", "text": "I'm calling about your recent order.", "meaning": "Say why you are calling.", "patternId": "pat_calling_about", "situationId": "sit_customer_call" },
+    { "id": "chk_good_time", "text": "Is now a good time to talk?", "meaning": "Check that the other person can talk.", "patternId": "pat_good_time", "situationId": "sit_customer_call" },
+    { "id": "chk_cc_sorry", "text": "I'm sorry for the inconvenience.", "meaning": "Apologise professionally.", "level": "B1", "register": "formal", "situationId": "sit_customer_call" },
+    { "id": "chk_cc_check", "text": "Let me check that for you.", "meaning": "Buy time politely while you look something up.", "level": "A2", "register": "polite", "situationId": "sit_customer_call" },
+    { "id": "chk_confirm", "text": "Could you confirm your email address?", "meaning": "Double-check a detail.", "patternId": "pat_confirm", "situationId": "sit_customer_call" },
+    { "id": "chk_send_by", "text": "I'll send you the details by the end of the day.", "meaning": "Promise a follow-up with a deadline.", "patternId": "pat_send_by", "situationId": "sit_customer_call" },
+
+    { "id": "chk_had_symptom", "text": "I've had a headache for a few days.", "meaning": "Describe what is wrong and since when.", "patternId": "pat_had_symptom", "situationId": "sit_doctor" },
+    { "id": "chk_hurts_when", "text": "It hurts when I swallow.", "meaning": "Say when the pain appears.", "patternId": "pat_hurts_when", "situationId": "sit_doctor" },
+    { "id": "chk_do_i_need", "text": "Do I need a prescription?", "meaning": "Ask what treatment is required.", "patternId": "pat_do_i_need", "situationId": "sit_doctor" },
+    { "id": "chk_how_often_take", "text": "How often should I take this?", "meaning": "Ask about dosage.", "patternId": "pat_how_often_take", "situationId": "sit_doctor" },
+
+    { "id": "chk_grab", "text": "Do you want to grab coffee this weekend?", "meaning": "Suggest meeting up casually.", "patternId": "pat_grab", "situationId": "sit_friends" },
+    { "id": "chk_how_about", "text": "How about Saturday afternoon?", "meaning": "Propose a time.", "patternId": "pat_how_about", "situationId": "sit_friends" },
+    { "id": "chk_im_free", "text": "I'm free tonight.", "meaning": "Say when you are available.", "patternId": "pat_im_free", "situationId": "sit_friends" },
+    { "id": "chk_lets_meet_at", "text": "Let's meet at the café near the station.", "meaning": "Propose a meeting place.", "patternId": "pat_lets_meet_at", "situationId": "sit_friends" },
+    { "id": "chk_cant_make_it", "text": "Sorry, I can't make it tonight.", "meaning": "Cancel or decline politely.", "patternId": "pat_cant_make_it", "situationId": "sit_friends" }
+  ],
+  "dialogues": [
+    {
+      "id": "dlg_small_talk",
+      "situationId": "sit_small_talk",
+      "title": "First chat in the break room",
+      "level": "A2",
+      "lines": [
+        { "speaker": "self", "text": "Hi! I'm new on the team, by the way.", "chunkIds": ["chk_st_im_new"] },
+        { "speaker": "other", "text": "Oh, welcome! I'm Sam. How's it going so far?" },
+        { "speaker": "self", "text": "Pretty good, thanks. How was your {event}?", "chunkIds": ["chk_how_was"] },
+        { "speaker": "other", "text": "It was great, actually — very relaxing. And you?" },
+        { "speaker": "self", "text": "I've been {activity} lately. It's been busy!", "chunkIds": ["chk_been_lately"] },
+        { "speaker": "other", "text": "Nice. Have you had a chance to look around the area?" },
+        { "speaker": "self", "text": "Not yet. Have you been to {place}?", "chunkIds": ["chk_have_you_been"] },
+        { "speaker": "other", "text": "Yes, it's great — we should go together sometime." },
+        { "speaker": "self", "text": "I'd love that. Do you have any plans for {time}?", "chunkIds": ["chk_plans_for"] },
+        { "speaker": "other", "text": "Not really. Let's figure something out." },
+        { "speaker": "self", "text": "Sounds good. It was nice {closing}.", "chunkIds": ["chk_nice_talking"] }
+      ]
+    },
+    {
+      "id": "dlg_restaurant",
+      "situationId": "sit_restaurant",
+      "title": "Dinner for two",
+      "level": "A2",
+      "lines": [
+        { "speaker": "other", "text": "Good evening! Welcome. Do you have a reservation?" },
+        { "speaker": "self", "text": "No, we don't. Could I get a table for {number}, please?", "chunkIds": ["chk_table_for"] },
+        { "speaker": "other", "text": "Of course, right this way. Here are the menus." },
+        { "speaker": "self", "text": "Thank you. What would you recommend?", "chunkIds": ["chk_rs_recommend"] },
+        { "speaker": "other", "text": "The grilled salmon is very popular tonight." },
+        { "speaker": "self", "text": "Sounds good. Does this come with {side}?", "chunkIds": ["chk_come_with"] },
+        { "speaker": "other", "text": "Yes, it does. Anything to drink?" },
+        { "speaker": "self", "text": "Just water for me. I'd like {dish}, please.", "chunkIds": ["chk_id_like"] },
+        { "speaker": "other", "text": "Certainly. Any allergies I should know about?" },
+        { "speaker": "self", "text": "Yes — I'm allergic to {allergen}.", "chunkIds": ["chk_allergic"] },
+        { "speaker": "other", "text": "Noted, I'll let the kitchen know." },
+        { "speaker": "self", "text": "Thanks. When we're done, could we have the {item}, please?", "chunkIds": ["chk_could_we_have"] }
+      ]
+    },
+    {
+      "id": "dlg_directions",
+      "situationId": "sit_directions",
+      "title": "Finding the station",
+      "level": "A2",
+      "lines": [
+        { "speaker": "self", "text": "Excuse me, how do I get to {place}?", "chunkIds": ["chk_how_get_to"] },
+        { "speaker": "other", "text": "Sure. Go straight for two blocks, then turn left at the bank." },
+        { "speaker": "self", "text": "Could you show me on the map?", "chunkIds": ["chk_dr_show_map"] },
+        { "speaker": "other", "text": "Of course. We're here, and it's over there." },
+        { "speaker": "self", "text": "Is {place} far from here?", "chunkIds": ["chk_is_far"] },
+        { "speaker": "other", "text": "About fifteen minutes on foot. Or you can take the bus." },
+        { "speaker": "self", "text": "Which {transport} should I take?", "chunkIds": ["chk_which_take"] },
+        { "speaker": "other", "text": "Number 12. The stop is just across the street." },
+        { "speaker": "self", "text": "Great. How long does it take to get to {place}?", "chunkIds": ["chk_how_long"] },
+        { "speaker": "other", "text": "Ten minutes, maybe less." },
+        { "speaker": "self", "text": "Thanks so much for your help!", "chunkIds": ["chk_dr_thanks_help"] },
+        { "speaker": "other", "text": "You're welcome. Have a good trip!" }
+      ]
+    },
+    {
+      "id": "dlg_hotel",
+      "situationId": "sit_hotel",
+      "title": "Check-in at the Riverside",
+      "level": "B1",
+      "lines": [
+        { "speaker": "other", "text": "Good afternoon, welcome to the Riverside Hotel." },
+        { "speaker": "self", "text": "Hello. I have a reservation under the name {name}.", "chunkIds": ["chk_reservation_under"] },
+        { "speaker": "other", "text": "Let me check… yes, three nights in a double room." },
+        { "speaker": "self", "text": "Great. Could I have a room {feature}?", "chunkIds": ["chk_room_with"] },
+        { "speaker": "other", "text": "Let me see what's available… yes, room 812 is free." },
+        { "speaker": "self", "text": "Perfect. What time is {service}?", "chunkIds": ["chk_what_time_is"] },
+        { "speaker": "other", "text": "From 6:30 to 10, in the restaurant downstairs." },
+        { "speaker": "self", "text": "Is {amenity} included?", "chunkIds": ["chk_is_included"] },
+        { "speaker": "other", "text": "Yes, it's included in your rate." },
+        { "speaker": "self", "text": "One more thing — on Friday, could you call me a taxi to {destination}?", "chunkIds": ["chk_call_taxi"] },
+        { "speaker": "other", "text": "Of course. Just let us know the time. Enjoy your stay!" }
+      ]
+    },
+    {
+      "id": "dlg_professor",
+      "situationId": "sit_professor",
+      "title": "Office hours, first visit",
+      "level": "B1",
+      "lines": [
+        { "speaker": "self", "text": "Good morning, Professor. Thank you for seeing me. I'm particularly interested in {interest}.", "chunkIds": ["chk_interested_in"] },
+        { "speaker": "other", "text": "Nice to meet you. That's one of our main directions. What draws you to it?" },
+        { "speaker": "self", "text": "I have some experience with {skill}. I'd like to go deeper.", "chunkIds": ["chk_experience_with"] },
+        { "speaker": "other", "text": "That's a good foundation. We're currently working on two related projects." },
+        { "speaker": "self", "text": "Could you tell me more about {topic}?", "chunkIds": ["chk_tell_me_more"] },
+        { "speaker": "other", "text": "Sure. The first one is more theoretical, the second is quite applied." },
+        { "speaker": "self", "text": "That sounds fascinating. Would it be possible to {request}?", "chunkIds": ["chk_would_it_be_possible"] },
+        { "speaker": "other", "text": "Of course. We meet on Thursdays — I'll add you to the list." },
+        { "speaker": "self", "text": "Thank you for taking the time to {action}.", "chunkIds": ["chk_thank_time"] },
+        { "speaker": "other", "text": "My pleasure. See you on Thursday." }
+      ]
+    },
+    {
+      "id": "dlg_interview",
+      "situationId": "sit_interview",
+      "title": "First-round interview",
+      "level": "B1",
+      "lines": [
+        { "speaker": "other", "text": "Thanks for coming in. Could you start by telling me a bit about yourself?" },
+        { "speaker": "self", "text": "Of course. I have {years} years of experience in {field}.", "chunkIds": ["chk_years_experience"] },
+        { "speaker": "other", "text": "Great. What would you say you're good at?" },
+        { "speaker": "self", "text": "One of my strengths is {strength}.", "chunkIds": ["chk_strength"] },
+        { "speaker": "other", "text": "Can you give me an example from your last job?" },
+        { "speaker": "self", "text": "Sure. In my previous role, I was responsible for {responsibility}.", "chunkIds": ["chk_responsible_for"] },
+        { "speaker": "other", "text": "And why are you interested in this position?" },
+        { "speaker": "self", "text": "I'm looking for a role where I can {goal}.", "chunkIds": ["chk_looking_for_role"] },
+        { "speaker": "other", "text": "That fits well. Do you have any questions for us?" },
+        { "speaker": "self", "text": "Yes. Could you tell me more about {topic}?", "chunkIds": ["chk_tell_me_more"] },
+        { "speaker": "other", "text": "Certainly. It's a team of six, and the next step would be a technical interview." },
+        { "speaker": "self", "text": "Thank you for taking the time to {action}.", "chunkIds": ["chk_thank_time"] }
+      ]
+    },
+    {
+      "id": "dlg_customer_call",
+      "situationId": "sit_customer_call",
+      "title": "Follow-up call about an order",
+      "level": "B1",
+      "lines": [
+        { "speaker": "other", "text": "Hello, this is Maria." },
+        { "speaker": "self", "text": "Hi Maria, this is Khoi from OpenTech. I'm calling about {matter}.", "chunkIds": ["chk_calling_about"] },
+        { "speaker": "other", "text": "Oh, right. I was expecting your call." },
+        { "speaker": "self", "text": "Is now a good time to {purpose}?", "chunkIds": ["chk_good_time"] },
+        { "speaker": "other", "text": "Yes, go ahead. I did have a problem with the last delivery." },
+        { "speaker": "self", "text": "I'm sorry for the inconvenience. Let me check that for you.", "chunkIds": ["chk_cc_sorry", "chk_cc_check"] },
+        { "speaker": "other", "text": "Thanks. The tracking number is 4471." },
+        { "speaker": "self", "text": "Could you confirm {detail}?", "chunkIds": ["chk_confirm"] },
+        { "speaker": "other", "text": "Sure, it's maria@example.com." },
+        { "speaker": "self", "text": "Perfect. I'll send you the details by {deadline}.", "chunkIds": ["chk_send_by"] },
+        { "speaker": "other", "text": "Great, thank you for following up." }
+      ]
+    },
+    {
+      "id": "dlg_doctor",
+      "situationId": "sit_doctor",
+      "title": "A sore throat",
+      "level": "A2",
+      "lines": [
+        { "speaker": "other", "text": "Hello, come in. What brings you here today?" },
+        { "speaker": "self", "text": "I've had {symptom} for a few days.", "chunkIds": ["chk_had_symptom"] },
+        { "speaker": "other", "text": "I see. Any other symptoms?" },
+        { "speaker": "self", "text": "It hurts when I {movement}.", "chunkIds": ["chk_hurts_when"] },
+        { "speaker": "other", "text": "Let me take a look… Are you allergic to any medication?" },
+        { "speaker": "self", "text": "Yes, I'm allergic to {allergen}.", "chunkIds": ["chk_allergic"] },
+        { "speaker": "other", "text": "Okay, I'll note that. It looks like a mild infection." },
+        { "speaker": "self", "text": "Do I need {treatment}?", "chunkIds": ["chk_do_i_need"] },
+        { "speaker": "other", "text": "Yes, I'll write you a prescription for antibiotics." },
+        { "speaker": "self", "text": "How often should I take {medicine}?", "chunkIds": ["chk_how_often_take"] },
+        { "speaker": "other", "text": "One tablet twice a day, after meals. Come back if it gets worse." },
+        { "speaker": "self", "text": "Thank you, doctor." }
+      ]
+    },
+    {
+      "id": "dlg_friends",
+      "situationId": "sit_friends",
+      "title": "Weekend catch-up",
+      "level": "A2",
+      "lines": [
+        { "speaker": "self", "text": "Hey! Do you want to grab {meal} this weekend?", "chunkIds": ["chk_grab"] },
+        { "speaker": "other", "text": "Yes! I've been meaning to catch up. When works for you?" },
+        { "speaker": "self", "text": "How about {suggestion}?", "chunkIds": ["chk_how_about"] },
+        { "speaker": "other", "text": "Ah, I have a family thing then. Any other time?" },
+        { "speaker": "self", "text": "I'm free {availability}.", "chunkIds": ["chk_im_free"] },
+        { "speaker": "other", "text": "Perfect, that works. Where?" },
+        { "speaker": "self", "text": "Let's meet at {place}.", "chunkIds": ["chk_lets_meet_at"] },
+        { "speaker": "other", "text": "Great, see you there!" },
+        { "speaker": "self", "text": "Also — sorry, I can't make it {when}. Rain check on that one?", "chunkIds": ["chk_cant_make_it"] },
+        { "speaker": "other", "text": "No worries, another time!" }
+      ]
+    }
+  ]
+}
