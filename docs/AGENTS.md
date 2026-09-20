@@ -34,5 +34,6 @@ Owns durable **product and project documentation** for OpenSen: positioning, lea
 | [`product-strategy.md`](product-strategy.md) | Positioning, core loop, MVP scope, non-goals, metrics, roadmap |
 | [`product.md`](product.md) | Learning model and chunking rationale |
 | [`features.md`](features.md) | Feature catalog and relationships |
+| [`mobile-ui-design.md`](mobile-ui-design.md) | Mobile UI/UX design contract: navigation, design tokens, screen specs, Flutter blueprint |
 | [`database-architecture.md`](database-architecture.md) | Content graph + learning engine data model |
 | [`solutions/`](solutions/) | Documented solutions to past problems (architecture patterns, tooling decisions) |

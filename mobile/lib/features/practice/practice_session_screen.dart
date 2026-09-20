@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/di/providers.dart';
 import '../../core/platform/speech_synthesizer.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../domain/entities/practice.dart';
 import '../../domain/services/answer_matcher.dart';
 import '../../domain/services/practice_session.dart';
@@ -151,74 +152,107 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
     }
   }
 
+  Future<void> _close() async {
+    final session = _session;
+    final midSession = (_phase == _Phase.prompt || _phase == _Phase.reveal) &&
+        session != null &&
+        session.completed > 0;
+    if (!midSession) {
+      context.pop();
+      return;
+    }
+    final end = await confirm(
+      context,
+      title: 'End session?',
+      message: 'Graded chunks are already saved.',
+      confirmLabel: 'End session',
+    );
+    if (end && mounted) context.pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Recall practice'),
-        actions: <Widget>[
-          if (_phase == _Phase.prompt || _phase == _Phase.reveal)
-            TextButton(
-              onPressed: () {
-                _session?.skip();
-                _startPrompt();
-              },
-              child: const Text('Skip'),
+      body: SafeArea(
+        child: switch (_phase) {
+          _Phase.loading => const Center(child: CircularProgressIndicator()),
+          _Phase.empty => EmptyState(
+              icon: _error == null
+                  ? Icons.check_circle_outline
+                  : Icons.error_outline,
+              title: _error == null ? 'Nothing to practise' : 'Could not start',
+              message: _error ??
+                  'Add chunks to your plan from a dialogue or the library first.',
+              action: OutlinedButton(
+                onPressed: () => context.pop(),
+                child: const Text('Back'),
+              ),
             ),
-        ],
+          _Phase.finished => _Summary(
+              session: _session!,
+              onMore: _load,
+              onDone: () => context.pop(),
+            ),
+          _Phase.prompt || _Phase.reveal => _buildSession(context),
+        },
       ),
-      body: switch (_phase) {
-        _Phase.loading => const Center(child: CircularProgressIndicator()),
-        _Phase.empty => EmptyState(
-            icon: _error == null ? Icons.check_circle_outline : Icons.error_outline,
-            title: _error == null ? 'Nothing to practise' : 'Could not start',
-            message: _error ??
-                'Add chunks to your plan from a dialogue or the library first.',
-            action: OutlinedButton(
-              onPressed: () => context.pop(),
-              child: const Text('Back'),
-            ),
-          ),
-        _Phase.finished => _Summary(
-            session: _session!,
-            onMore: _load,
-            onDone: () => context.pop(),
-          ),
-        _Phase.prompt || _Phase.reveal => _buildCard(context),
-      },
     );
   }
 
-  Widget _buildCard(BuildContext context) {
-    final theme = Theme.of(context);
+  /// Prompt and reveal are separate subtrees: the answer does not exist in
+  /// the widget tree until the learner commits (design doc §5.4–5.5).
+  Widget _buildSession(BuildContext context) {
     final session = _session!;
-    final entry = session.current!;
-    final item = session.currentItem!;
     final revealed = _phase == _Phase.reveal;
-    final now = ref.read(clockProvider).now();
-    final previews =
-        revealed ? ref.read(schedulerProvider).preview(entry.state, now) : null;
-    final score = _matchScore;
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
+    return Column(
       children: <Widget>[
-        LinearProgressIndicator(value: session.progress),
-        Gaps.sm,
-        Row(
-          children: <Widget>[
-            Chip(
-              label: Text(item.mode.label),
-              visualDensity: VisualDensity.compact,
-            ),
-            const Spacer(),
-            Text(
-              '${session.completed} done · ${session.remaining} left',
-              style: theme.textTheme.labelMedium,
-            ),
-          ],
+        SessionHeader(
+          progress: session.progress,
+          done: session.completed,
+          total: session.initialCount,
+          onClose: _close,
+          trailing: !revealed
+              ? TextButton(
+                  onPressed: () {
+                    session.skip();
+                    _startPrompt();
+                  },
+                  child: const Text('Skip'),
+                )
+              : null,
         ),
-        Gaps.md,
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 150),
+            child: SingleChildScrollView(
+              key: ValueKey<_Phase>(_phase),
+              padding: const EdgeInsets.all(16),
+              child:
+                  revealed ? _revealContent(context) : _promptContent(context),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+          child: revealed ? _gradingBar(context) : _promptActions(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _promptContent(BuildContext context) {
+    final theme = Theme.of(context);
+    final item = _session!.currentItem!;
+    final blanked = item.mode == PracticeMode.cloze ||
+        item.mode == PracticeMode.slotSwap;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Chip(
+          label: Text(item.mode.label),
+          visualDensity: VisualDensity.compact,
+        ),
+        Gaps.sm,
         Text(
           item.mode.instruction,
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -232,7 +266,7 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                if (item.mode == PracticeMode.listenRepeat && !revealed) ...<Widget>[
+                if (item.mode == PracticeMode.listenRepeat) ...<Widget>[
                   Row(
                     children: <Widget>[
                       IconButton.filled(
@@ -255,12 +289,13 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
                   ),
                   Gaps.md,
                 ],
-                Text(
-                  item.prompt,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                if (blanked)
+                  SlotBlankText(
+                    item.prompt,
+                    style: AppText.chunkDisplay(context),
+                  )
+                else
+                  Text(item.prompt, style: AppText.chunkDisplay(context)),
                 if (_showHint && item.hint != null) ...<Widget>[
                   Gaps.sm,
                   Text(
@@ -270,154 +305,142 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
                     ),
                   ),
                 ],
-                if (revealed) ...<Widget>[
-                  const Divider(height: 32),
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          item.expected,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      if (_canSpeak)
-                        IconButton(
-                          tooltip: 'Listen',
-                          icon: const Icon(Icons.volume_up_outlined),
-                          onPressed: () => _speak(item.expected),
-                        ),
-                    ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _promptActions(BuildContext context) {
+    final item = _session!.currentItem!;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        TextField(
+          controller: _typed,
+          decoration: AppTheme.input(
+            'Type it (optional) — or just say it',
+            hint: 'Typing gives you a match score',
+          ),
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _reveal(),
+        ),
+        Gaps.sm,
+        OutlinedButton.icon(
+          onPressed: _reveal,
+          icon: const Icon(Icons.visibility_outlined),
+          label: const Text('Show answer'),
+        ),
+        if (item.hint != null && !_showHint)
+          TextButton(
+            onPressed: () => setState(() {
+              _showHint = true;
+              _usedHint = true;
+            }),
+            child: const Text('Show a hint'),
+          ),
+      ],
+    );
+  }
+
+  Widget _revealContent(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final entry = _session!.current!;
+    final item = _session!.currentItem!;
+    final score = _matchScore;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Chip(
+          label: Text(item.mode.label),
+          visualDensity: VisualDensity.compact,
+        ),
+        Gaps.md,
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                if (_transcript != null) ...<Widget>[
+                  Text(
+                    'You typed: $_transcript',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
-                  if (entry.chunk.meaning.isNotEmpty &&
-                      item.mode != PracticeMode.l1ToL2) ...<Widget>[
-                    Gaps.xs,
-                    Text(
-                      entry.chunk.meaning,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                  Gaps.sm,
+                ],
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        item.expected,
+                        style: AppText.chunkDisplay(context)
+                            ?.copyWith(color: scheme.primary),
                       ),
                     ),
-                  ],
-                  if (score != null) ...<Widget>[
-                    Gaps.sm,
-                    Text(
-                      AnswerMatcher.isCorrect(score)
-                          ? 'Match ${(score * 100).round()}% — nice.'
-                          : 'Match ${(score * 100).round()}% — compare and say it again.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AnswerMatcher.isCorrect(score)
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.error,
+                    if (_canSpeak)
+                      IconButton(
+                        tooltip: 'Listen',
+                        icon: const Icon(Icons.volume_up_outlined),
+                        onPressed: () => _speak(item.expected),
                       ),
+                  ],
+                ),
+                if (entry.chunk.meaning.isNotEmpty &&
+                    item.mode != PracticeMode.l1ToL2) ...<Widget>[
+                  Gaps.xs,
+                  Text(
+                    entry.chunk.meaning,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
                     ),
-                    if (_transcript != null)
-                      Text(
-                        'You typed: $_transcript',
-                        style: theme.textTheme.bodySmall,
-                      ),
-                  ],
+                  ),
+                ],
+                if (score != null) ...<Widget>[
+                  Gaps.sm,
+                  Text(
+                    AnswerMatcher.isCorrect(score)
+                        ? 'Match ${(score * 100).round()}% — nice.'
+                        : 'Match ${(score * 100).round()}% — compare and say it again.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AnswerMatcher.isCorrect(score)
+                          ? scheme.primary
+                          : scheme.error,
+                    ),
+                  ),
                 ],
               ],
             ),
           ),
         ),
-        Gaps.md,
-        if (!revealed) ...<Widget>[
-          TextField(
-            controller: _typed,
-            decoration: AppTheme.input(
-              'Type it (optional) — or just say it',
-              hint: 'Typing gives you a match score',
-            ),
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _reveal(),
-          ),
-          Gaps.sm,
-          FilledButton.icon(
-            onPressed: _reveal,
-            icon: const Icon(Icons.visibility_outlined),
-            label: const Text('I said it — reveal'),
-          ),
-          if (item.hint != null && !_showHint) ...<Widget>[
-            Gaps.xs,
-            TextButton(
-              onPressed: () => setState(() {
-                _showHint = true;
-                _usedHint = true;
-              }),
-              child: const Text('Show a hint'),
-            ),
-          ],
-        ] else ...<Widget>[
-          Text(
+        Gaps.sm,
+        Center(
+          child: Text(
             'How well did you recall it?',
             style: theme.textTheme.titleSmall,
-            textAlign: TextAlign.center,
           ),
-          Gaps.sm,
-          Row(
-            children: <Widget>[
-              for (final rating in ReviewRating.values) ...<Widget>[
-                Expanded(
-                  child: _GradeButton(
-                    rating: rating,
-                    interval: previews == null
-                        ? ''
-                        : formatInterval(previews[rating]!.difference(now)),
-                    enabled: !_grading,
-                    onPressed: () => _grade(rating),
-                  ),
-                ),
-                if (rating != ReviewRating.easy) Gaps.sm,
-              ],
-            ],
-          ),
-        ],
+        ),
       ],
     );
   }
-}
 
-class _GradeButton extends StatelessWidget {
-  const _GradeButton({
-    required this.rating,
-    required this.interval,
-    required this.enabled,
-    required this.onPressed,
-  });
-
-  final ReviewRating rating;
-  final String interval;
-  final bool enabled;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final color = switch (rating) {
-      ReviewRating.forgot => scheme.error,
-      ReviewRating.hard => scheme.tertiary,
-      ReviewRating.good => scheme.primary,
-      ReviewRating.easy => scheme.secondary,
-    };
-    return OutlinedButton(
-      onPressed: enabled ? onPressed : null,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        side: BorderSide(color: color),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-        minimumSize: const Size.fromHeight(56),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(rating.label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          Text(interval, style: Theme.of(context).textTheme.labelSmall),
-        ],
-      ),
+  Widget _gradingBar(BuildContext context) {
+    final entry = _session!.current!;
+    final now = ref.read(clockProvider).now();
+    final previews = ref.read(schedulerProvider).preview(entry.state, now);
+    return GradingBar(
+      enabled: !_grading,
+      intervals: <ReviewRating, String>{
+        for (final rating in ReviewRating.values)
+          rating: formatInterval(previews[rating]!.difference(now)),
+      },
+      onGrade: _grade,
     );
   }
 }
@@ -441,7 +464,8 @@ class _Summary extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Icon(Icons.celebration_outlined, size: 56, color: theme.colorScheme.primary),
+          Icon(Icons.check_circle_outline,
+              size: 56, color: theme.colorScheme.primary),
           Gaps.md,
           Text('Session complete', style: theme.textTheme.headlineSmall),
           Gaps.sm,
@@ -462,9 +486,9 @@ class _Summary extends StatelessWidget {
             ],
           ),
           Gaps.xl,
-          FilledButton(onPressed: onMore, child: const Text('Practice more')),
+          FilledButton(onPressed: onDone, child: const Text('Done')),
           Gaps.sm,
-          OutlinedButton(onPressed: onDone, child: const Text('Done')),
+          TextButton(onPressed: onMore, child: const Text('Practice more')),
         ],
       ),
     );

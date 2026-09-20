@@ -6,19 +6,18 @@ import 'package:opensen/features/shell/app_shell.dart';
 import '../helpers/fakes.dart';
 
 void main() {
-  testWidgets('launches into the Situations shell with four destinations',
+  testWidgets('launches into the Today shell with four destinations',
       (tester) async {
     await pumpApp(tester, TestHarness());
 
     expect(find.byType(MaterialApp), findsOneWidget);
     expect(find.byType(AppShell), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.text('Situations'), findsWidgets);
+    expect(find.text('Today'), findsWidgets);
     expect(find.text('Library'), findsOneWidget);
-    expect(find.text('Practice'), findsOneWidget);
+    expect(find.text('Situations'), findsOneWidget);
     expect(find.text('Plan'), findsOneWidget);
-    expect(find.text('What conversation do you need soon?'), findsOneWidget);
-    expect(find.text('Meeting a professor'), findsOneWidget);
+    expect(find.text('Start with a situation'), findsOneWidget);
     expect(find.text('Flutter Demo'), findsNothing);
   });
 
@@ -33,21 +32,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Could you tell me more about your research?'), findsOneWidget);
 
-    await tester.tap(find.text('Practice'));
-    await tester.pumpAndSettle();
-    expect(
-      find.text('Your plan is empty. Build a dialogue and add its chunks.'),
-      findsOneWidget,
-    );
-
     await tester.tap(find.text('Plan'));
     await tester.pumpAndSettle();
     expect(find.text('Practice Plan'), findsOneWidget);
     expect(find.text('Export to Anki'), findsOneWidget);
 
-    await tester.tap(find.text('Situations').last);
+    await tester.tap(find.text('Situations'));
     await tester.pumpAndSettle();
     expect(find.text('Meeting a professor'), findsOneWidget);
+
+    await tester.tap(find.text('Today'));
+    await tester.pumpAndSettle();
+    expect(find.text('Start with a situation'), findsOneWidget);
   });
 
   testWidgets('shows onboarding first and finishes with Skip', (tester) async {
@@ -74,6 +70,8 @@ void main() {
     final harness = TestHarness();
     await pumpApp(tester, harness);
 
+    await tester.tap(find.text('Situations'));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Meeting a professor'));
     await tester.tap(find.text('Meeting a professor'));
     await tester.pumpAndSettle();
@@ -107,10 +105,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(harness.practice.states, isNotEmpty);
-    expect(find.text('Recall practice'), findsOneWidget);
-    expect(find.text('I said it — reveal'), findsOneWidget);
+    expect(find.text('Show answer'), findsOneWidget);
 
-    await tester.tap(find.text('I said it — reveal'));
+    await tester.tap(find.text('Show answer'));
     await tester.pumpAndSettle();
     expect(find.text('Good'), findsOneWidget);
 
@@ -124,6 +121,8 @@ void main() {
   testWidgets('substitution drill grades a chosen fill', (tester) async {
     await pumpApp(tester, TestHarness());
 
+    await tester.tap(find.text('Situations'));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Meeting a professor'));
     await tester.tap(find.text('Meeting a professor'));
     await tester.pumpAndSettle();

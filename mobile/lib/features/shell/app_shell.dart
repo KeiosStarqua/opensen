@@ -10,9 +10,9 @@ class AppShell extends StatelessWidget {
   static const List<NavigationDestination> destinations =
       <NavigationDestination>[
     NavigationDestination(
-      icon: Icon(Icons.explore_outlined),
-      selectedIcon: Icon(Icons.explore),
-      label: 'Situations',
+      icon: Icon(Icons.home_outlined),
+      selectedIcon: Icon(Icons.home),
+      label: 'Today',
     ),
     NavigationDestination(
       icon: Icon(Icons.library_books_outlined),
@@ -20,9 +20,9 @@ class AppShell extends StatelessWidget {
       label: 'Library',
     ),
     NavigationDestination(
-      icon: Icon(Icons.record_voice_over_outlined),
-      selectedIcon: Icon(Icons.record_voice_over),
-      label: 'Practice',
+      icon: Icon(Icons.explore_outlined),
+      selectedIcon: Icon(Icons.explore),
+      label: 'Situations',
     ),
     NavigationDestination(
       icon: Icon(Icons.insights_outlined),

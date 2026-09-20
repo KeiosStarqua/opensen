@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Flutter **mobile client** for OpenSen. v1 is **fully offline**: bundled situation content, local SQLite, FSRS scheduling and text-to-speech run on-device with no backend or network. Surfaces: Situations (Dialog Builder), Chunk Library, Substitution Drills, Recall Practice, Practice Plan, Anki export, Settings, Onboarding.
+Flutter **mobile client** for OpenSen. v1 is **fully offline**: bundled situation content, local SQLite, FSRS scheduling and text-to-speech run on-device with no backend or network. Surfaces: Today (dashboard), Situations (Dialog Builder), Chunk Library, Substitution Drills, Recall Practice, Practice Plan, Anki export, Settings, Onboarding. UI/UX design contract: [`docs/mobile-ui-design.md`](../docs/mobile-ui-design.md).
 
 ## Ownership
 
@@ -22,7 +22,8 @@ Flutter **mobile client** for OpenSen. v1 is **fully offline**: bundled situatio
   - `lib/core/` — composition root: `bootstrap.dart` (open DB, import seed, load settings), `di/providers.dart` (all Riverpod providers and use-case wiring), `routing/`, `theme/`, `platform/` (TTS via `flutter_tts`, share via `share_plus`), `util/` (uuid).
   - `lib/features/<surface>/` — screens and per-feature providers only. Business rules go in `domain`.
 - **Riverpod:** `Provider` / `FutureProvider(.family)` / `Notifier` only. No `StateProvider`, no family `Notifier`s, no codegen — keeps the code valid across Riverpod 2.x/3.x. Transient session state (drills, practice) lives in domain session classes held by `ConsumerStatefulWidget`s.
-- **Routing:** `go_router` with `StatefulShellRoute.indexedStack` for the four tabs; detail routes are root-level so they cover the bottom bar. Paths live in `core/routing/app_routes.dart`; `/chunks/new` is declared before `/chunks/:id`.
+- **Routing:** `go_router` with `StatefulShellRoute.indexedStack` for the four tabs (Today, Library, Situations, Plan); detail routes and `/practice/session` are root-level so they cover the bottom bar. Paths live in `core/routing/app_routes.dart`; `/chunks/new` is declared before `/chunks/:id`.
+- **Design tokens:** semantic learning-state colours, radii and learning-text styles live in `core/theme/app_tokens.dart` (per the design contract); shared recall widgets (`SessionHeader`, `GradingBar`, `SlotBlankText`) live in `features/shared/widgets.dart`.
 - **Scheduling:** FSRS-5 in `domain/services/fsrs/` (published default weights, learning steps 1m/10m, relearning 10m). Intervals are derived from stability at scheduling time; `user_chunks` stores state, `review_history` is append-only. Do not hand-roll a different scheduler; swap implementations behind `FsrsScheduler`.
 - **Persistence rules:** ids are client-generated UUIDs; timestamps are ISO-8601 UTC strings; template rows are `INSERT OR IGNORE` on re-seed; learner data is deleted explicitly by repositories (no FK cascades). Settings live in the `meta` table under `settings.*`.
 - **Plan membership:** a chunk is in the Practice Plan only when a `user_chunks` row exists (explicit enrolment). Due = `next_review IS NULL OR next_review <= now`.
