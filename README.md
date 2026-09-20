@@ -18,13 +18,17 @@ Full product docs: [`docs/`](docs/).
 
 ## Mobile app
 
-The Flutter app lives in [`mobile/`](mobile/).
+The Flutter app lives in [`mobile/`](mobile/). v1 works fully offline: bundled situations, local SQLite, FSRS scheduling and system text-to-speech.
 
 ```bash
 cd mobile
 flutter pub get
-flutter run
+flutter run          # Android / iOS / macOS; Windows & Linux need a system SQLite library
+flutter analyze
+flutter test
 ```
+
+CI: [`.github/workflows/mobile-ci.yml`](.github/workflows/mobile-ci.yml) analyzes, tests and builds a debug-signed APK on every change under `mobile/`.
 
 ## Backend API
 

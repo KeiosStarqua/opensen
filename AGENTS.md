@@ -21,9 +21,10 @@ Durable product detail: [`docs/`](docs/).
 | Path | Role |
 |------|------|
 | [`docs/`](docs/) | Product documentation |
-| [`mobile/`](mobile/) | Flutter mobile app |
+| [`mobile/`](mobile/) | Flutter mobile app (offline-first v1) |
 | [`backend/`](backend/) | Hono API on Vercel |
 | [`web/`](web/) | Next.js landing + web app |
+| [`.github/workflows/`](.github/workflows/) | GitHub Actions CI (`mobile-ci.yml`: analyze, test, Android APK) |
 
 ---
 
