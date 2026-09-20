@@ -42,24 +42,23 @@ class PracticeSession {
   PracticeSession({
     required List<PracticeEntry> entries,
     required this.canSpeak,
-    PracticeItemFactory itemFactory = const PracticeItemFactory(),
+    this.itemFactory = const PracticeItemFactory(),
     Random? random,
     this.learnAhead = const Duration(minutes: 20),
     this.maxAppearances = 3,
   })  : _queue = List<PracticeEntry>.from(entries),
-        _itemFactory = itemFactory,
         _random = random ?? Random(),
         initialCount = entries.length {
     _prepareCurrent();
   }
 
   final bool canSpeak;
+  final PracticeItemFactory itemFactory;
   final Duration learnAhead;
   final int maxAppearances;
   final int initialCount;
 
   final List<PracticeEntry> _queue;
-  final PracticeItemFactory _itemFactory;
   final Random _random;
   final Map<ReviewRating, int> ratings = <ReviewRating, int>{};
 
@@ -109,12 +108,12 @@ class PracticeSession {
       _currentItem = null;
       return;
     }
-    final mode = _itemFactory.chooseMode(
+    final mode = itemFactory.chooseMode(
       entry.state,
       hasSwappableSlot: entry.hasSwappableSlot,
       canSpeak: canSpeak,
     );
-    _currentItem = _itemFactory.build(
+    _currentItem = itemFactory.build(
       chunk: entry.chunk,
       mode: mode,
       pattern: entry.pattern,

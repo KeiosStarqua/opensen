@@ -339,21 +339,21 @@ class TestHarness {
   final LearnerSettings initialSettings;
   final RecordingExportSink exportSink = RecordingExportSink();
 
-  List<Override> get overrides => <Override>[
-        contentRepositoryProvider.overrideWith((ref) => content),
-        practiceRepositoryProvider.overrideWith((ref) => practice),
-        settingsRepositoryProvider.overrideWith((ref) => settingsRepository),
-        initialSettingsProvider.overrideWith((ref) => initialSettings),
-        clockProvider.overrideWith((ref) => clock),
-        idGeneratorProvider.overrideWith((ref) => SequentialIdGenerator()),
-        speechSynthesizerProvider.overrideWith(
-          (ref) => const SilentSpeechSynthesizer(),
-        ),
-        exportSinkProvider.overrideWith((ref) => exportSink),
-      ];
-
-  Widget buildApp() =>
-      ProviderScope(overrides: overrides, child: const OpenSenApp());
+  Widget buildApp() => ProviderScope(
+        overrides: [
+          contentRepositoryProvider.overrideWith((ref) => content),
+          practiceRepositoryProvider.overrideWith((ref) => practice),
+          settingsRepositoryProvider.overrideWith((ref) => settingsRepository),
+          initialSettingsProvider.overrideWith((ref) => initialSettings),
+          clockProvider.overrideWith((ref) => clock),
+          idGeneratorProvider.overrideWith((ref) => SequentialIdGenerator()),
+          speechSynthesizerProvider.overrideWith(
+            (ref) => const SilentSpeechSynthesizer(),
+          ),
+          exportSinkProvider.overrideWith((ref) => exportSink),
+        ],
+        child: const OpenSenApp(),
+      );
 }
 
 /// Pumps the app on a tall phone-sized surface so lists render fully and

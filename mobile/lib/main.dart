@@ -10,7 +10,7 @@ Future<void> main() async {
   final bootstrap = await AppBootstrap.run();
   runApp(
     ProviderScope(
-      overrides: <Override>[
+      overrides: [
         databaseProvider.overrideWith((ref) => bootstrap.database),
         initialSettingsProvider.overrideWith((ref) => bootstrap.settings),
       ],

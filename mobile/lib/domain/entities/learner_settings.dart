@@ -67,7 +67,7 @@ class LearnerSettings {
   final double speechRate;
 
   Map<String, String> toMap() => <String, String>{
-        if (goal != null) 'goal': goal!,
+        'goal': ?goal,
         'nativeLanguage': nativeLanguage,
         'dailyNewLimit': '$dailyNewLimit',
         'sessionSize': '$sessionSize',
