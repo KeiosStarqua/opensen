@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/providers.dart';
+import '../../domain/entities/chunk.dart';
 import '../../domain/entities/practice.dart';
 import '../../domain/entities/sentence_pattern.dart';
 
@@ -38,8 +39,19 @@ final recentHistoryProvider = FutureProvider<List<ReviewRecord>>(
   (ref) => ref.watch(practiceRepositoryProvider).listHistory(limit: 30),
 );
 
+/// Last chunks the learner practised, most recent first (Today screen).
+final recentChunksProvider = FutureProvider<List<Chunk>>((ref) async {
+  final history = await ref.watch(recentHistoryProvider.future);
+  final ids = <String>{for (final record in history) record.chunkId};
+  if (ids.isEmpty) return const <Chunk>[];
+  return ref
+      .watch(contentRepositoryProvider)
+      .listChunks(ids: ids.take(3).toSet());
+});
+
 void invalidatePracticeViews(WidgetRef ref) {
   ref.invalidate(planStatsProvider);
   ref.invalidate(drillablePatternsProvider);
   ref.invalidate(recentHistoryProvider);
+  ref.invalidate(recentChunksProvider);
 }

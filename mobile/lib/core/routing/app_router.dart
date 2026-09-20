@@ -8,7 +8,6 @@ import '../../features/drills/drill_screen.dart';
 import '../../features/export/export_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/plan/plan_screen.dart';
-import '../../features/practice/practice_home_screen.dart';
 import '../../features/practice/practice_session_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/shell/app_shell.dart';
@@ -16,6 +15,7 @@ import '../../features/situations/dialogue_builder_screen.dart';
 import '../../features/situations/dialogue_screen.dart';
 import '../../features/situations/situation_detail_screen.dart';
 import '../../features/situations/situations_screen.dart';
+import '../../features/today/today_screen.dart';
 import '../di/providers.dart';
 import 'app_routes.dart';
 
@@ -24,7 +24,7 @@ import 'app_routes.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   final onboarded = ref.read(settingsProvider).onboardingComplete;
   return createAppRouter(
-    initialLocation: onboarded ? AppRoutes.situations : AppRoutes.onboarding,
+    initialLocation: onboarded ? AppRoutes.today : AppRoutes.onboarding,
     isOnboarded: () => ref.read(settingsProvider).onboardingComplete,
   );
 });
@@ -38,7 +38,7 @@ GoRouter createAppRouter({
     redirect: (context, state) {
       final onboardingRoute = state.matchedLocation == AppRoutes.onboarding;
       if (!isOnboarded() && !onboardingRoute) return AppRoutes.onboarding;
-      if (isOnboarded() && onboardingRoute) return AppRoutes.situations;
+      if (isOnboarded() && onboardingRoute) return AppRoutes.today;
       return null;
     },
     routes: <RouteBase>[
@@ -53,8 +53,8 @@ GoRouter createAppRouter({
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
-                path: AppRoutes.situations,
-                builder: (context, state) => const SituationsScreen(),
+                path: AppRoutes.today,
+                builder: (context, state) => const TodayScreen(),
               ),
             ],
           ),
@@ -69,8 +69,8 @@ GoRouter createAppRouter({
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
-                path: AppRoutes.practice,
-                builder: (context, state) => const PracticeHomeScreen(),
+                path: AppRoutes.situations,
+                builder: (context, state) => const SituationsScreen(),
               ),
             ],
           ),

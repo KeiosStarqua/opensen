@@ -6,9 +6,9 @@ class AppRoutes {
   static const String onboarding = '/onboarding';
 
   // Shell branches.
-  static const String situations = '/situations';
+  static const String today = '/today';
   static const String library = '/library';
-  static const String practice = '/practice';
+  static const String situations = '/situations';
   static const String plan = '/plan';
 
   // Detail routes (root navigator).

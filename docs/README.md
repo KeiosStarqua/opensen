@@ -9,6 +9,7 @@ OpenSen (Open Sentence) turns conversations a learner actually needs into senten
 | [Product strategy](product-strategy.md) | Positioning, core loop, MVP scope, non-goals, metrics, roadmap |
 | [Product overview](product.md) | Learning model and target outcomes |
 | [Features](features.md) | Product capabilities and how they fit together |
+| [Mobile UI/UX design](mobile-ui-design.md) | Mobile design contract: UX architecture, design system, screen specs, Flutter blueprint |
 | [Database architecture](database-architecture.md) | Content graph + learning engine schema (MVP tables) |
 
 ## Repository layout

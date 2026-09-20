@@ -41,7 +41,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         );
     if (!mounted) return;
-    context.go(AppRoutes.situations);
+    context.go(AppRoutes.today);
     if (pick != null) {
       context.push(AppRoutes.buildDialogue(pick.id));
     }

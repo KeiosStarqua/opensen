@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../domain/entities/chunk.dart';
 import '../../domain/entities/practice.dart';
 import '../../domain/entities/register.dart';
+import '../../domain/services/slot_template.dart';
 
 /// Renders loading / error / data for an [AsyncValue] with consistent chrome.
 class AsyncValueView<T> extends StatelessWidget {
@@ -118,7 +121,7 @@ class SectionHeader extends StatelessWidget {
               ],
             ),
           ),
-          if (action != null) action!,
+          ?action,
         ],
       ),
     );
@@ -277,6 +280,203 @@ void showSnack(BuildContext context, String message) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(message)));
+}
+
+/// Practice-session header: close, progress bar, item counter. No timer, no
+/// score (design doc §4.14).
+class SessionHeader extends StatelessWidget {
+  const SessionHeader({
+    super.key,
+    required this.progress,
+    required this.done,
+    required this.total,
+    required this.onClose,
+    this.trailing,
+  });
+
+  final double progress;
+  final int done;
+  final int total;
+  final VoidCallback onClose;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 8, 8, 0),
+      child: Row(
+        children: <Widget>[
+          IconButton(
+            tooltip: 'End session',
+            icon: const Icon(Icons.close),
+            onPressed: onClose,
+          ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(value: progress, minHeight: 6),
+            ),
+          ),
+          Gaps.sm,
+          Text('$done of $total', style: theme.textTheme.labelMedium),
+          Gaps.sm,
+          ?trailing,
+        ],
+      ),
+    );
+  }
+}
+
+/// The four FSRS grades with the interval each would schedule, so grading is
+/// informed (design doc §4.14). Fixed order left→right by severity.
+class GradingBar extends StatelessWidget {
+  const GradingBar({
+    super.key,
+    required this.onGrade,
+    required this.intervals,
+    this.enabled = true,
+  });
+
+  final void Function(ReviewRating rating) onGrade;
+
+  /// Human interval per rating, e.g. `1m`, `4d`.
+  final Map<ReviewRating, String> intervals;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return Row(
+      children: <Widget>[
+        for (final rating in ReviewRating.values) ...<Widget>[
+          Expanded(
+            child: _GradeButton(
+              rating: rating,
+              interval: intervals[rating] ?? '',
+              color: StateColors.forRating(rating, brightness),
+              enabled: enabled,
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                onGrade(rating);
+              },
+            ),
+          ),
+          if (rating != ReviewRating.easy) Gaps.sm,
+        ],
+      ],
+    );
+  }
+}
+
+class _GradeButton extends StatelessWidget {
+  const _GradeButton({
+    required this.rating,
+    required this.interval,
+    required this.color,
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final ReviewRating rating;
+  final String interval;
+  final Color color;
+  final bool enabled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton(
+      onPressed: enabled ? onPressed : null,
+      style: FilledButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: StateColors.onColor(color),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        minimumSize: const Size.fromHeight(56),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(rating.label, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(interval, style: Theme.of(context).textTheme.labelSmall),
+        ],
+      ),
+    );
+  }
+}
+
+/// Renders frames and prompts with `{slot}` markers and `_____` blanks as
+/// styled inline gaps (design doc §4.1 slot rendering): filled slots are
+/// chips, unfilled slots and blanks are underline boxes.
+class SlotBlankText extends StatelessWidget {
+  const SlotBlankText(
+    this.text, {
+    super.key,
+    this.style,
+    this.fills = const <String, String>{},
+  });
+
+  final String text;
+  final TextStyle? style;
+
+  /// Slot fills by slot name. A `{slot}` without a fill renders as a blank.
+  final Map<String, String> fills;
+
+  static final RegExp _token =
+      RegExp('${SlotTemplate.slotPattern.pattern}|_____+');
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_token.hasMatch(text)) {
+      return Text(text, style: style);
+    }
+    final scheme = Theme.of(context).colorScheme;
+    final spans = <InlineSpan>[];
+    var index = 0;
+    for (final match in _token.allMatches(text)) {
+      if (match.start > index) {
+        spans.add(TextSpan(text: text.substring(index, match.start)));
+      }
+      final token = match.group(0)!;
+      final slot = SlotTemplate.slotPattern.firstMatch(token)?.group(1);
+      final fill = slot == null ? null : fills[slot];
+      spans.add(
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: Semantics(
+            label: fill == null ? 'blank' : 'slot: $fill',
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: fill == null ? null : scheme.secondaryContainer,
+                borderRadius: BorderRadius.circular(AppRadii.sm),
+                border: fill == null
+                    ? Border(
+                        bottom: BorderSide(color: scheme.outline, width: 2),
+                      )
+                    : null,
+              ),
+              child: Text(
+                fill ?? '      ',
+                style: fill == null
+                    ? style
+                    : style?.copyWith(color: scheme.onSecondaryContainer),
+              ),
+            ),
+          ),
+        ),
+      );
+      index = match.end;
+    }
+    if (index < text.length) {
+      spans.add(TextSpan(text: text.substring(index)));
+    }
+    return Text.rich(TextSpan(children: spans), style: style);
+  }
 }
 
 /// Confirmation dialog; resolves true when the destructive action is chosen.
