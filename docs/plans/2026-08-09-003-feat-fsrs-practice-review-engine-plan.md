@@ -3,7 +3,7 @@ title: FSRS Practice Review Engine - Plan
 type: feat
 date: 2026-08-09
 artifact_contract: ce-unified-plan/v1
-artifact_readiness: implementation-ready
+artifact_readiness: shipped
 product_contract_source: ce-plan-bootstrap
 execution: code
 linear_issues:
@@ -11,6 +11,8 @@ linear_issues:
 ---
 
 # FSRS Practice Review Engine - Plan
+
+> **Status:** Shipped in [PR #13](https://github.com/KeiosStarqua/opensen/pull/13). [KEI-140](https://linear.app/keios/issue/KEI-140/backend-xay-dung-fsrs-practice-review-engine-apipractice) is Done. The learning write-up is [`fsrs-practice-review-engine.md`](../solutions/architecture-patterns/fsrs-practice-review-engine.md). This file is the original plan, kept for traceability.
 
 ## Goal Capsule
 
