@@ -36,4 +36,5 @@ Owns durable **product and project documentation** for OpenSen: positioning, lea
 | [`features.md`](features.md) | Feature catalog and relationships |
 | [`mobile-ui-design.md`](mobile-ui-design.md) | Mobile UI/UX design contract: navigation, design tokens, screen specs, Flutter blueprint |
 | [`database-architecture.md`](database-architecture.md) | Content graph + learning engine data model |
+| [`plans/`](plans/) | Implementation plans linked to Linear issues |
 | [`solutions/`](solutions/) | Documented solutions to past problems (architecture patterns, tooling decisions) |
