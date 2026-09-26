@@ -19,6 +19,7 @@ Next.js **web client** for OpenSen: marketing/landing and the authenticated web 
 - Run from this directory: `npm install`, `npm run dev`, `npm run build`, `npm run lint`
 - Import alias: `@/*`
 - Landing and app share this project; prefer route groups (e.g. `(marketing)`, `(app)`) when splitting surfaces
+- Page analytics: `onedollarstats` initialized in root layout via `components/onedollarstats-analytics.tsx`; env vars documented in `.env.example` (`NEXT_PUBLIC_ONEDOLLARSTATS_*`)
 
 <!-- BEGIN:nextjs-agent-rules -->
 ## Next.js guidance
