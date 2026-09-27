@@ -15,7 +15,8 @@ Sentry.init({
   tracesSampleRate: process.env.NODE_ENV === "development" ? 1.0 : 0.1,
   environment: process.env.NODE_ENV,
   tracePropagationTargets: [
-    "localhost",
+    /^https?:\/\/localhost(?::\d+)?/,
+    /^https:\/\/api\.opensen\.taquangkhoi\.com/,
     /^https:\/\/opensen\.taquangkhoi\.com/,
     /^\//,
   ],

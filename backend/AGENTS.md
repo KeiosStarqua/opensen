@@ -32,7 +32,7 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 
 - Map new endpoints to tables/layers in `docs/database-architecture.md`
 - Env vars: document in `.env.example`; never commit secrets
-- CORS origins via `CORS_ORIGINS` (comma-separated)
+- CORS origins via `CORS_ORIGINS` (comma-separated). Allowed request headers include `Content-Type`, `Authorization`, `X-User-Id`, `sentry-trace`, and `baggage` so the web app can continue Sentry traces into the API.
 - `DIALOGUE_PERSISTENCE_MODE` — `disabled` (default), `internal`, or `ephemeral`; persistence runs only in the latter two until authenticated ownership ships
 - AI: `AI_PROVIDER` + `AI_MODEL`; OpenRouter needs `OPENROUTER_API_KEY`
 - Database env: `DATABASE_URL` (runtime), optional `MIGRATION_DATABASE_URL` (DDL), `TEST_DATABASE_URL` (integration tests only — must target `opensen_test` or `*_test`)
