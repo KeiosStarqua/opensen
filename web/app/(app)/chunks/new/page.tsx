@@ -1,12 +1,11 @@
-import { PlaceholderSurface } from "@/components/placeholder-surface";
+import { ChunkCreateForm } from "@/components/chunks/chunk-create-form";
 
 export const metadata = { title: "New chunk" };
 
 export default function NewChunkPage() {
   return (
-    <PlaceholderSurface
-      title="New chunk"
-      description="Create a custom chunk frame and slots here in a follow-up issue."
-    />
+    <div className="mx-auto max-w-2xl px-6 py-10">
+      <ChunkCreateForm />
+    </div>
   );
 }
