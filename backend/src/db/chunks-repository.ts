@@ -66,6 +66,7 @@ export type ChunksRepository = {
   ): Promise<{ items: ChunkSummary[]; nextCursor: string | null }>
   getById(id: string, userId: string | null): Promise<ChunkDetail | null>
   getPatternsForChunk(id: string): Promise<ChunkPatternPayload | null>
+  getPatternById(patternId: string): Promise<ChunkPatternPayload['pattern'] | null>
   create(userId: string, input: CreateChunkInput): Promise<ChunkDetail>
   update(
     userId: string,
@@ -158,6 +159,52 @@ export function createChunksRepository(database: Database): ChunksRepository {
         patternId: row.patternId,
         pronunciation: row.pronunciation,
         situation,
+      }
+    },
+
+    async getPatternById(patternId) {
+      const patternRows = await database
+        .select()
+        .from(sentencePatterns)
+        .where(eq(sentencePatterns.id, patternId))
+        .limit(1)
+      const pattern = patternRows[0]
+      if (!pattern) return null
+
+      const slots = await database
+        .select()
+        .from(patternSlots)
+        .where(eq(patternSlots.patternId, patternId))
+        .orderBy(asc(patternSlots.position))
+
+      const slotIds = slots.map((slot) => slot.id)
+      const variants =
+        slotIds.length === 0
+          ? []
+          : await database
+              .select()
+              .from(slotVariants)
+              .where(inArray(slotVariants.slotId, slotIds))
+
+      return {
+        id: pattern.id,
+        template: pattern.template,
+        meaning: pattern.meaning,
+        register: pattern.register,
+        level: pattern.level,
+        slots: slots.map((slot) => ({
+          id: slot.id,
+          name: slot.name,
+          position: slot.position,
+          expectedPos: slot.expectedPos,
+          variants: variants
+            .filter((variant) => variant.slotId === slot.id)
+            .map((variant) => ({
+              id: variant.id,
+              text: variant.text,
+              meaning: variant.meaning,
+            })),
+        })),
       }
     },
 

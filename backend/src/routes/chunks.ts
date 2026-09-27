@@ -94,6 +94,18 @@ export function createChunksRouter(deps: ChunksRouteDeps = {}): Hono {
     )
   })
 
+  router.get('/patterns/:patternId', async (c) => {
+    const { patternId } = c.req.param()
+    resolveLoadDatabaseEnv()
+    const database = resolveGetDatabase()
+    const repository = resolveCreateRepository(database)
+    const pattern = await repository.getPatternById(patternId)
+    if (!pattern) {
+      throw new HTTPException(404, { message: 'Pattern not found' })
+    }
+    return c.json({ pattern })
+  })
+
   router.get('/:id/patterns', async (c) => {
     const { id } = c.req.param()
     resolveLoadDatabaseEnv()
