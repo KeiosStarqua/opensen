@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { AuthProvider } from "@/components/auth-provider";
 import { OneDollarStatsAnalytics } from "@/components/onedollarstats-analytics";
 import "./globals.css";
 
@@ -35,10 +34,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>
-          <OneDollarStatsAnalytics />
-          {children}
-        </AuthProvider>
+        <OneDollarStatsAnalytics />
+        {children}
       </body>
     </html>
   );

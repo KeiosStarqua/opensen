@@ -13,7 +13,7 @@ Copy `web/.env.example` to `web/.env.local` and set `NEXT_PUBLIC_ONEDOLLARSTATS_
 
 **Backend API:** set `NEXT_PUBLIC_OPENSEN_API_URL` to your Hono API origin (default `http://localhost:3000` when running `backend/` with Vercel dev). Ensure `CORS_ORIGINS` in the backend includes this Next.js app (e.g. `http://localhost:3001` when Next runs on the default port). All browser calls to `/api/*` should go through `lib/api/` — not ad-hoc `fetch`.
 
-**Auth:** set `VITE_NEON_AUTH_URL` (Neon Console → Auth → Configuration) and `NEON_AUTH_COOKIE_SECRET` (`openssl rand -base64 32`) in `web/.env.local`. Sign-in lives at `/auth/sign-in`. Add this app's origin to Neon Auth trusted domains before using a non-local host.
+**Auth:** set `NEON_AUTH_BASE_URL` (Neon Console → Auth → Configuration) and `NEON_AUTH_COOKIE_SECRET` (`openssl rand -base64 32`) in `web/.env.local` and in the Vercel project. Both are required at build time. Sign-in lives at `/auth/sign-in`. Add this app's origin to Neon Auth trusted domains before using a non-local host.
 
 | Script | Purpose |
 |--------|---------|

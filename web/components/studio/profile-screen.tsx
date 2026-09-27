@@ -1,7 +1,8 @@
 "use client";
 
-import { UserButton } from "@neondatabase/auth-ui";
 import Link from "next/link";
+
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { useMemo, useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
@@ -28,7 +29,7 @@ export function ProfileScreen() {
         <h1 className="text-3xl font-extrabold tracking-tight">My Progress</h1>
         <div className="flex items-center gap-2">
           <SearchField value={query} onChange={setQuery} className="w-full max-w-xs" label="Search topics" />
-          <UserButton size="icon" />
+          <SignOutButton />
           <Link
             href={AppRoutes.account}
             className="rounded-full bg-white px-4 py-2 text-sm font-extrabold text-sen-ink shadow-sm hover:bg-sen-soft"
