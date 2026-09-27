@@ -265,10 +265,10 @@ web/
 
 ## Definition of Done
 
-- [ ] U1: Path constants and full route tree exist under `(app)/(shell)` and sibling detail routes.
-- [ ] U2: Responsive shell nav (bottom on small screens, sidebar on `md+`) with four tabs and Settings link.
-- [ ] U3: Tab pages show named placeholders inside the shell.
-- [ ] U4: All listed detail routes render placeholders outside the shell.
-- [ ] U5: `/` and `/onboarding` unchanged in behavior (no shell); Settings reachable from shell.
-- [ ] U6: `npm run lint` and `npm run build` pass from `web/`.
-- [ ] Acceptance criteria on KEI-728 are demonstrably met (navigation, isolation, responsive, lint/build).
+- [x] U1: Path constants and full route tree exist under `(app)/(shell)` and sibling detail routes.
+- [x] U2: Responsive shell nav (bottom on small screens, sidebar on `md+`) with four tabs and Settings link.
+- [x] U3: Tab pages show named placeholders inside the shell.
+- [x] U4: All listed detail routes render placeholders outside the shell.
+- [x] U5: `/` and `/onboarding` unchanged in behavior (no shell); Settings reachable from shell.
+- [x] U6: `npm run lint` and `npm run build` pass from `web/`.
+- [x] Acceptance criteria on KEI-728 are demonstrably met (navigation, isolation, responsive, lint/build).
