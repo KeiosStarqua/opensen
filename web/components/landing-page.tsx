@@ -178,6 +178,39 @@ export function LandingPage() {
           </div>
         </section>
 
+        <section
+          id="newsletter"
+          className="border-y border-slate-200 bg-[#f8f6f2]"
+          aria-labelledby="newsletter-heading"
+        >
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            <div className="mx-auto max-w-xl text-center">
+              <h2
+                id="newsletter-heading"
+                className="text-3xl font-semibold tracking-tight"
+              >
+                Get OpenSen updates by email
+              </h2>
+              <p className="mt-4 text-lg leading-8 text-slate-600">
+                Subscribe on Substack for product news, speaking tips, and new
+                features.
+              </p>
+            </div>
+            <div className="mx-auto mt-10 w-full max-w-[480px] overflow-hidden">
+              <iframe
+                src="https://opensen.substack.com/embed"
+                width={480}
+                height={320}
+                style={{ border: "1px solid #EEE", background: "white" }}
+                title="Subscribe to the OpenSen newsletter on Substack"
+                frameBorder={0}
+                scrolling="no"
+                className="mx-auto block w-full max-w-[480px]"
+              />
+            </div>
+          </div>
+        </section>
+
         <section className="mx-auto max-w-6xl px-6 py-20">
           <div className="rounded-3xl bg-slate-900 px-8 py-12 text-center text-white sm:px-12">
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
