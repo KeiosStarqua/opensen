@@ -20,7 +20,7 @@ Next.js **web client** for OpenSen: marketing/landing and the authenticated web 
 - Import alias: `@/*`
 - Landing and app share this project; prefer route groups (e.g. `(marketing)`, `(app)`) when splitting surfaces
 - Page analytics: `onedollarstats` initialized in root layout via `components/onedollarstats-analytics.tsx`; env vars documented in `.env.example` (`NEXT_PUBLIC_ONEDOLLARSTATS_*`)
-- Auth: Managed Better Auth via `@neondatabase/auth` and `@neondatabase/auth-ui`. Server instance in `lib/auth/server.ts` (`NEON_AUTH_BASE_URL`, fallback `VITE_NEON_AUTH_URL`, plus `NEON_AUTH_COOKIE_SECRET`). Browser client in `lib/auth/client.ts`. UI provider in `components/auth-provider.tsx`. Catch-all views: `app/auth/[path]` and `app/account/[path]`. Session proxy in `proxy.ts` protects app routes (study shell, onboarding, settings, account) and leaves `/` and `/auth/*` public. API proxy: `app/api/auth/[...path]`
+- Auth: Managed Better Auth via `@neondatabase/auth` and `@neondatabase/auth-ui`. Server instance in `lib/auth/server.ts` (`VITE_NEON_AUTH_URL` plus `NEON_AUTH_COOKIE_SECRET`). Browser client in `lib/auth/client.ts`. UI provider in `components/auth-provider.tsx`. Catch-all views: `app/auth/[path]` and `app/account/[path]`. Session proxy in `proxy.ts` protects app routes (study shell, onboarding, settings, account) and leaves `/` and `/auth/*` public. API proxy: `app/api/auth/[...path]`
 
 <!-- BEGIN:nextjs-agent-rules -->
 ## Next.js guidance
