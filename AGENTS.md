@@ -119,6 +119,14 @@ Apply these on all product code (`backend/`, `mobile/`, `web/`). Prefer depth an
 
 Child `AGENTS.md` files may add stack-specific seams (e.g. AI only via `backend/src/ai/`); they must not weaken these principles.
 
+### Icons
+
+UI icons on every frontend (`web/`, `mobile/`) come from [Phosphor Icons](https://phosphoricons.com) ([overview](https://github.com/phosphor-icons/homepage)). Any control, nav item, status, or empty state that needs an icon uses Phosphor.
+
+- Default weight is **regular**. Use **fill** only for the selected or active state of the same icon.
+- Brand mark, mascot, and storybook illustrations stay custom art. They are not UI icons.
+- Package, import, and weight rules for each stack live in [`web/AGENTS.md`](web/AGENTS.md) and [`mobile/AGENTS.md`](mobile/AGENTS.md).
+
 ## Child DOX Index
 
 | Path | Scope |

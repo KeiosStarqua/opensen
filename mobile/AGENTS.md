@@ -35,6 +35,7 @@ Flutter **mobile client** for OpenSen. v1 is **fully offline**: bundled situatio
 - Schema changes: bump `AppDatabase.schemaVersion`, add statements in `onUpgrade`, keep column names aligned with [`docs/database-architecture.md`](../docs/database-architecture.md).
 - Seed content changes: follow [`assets/seed/AGENTS.md`](assets/seed/AGENTS.md) and bump `version` in `content.json`.
 - Prefer `const` widgets and explicit `ColorScheme`/`InputDecoration` helpers in `core/theme/app_theme.dart` over new theme extensions.
+- UI icons: [`phosphor_flutter`](https://github.com/phosphor-icons/flutter). Import `package:phosphor_flutter/phosphor_flutter.dart` and use a style class (`PhosphorIconsRegular`, `PhosphorIconsThin`, `PhosphorIconsLight`, `PhosphorIconsBold`, `PhosphorIconsFill`, `PhosphorIconsDuotone`) so unused weights tree-shake. Render with `PhosphorIcon` (`Icon` drops the duotone layer). Default `PhosphorIconsRegular`; the selected or active state uses `PhosphorIconsFill` of the same glyph. Do not add new Material `Icons.*` glyphs for UI chrome.
 
 ## Verification
 

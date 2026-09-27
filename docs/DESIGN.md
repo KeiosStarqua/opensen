@@ -581,47 +581,36 @@ Use shadows sparingly.
 
 # 13. Iconography
 
-Use:
-
-**Lucide-style outline icons**
+Use [Phosphor Icons](https://phosphoricons.com) for every UI icon. Implementation rules live in the root [`AGENTS.md`](../AGENTS.md) and the frontend child docs.
 
 Properties:
 
-* 1.75–2px stroke
-* rounded caps
-* simple geometry
-* no unnecessary detail
+* Default weight: **regular**
+* **Fill** only for the selected or active state of the same icon
+* Simple geometry; no second icon family and no 3D icons in the same interface
 
 Common icons:
 
 ```text
 Play
 Pause
-Volume
-Mic
+SpeakerHigh
+Microphone
 BookOpen
-MessageCircle
-Layers
-Sparkles
+ChatCircle
+Stack
+Sparkle
 Repeat
 Check
 X
-ChevronRight
+CaretRight
 Lightbulb
 Brain
 Target
 Clock
-Settings
-Search
+Gear
+MagnifyingGlass
 ```
-
-Avoid mixing:
-
-* outline icons
-* filled icons
-* 3D icons
-
-in the same interface.
 
 ---
 
