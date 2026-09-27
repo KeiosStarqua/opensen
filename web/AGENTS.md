@@ -16,10 +16,12 @@ Next.js **web client** for OpenSen: marketing/landing and the authenticated web 
 
 - Framework: [Next.js App Router](https://nextjs.org/docs/app) (TypeScript, Tailwind CSS, ESLint)
 - Package name: `opensen-web` (see `package.json`)
+- Production host: `https://opensen.taquangkhoi.com/`
 - Run from this directory: `npm install`, `npm run dev`, `npm run build`, `npm run lint`
 - Import alias: `@/*`
 - Landing and app share this project; prefer route groups (e.g. `(marketing)`, `(app)`) when splitting surfaces
 - Page analytics: `onedollarstats` initialized in root layout via `components/onedollarstats-analytics.tsx`; env vars documented in `.env.example` (`NEXT_PUBLIC_ONEDOLLARSTATS_*`)
+- Error monitoring and tracing: `@sentry/nextjs` (`instrumentation-client.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `instrumentation.ts`, `app/global-error.tsx`). `next.config.ts` wraps config with `withSentryConfig` from `@sentry/nextjs/config` and sets `tunnelRoute: "/monitoring"`, so the production browser ingest endpoint is `https://opensen.taquangkhoi.com/monitoring`. DSNs and source-map upload use `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, and `SENTRY_PROJECT` (see `.env.example`). `proxy.ts` does not match `/monitoring`.
 - Auth: Managed Better Auth via `@neondatabase/auth` SDK methods (`createNeonAuth`, `auth.signIn.email`, `auth.signUp.email`, `auth.getSession`, `auth.updateUser`, `auth.signOut`). Server instance in `lib/auth/server.ts` (`NEON_AUTH_BASE_URL` plus `NEON_AUTH_COOKIE_SECRET`, both required at build). Browser client in `lib/auth/client.ts`. Email forms: `app/auth/sign-in` and `app/auth/sign-up`. Account name + sign-out: `app/account/settings`. Session proxy in `proxy.ts` protects app routes (study shell, onboarding, settings, account) and leaves `/` and `/auth/*` public. API proxy: `app/api/auth/[...path]`
 
 <!-- BEGIN:nextjs-agent-rules -->

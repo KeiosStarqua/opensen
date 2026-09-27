@@ -22,8 +22,8 @@ Durable product detail: [`docs/`](docs/).
 |------|------|
 | [`docs/`](docs/) | Product documentation |
 | [`mobile/`](mobile/) | Flutter mobile app (offline-first v1) |
-| [`backend/`](backend/) | Hono API on Vercel |
-| [`web/`](web/) | Next.js landing + web app |
+| [`backend/`](backend/) | Hono API on Vercel — `https://api.opensen.taquangkhoi.com/` |
+| [`web/`](web/) | Next.js landing + web app — `https://opensen.taquangkhoi.com/` |
 | [`.github/workflows/`](.github/workflows/) | GitHub Actions CI (`mobile-ci.yml`: analyze, test, Android APK) |
 
 ---
