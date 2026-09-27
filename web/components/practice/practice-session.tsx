@@ -184,10 +184,10 @@ export function PracticeSession() {
             Browse Situations
           </Link>
           <Link
-            href={AppRoutes.today}
+            href={AppRoutes.home}
             className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Back to Today
+            Back to Home
           </Link>
         </div>
       </ScreenShell>
@@ -225,10 +225,10 @@ export function PracticeSession() {
           updates on the server — check Today or Plan next.
         </p>
         <Link
-          href={AppRoutes.today}
+          href={AppRoutes.home}
           className="mt-6 inline-block rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white"
         >
-          Back to Today
+          Back to Home
         </Link>
       </ScreenShell>
     );

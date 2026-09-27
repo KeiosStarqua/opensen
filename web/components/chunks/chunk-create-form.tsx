@@ -54,8 +54,8 @@ export function ChunkCreateForm() {
 
   return (
     <form onSubmit={(event) => void onSubmit(event)} className="space-y-4">
-      <Link href={AppRoutes.library} className="text-sm text-slate-600">
-        ← Library
+      <Link href={AppRoutes.patterns} className="text-sm text-slate-600">
+        ← Sentence patterns
       </Link>
       <h1 className="text-2xl font-semibold">New chunk</h1>
       {error ? <p className="text-sm text-red-700">{error}</p> : null}

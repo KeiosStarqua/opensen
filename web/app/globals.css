@@ -10,6 +10,17 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-studio: var(--font-nunito), ui-rounded, system-ui, sans-serif;
+  --color-sen-canvas: #e6efe3;
+  --color-sen-ink: #1b2a22;
+  --color-sen-muted: #6b7c73;
+  --color-sen-primary: #1f9d52;
+  --color-sen-primary-dark: #157a3e;
+  --color-sen-soft: #e7f6eb;
+  --color-sen-line: #e4eee6;
+  --color-sen-gold: #e4b322;
+  --color-sen-flame: #f08c2a;
+  --color-sen-heart: #ef5b6c;
 }
 
 @media (prefers-color-scheme: dark) {

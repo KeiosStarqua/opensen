@@ -119,10 +119,10 @@ export function OnboardingForm() {
               Practice these chunks now
             </button>
             <Link
-              href={AppRoutes.today}
+              href={AppRoutes.home}
               className="inline-flex items-center justify-center rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-800"
             >
-              Go to Today
+              Go to Home
             </Link>
           </div>
           {error ? <p className="mt-4 text-sm text-red-700">{error}</p> : null}

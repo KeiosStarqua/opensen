@@ -86,8 +86,8 @@ export function SubstitutionDrillSession({ patternId }: { patternId: string }) {
     return (
       <p className="text-red-700">
         {error}{" "}
-        <Link href={AppRoutes.today} className="underline">
-          Today
+        <Link href={AppRoutes.home} className="underline">
+          Home
         </Link>
       </p>
     );
@@ -104,8 +104,8 @@ export function SubstitutionDrillSession({ patternId }: { patternId: string }) {
         <p className="text-slate-700">
           {correctCount} / {items.length} correct
         </p>
-        <Link href={AppRoutes.today} className="text-emerald-800 underline">
-          Back to Today
+        <Link href={AppRoutes.home} className="text-emerald-800 underline">
+          Back to Home
         </Link>
       </div>
     );

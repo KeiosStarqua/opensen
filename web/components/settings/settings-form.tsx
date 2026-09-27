@@ -45,13 +45,13 @@ export function SettingsForm() {
     }
     window.localStorage.removeItem(LEARNER_ID_STORAGE_KEY);
     setConfirmReset(false);
-    router.push(AppRoutes.today);
+    router.push(AppRoutes.home);
   }
 
   return (
     <div className="space-y-8">
-      <Link href={AppRoutes.today} className="text-sm text-slate-600">
-        ← Today
+      <Link href={AppRoutes.home} className="text-sm text-slate-600">
+        ← Home
       </Link>
       <h1 className="text-3xl font-semibold">Settings</h1>
       <label className="block text-sm">

@@ -91,8 +91,8 @@ export function ChunkDetailView({ chunkId }: { chunkId: string }) {
     return (
       <p className="text-red-700">
         {error}{" "}
-        <Link href={AppRoutes.library} className="underline">
-          Library
+        <Link href={AppRoutes.patterns} className="underline">
+          Sentence patterns
         </Link>
       </p>
     );
@@ -102,8 +102,8 @@ export function ChunkDetailView({ chunkId }: { chunkId: string }) {
 
   return (
     <div className="space-y-6">
-      <Link href={AppRoutes.library} className="text-sm text-slate-600">
-        ← Library
+      <Link href={AppRoutes.patterns} className="text-sm text-slate-600">
+        ← Sentence patterns
       </Link>
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       {data.editable ? (

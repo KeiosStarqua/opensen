@@ -5,6 +5,17 @@
 export const AppRoutes = {
   onboarding: "/onboarding",
 
+  home: "/home",
+  learn: "/learn",
+  learnTopic: (id: string) => `/learn/${id}`,
+  learnStep: (topicId: string, stepId: string) => `/learn/${topicId}/${stepId}`,
+  practice: "/practice",
+  practiceSpeak: "/practice/speak",
+  practiceDone: "/practice/done",
+  explore: "/explore",
+  profile: "/profile",
+  patterns: "/patterns",
+
   today: "/today",
   library: "/library",
   situations: "/situations",
@@ -22,8 +33,9 @@ export const AppRoutes = {
 } as const;
 
 export const shellTabRoutes = [
-  { href: AppRoutes.today, label: "Today" },
+  { href: AppRoutes.home, label: "Home" },
+  { href: AppRoutes.learn, label: "Learn" },
+  { href: AppRoutes.practice, label: "Practice" },
+  { href: AppRoutes.explore, label: "Explore" },
   { href: AppRoutes.library, label: "Library" },
-  { href: AppRoutes.situations, label: "Situations" },
-  { href: AppRoutes.plan, label: "Plan" },
 ] as const;

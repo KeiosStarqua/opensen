@@ -55,8 +55,8 @@ export function AnkiExportPanel() {
 
   return (
     <div className="space-y-6">
-      <Link href={AppRoutes.library} className="text-sm text-slate-600">
-        ← Library
+      <Link href={AppRoutes.patterns} className="text-sm text-slate-600">
+        ← Sentence patterns
       </Link>
       <h1 className="text-3xl font-semibold">Export to Anki</h1>
       <label className="block text-sm">

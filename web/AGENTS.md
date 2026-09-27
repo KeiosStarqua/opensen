@@ -33,6 +33,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Keep marketing and authenticated app routes separated via route groups as features land
 - All backend HTTP calls go through `lib/api/` (`createDefaultApiClient` or route helpers under `lib/api/routes/`). Do not scatter raw `fetch` with hand-rolled `X-User-Id` headers.
 - Temporary learner identity lives in `localStorage` (`opensen:learner-id`); only import learner-id helpers from client components or hooks.
+- The signed-in shell is the study UI in `components/studio/` and `components/app-shell.tsx`. Primary routes: `/home`, `/learn`, `/learn/[topic]`, `/learn/[topic]/[step]`, `/practice`, `/practice/speak`, `/practice/done`, `/explore`, `/library`, `/profile`. Lesson copy and the practice deck live in `lib/studio/content.ts`. Older recall, plan, situation, and chunk screens stay reachable from Explore (`/today`, `/plan`, `/situations`, `/patterns`).
 
 ## Verification
 
