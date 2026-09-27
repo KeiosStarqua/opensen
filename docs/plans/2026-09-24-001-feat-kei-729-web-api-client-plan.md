@@ -209,10 +209,10 @@ web/
 
 ## Definition of Done
 
-- [ ] `web/lib/api/` client with env-based base URL and route helpers for all five API prefixes.
-- [ ] Stable `X-User-Id` in `localStorage` across reload (R4–R5).
-- [ ] HTTP 400/404/501 and network errors modeled for UI (R7–R8); no uncaught fetch in reference usage.
-- [ ] Unit tests for learner id and client header/error parsing (R11).
-- [ ] `web/.env.example`, README, and `web/AGENTS.md` updated.
-- [ ] `npm run test`, `npm run lint`, `npm run build` pass from `web/`.
-- [ ] Linear KEI-729 linked to implementation PR; status In Review after `ce-work` (plan phase leaves issue at Todo).
+- [x] `web/lib/api/` client with env-based base URL and route helpers for all five API prefixes.
+- [x] Stable `X-User-Id` in `localStorage` across reload (R4–R5).
+- [x] HTTP 400/404/501 and network errors modeled for UI (R7–R8); no uncaught fetch in reference usage.
+- [x] Unit tests for learner id and client header/error parsing (R11).
+- [x] `web/.env.example`, README, and `web/AGENTS.md` updated.
+- [x] `npm run test`, `npm run lint`, `npm run build` pass from `web/`.
+- [x] Linear KEI-729 linked to implementation PR; status In Review after `ce-work` (plan phase leaves issue at Todo).

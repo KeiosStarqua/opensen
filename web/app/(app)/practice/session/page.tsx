@@ -1,12 +1,7 @@
-import { PlaceholderSurface } from "@/components/placeholder-surface";
+import { PracticeSession } from "@/components/practice/practice-session";
 
 export const metadata = { title: "Practice session" };
 
 export default function PracticeSessionPage() {
-  return (
-    <PlaceholderSurface
-      title="Practice session"
-      description="Recall practice runs full-screen without the tab bar."
-    />
-  );
+  return <PracticeSession />;
 }
