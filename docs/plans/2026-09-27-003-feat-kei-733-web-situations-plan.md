@@ -13,4 +13,8 @@ linear_issues:
 
 Backend: situations repository + routes reading Postgres; `scripts/seed-mobile-catalog.ts` imports `mobile/assets/seed/content.json` (owner runs manually). Web: `/situations` list + `/situations/[id]` detail with build link.
 
-Definition of Done: API list/detail/intents, web UI, typecheck/test backend, web lint/build; seed script documented via Linear hand-run issue.
+## Definition of Done
+
+- [x] API list/detail/intents, web UI
+- [x] typecheck/test backend, web lint/build
+- [x] Seed script + Linear hand-run KEI-879 (owner runs `npm run seed:mobile-catalog`)
