@@ -20,10 +20,10 @@ export function LandingHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-[#e4eee6]/80 bg-[#f6f3ea]/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3.5 lg:px-8">
-        <a href="#top" className="flex items-center gap-2.5">
-          <BrandMark className="h-8 w-8" />
-          <span className="text-lg font-extrabold tracking-tight text-[#173028]">
+      <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-2.5 sm:gap-4 sm:px-5 sm:py-3.5 lg:px-8">
+        <a href="#top" className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+          <BrandMark className="h-8 w-8 shrink-0" />
+          <span className="truncate text-base font-extrabold tracking-tight text-[#173028] sm:text-lg">
             {siteConfig.name}
           </span>
         </a>
@@ -36,11 +36,11 @@ export function LandingHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2.5">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2.5">
           <div className="relative">
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#d7e3da] bg-white px-3 py-1.5 text-xs font-extrabold text-[#173028]"
+              className="inline-flex items-center gap-1 rounded-full border border-[#d7e3da] bg-white px-2.5 py-1.5 text-xs font-extrabold text-[#173028] sm:gap-1.5 sm:px-3"
               aria-expanded={langOpen}
               aria-haspopup="listbox"
               onClick={() => setLangOpen((open) => !open)}
@@ -74,7 +74,7 @@ export function LandingHeader() {
 
           <Link
             href={siteConfig.trialHref}
-            className="inline-flex items-center rounded-full bg-[#178a45] px-4 py-2 text-sm font-extrabold text-white hover:bg-[#12753a]"
+            className="inline-flex items-center rounded-full bg-[#178a45] px-3 py-1.5 text-xs font-extrabold text-white hover:bg-[#12753a] sm:px-4 sm:py-2 sm:text-sm"
           >
             Get started
             <span aria-hidden className="ml-1.5">
@@ -84,7 +84,7 @@ export function LandingHeader() {
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#d7e3da] bg-white md:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#d7e3da] bg-white sm:h-10 sm:w-10 md:hidden"
             aria-expanded={menuOpen}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             onClick={() => setMenuOpen((open) => !open)}

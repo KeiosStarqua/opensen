@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { LessonPreview } from "@/components/landing/lesson-preview";
+import { MobileHero } from "@/components/landing/mobile-hero";
 import { PatternCard } from "@/components/landing/pattern-card";
 import { heroCopy, siteConfig } from "@/lib/site";
 
@@ -27,7 +28,8 @@ export function LandingPage() {
       <LandingHeader />
 
       <main>
-        <section className="mx-auto grid max-w-6xl items-center gap-6 px-5 pb-8 pt-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-4 lg:px-8 lg:pb-6 lg:pt-12">
+        <MobileHero />
+        <section className="mx-auto hidden max-w-6xl items-center gap-6 px-5 pb-8 pt-8 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-4 lg:px-8 lg:pb-6 lg:pt-12">
           <div>
             <p className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-bold text-[#5e6f68] shadow-sm">
               {siteConfig.tagline}
@@ -86,7 +88,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section id="features" className="scroll-mt-24 px-5 py-16 lg:px-8">
+        <section id="features" className="scroll-mt-24 px-5 py-10 lg:px-8 lg:py-16">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
               Turn everyday moments into language skills
