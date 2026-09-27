@@ -28,8 +28,8 @@ export function TodayDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     setError(null);
     const [planResult, dueResult] = await Promise.all([
       practiceApi.getPracticePlan(client),
@@ -47,8 +47,28 @@ export function TodayDashboard() {
   }, [client]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let active = true;
+    void (async () => {
+      setError(null);
+      const [planResult, dueResult] = await Promise.all([
+        practiceApi.getPracticePlan(client),
+        practiceApi.getPracticeDue(client, { limit: 10 }),
+      ]);
+      if (!active) return;
+      setLoading(false);
+      if (!planResult.ok) {
+        setError(formatApiErrorMessage(planResult.error));
+        return;
+      }
+      setStats(planResult.data as PlanStats);
+      if (dueResult.ok) {
+        setDueItems((dueResult.data as { items: DuePracticeItem[] }).items ?? []);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [client]);
 
   function startPractice() {
     if (dueItems.length === 0) return;
@@ -71,7 +91,7 @@ export function TodayDashboard() {
       {error ? (
         <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
           {error}{" "}
-          <button type="button" onClick={() => void load()} className="underline">
+          <button type="button" onClick={() => void load(true)} className="underline">
             Retry
           </button>
         </div>

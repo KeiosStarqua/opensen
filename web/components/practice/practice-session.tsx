@@ -12,6 +12,7 @@ import { AppRoutes } from "@/lib/app-routes";
 import { isCorrect, similarity } from "@/lib/practice/answer-matcher";
 import { consumePracticeFocusQueue } from "@/lib/practice/focus-queue";
 import { buildPracticeItem } from "@/lib/practice/practice-item";
+import { getLearnerSettings } from "@/lib/settings/learner-settings";
 import type { DuePracticeItem, ReviewRating } from "@/lib/practice/types";
 
 type Phase = "loading" | "prompt" | "reveal" | "finished" | "empty" | "error";
@@ -56,7 +57,8 @@ export function PracticeSession() {
       setPhase("loading");
     }
     setErrorMessage(null);
-    const result = await practiceApi.getPracticeDue(client, { limit: 20 });
+    const limit = getLearnerSettings().sessionSize;
+    const result = await practiceApi.getPracticeDue(client, { limit });
     if (!result.ok) {
       setErrorMessage(formatApiErrorMessage(result.error));
       setPhase("error");
@@ -77,7 +79,8 @@ export function PracticeSession() {
     }
     let active = true;
     void (async () => {
-      const result = await practiceApi.getPracticeDue(client, { limit: 20 });
+      const limit = getLearnerSettings().sessionSize;
+    const result = await practiceApi.getPracticeDue(client, { limit });
       if (!active) return;
       if (!result.ok) {
         setErrorMessage(formatApiErrorMessage(result.error));
@@ -98,8 +101,17 @@ export function PracticeSession() {
   }, [client, hasInitialFocus]);
 
   useEffect(() => {
-    if (phase !== "prompt" || !currentItem?.spokenText || !canSpeak) return;
+    const settings = getLearnerSettings();
+    if (
+      phase !== "prompt" ||
+      !currentItem?.spokenText ||
+      !canSpeak ||
+      !settings.ttsEnabled
+    ) {
+      return;
+    }
     const utterance = new SpeechSynthesisUtterance(currentItem.spokenText);
+    utterance.rate = settings.speechRate;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
   }, [phase, currentItem, canSpeak]);
@@ -113,8 +125,10 @@ export function PracticeSession() {
       setMatchScore(null);
     }
     setPhase("reveal");
-    if (currentItem.mode !== "listenRepeat" && canSpeak) {
+    const settings = getLearnerSettings();
+    if (currentItem.mode !== "listenRepeat" && canSpeak && settings.ttsEnabled) {
       const utterance = new SpeechSynthesisUtterance(currentItem.expected);
+      utterance.rate = settings.speechRate;
       window.speechSynthesis.speak(utterance);
     }
   }
