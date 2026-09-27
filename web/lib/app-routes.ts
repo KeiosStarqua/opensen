@@ -30,6 +30,10 @@ export const AppRoutes = {
   practiceSession: "/practice/session",
   settings: "/settings",
   export: "/export",
+
+  signIn: "/auth/sign-in",
+  signUp: "/auth/sign-up",
+  account: "/account/settings",
 } as const;
 
 export const shellTabRoutes = [

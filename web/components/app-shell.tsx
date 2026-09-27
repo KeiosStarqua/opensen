@@ -1,5 +1,6 @@
 "use client";
 
+import { UserButton } from "@neondatabase/auth-ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { flushSync } from "react-dom";
@@ -70,16 +71,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <Link
-          href={AppRoutes.profile}
-          aria-current={profileActive ? "page" : undefined}
-          className={`mt-4 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-extrabold ${
-            profileActive ? "bg-sen-soft text-sen-primary" : "text-[#5e6f66] hover:bg-[#f4f8f5]"
-          }`}
-        >
-          <ProfileAvatar className="h-9 w-9" />
-          Profile
-        </Link>
+        <div className="mt-4 flex items-center gap-2">
+          <UserButton size="icon" />
+          <Link
+            href={AppRoutes.profile}
+            aria-current={profileActive ? "page" : undefined}
+            className={`flex flex-1 items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-extrabold ${
+              profileActive ? "bg-sen-soft text-sen-primary" : "text-[#5e6f66] hover:bg-[#f4f8f5]"
+            }`}
+          >
+            <ProfileAvatar className="h-9 w-9" />
+            Profile
+          </Link>
+        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -88,6 +92,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <LogoMark className="h-8 w-8" />
             <span className="font-extrabold text-[#1d7a45]">OpenSen</span>
           </Link>
+          <UserButton size="icon" />
         </div>
         <main className="min-h-0 flex-1 overflow-auto pb-24 md:pb-1">{children}</main>
       </div>
