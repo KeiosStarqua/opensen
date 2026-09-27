@@ -31,11 +31,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - Prefer Server Components by default; add `"use client"` only when needed
 - Keep marketing and authenticated app routes separated via route groups as features land
+- All backend HTTP calls go through `lib/api/` (`createDefaultApiClient` or route helpers under `lib/api/routes/`). Do not scatter raw `fetch` with hand-rolled `X-User-Id` headers.
+- Temporary learner identity lives in `localStorage` (`opensen:learner-id`); only import learner-id helpers from client components or hooks.
 
 ## Verification
 
 - `npm run lint` from `web/`
 - `npm run build` from `web/`
+- `npm run test` from `web/` (API client unit tests)
 
 ## Child DOX Index
 
