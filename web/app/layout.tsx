@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "OpenSen — Speak without translating in your head",
+    default: "OpenSen — Real sentences for real life",
     template: "%s · OpenSen",
   },
   description:
-    "OpenSen turns real-life situations into reusable sentence patterns you can remember, adapt, and speak automatically.",
+    "OpenSen helps kids and beginners learn languages through real situations, fun stories, and interactive conversations — not just isolated words.",
 };
 
 export default function RootLayout({

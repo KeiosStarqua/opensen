@@ -11,6 +11,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-studio: var(--font-nunito), ui-rounded, system-ui, sans-serif;
+  --font-script: var(--font-caveat), cursive;
   --color-sen-canvas: #e6efe3;
   --color-sen-ink: #1b2a22;
   --color-sen-muted: #6b7c73;

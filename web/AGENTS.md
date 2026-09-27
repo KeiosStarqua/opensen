@@ -35,6 +35,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Temporary learner identity lives in `localStorage` (`opensen:learner-id`); only import learner-id helpers from client components or hooks.
 - The signed-in shell is the study UI in `components/studio/` and `components/app-shell.tsx`. Primary routes: `/home`, `/learn`, `/learn/[topic]`, `/learn/[topic]/[step]`, `/practice`, `/practice/speak`, `/practice/done`, `/explore`, `/library`, `/profile`. Lesson copy and the practice deck live in `lib/studio/content.ts`. Older recall, plan, situation, and chunk screens stay reachable from Explore (`/today`, `/plan`, `/situations`, `/patterns`).
 - Study illustrations live in `public/studio/` and are mapped by `components/studio/scenes.tsx`. Sen is the cream round character with the green leaf beret, glossy black eyes, and rosy cheeks. New scenes stay in that pastel storybook style and contain no UI chrome or readable text. `docs/DESIGN.md` still governs the calmer recall and plan surfaces.
+- The marketing page is `components/landing-page.tsx`, with storybook art in `public/landing/`. Readable product copy on that page stays in HTML. Landing headlines live in `lib/site.ts` and match the Landing copy section of `docs/product-strategy.md`.
 
 ## Verification
 

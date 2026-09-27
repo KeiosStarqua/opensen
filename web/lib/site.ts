@@ -1,15 +1,16 @@
 export const siteConfig = {
   name: "OpenSen",
-  tagline: "Open Sentence",
+  tagline: "A kinder, smarter way to learn languages",
   description:
-    "OpenSen turns real-life situations into reusable sentence patterns you can remember, adapt, and speak automatically.",
+    "OpenSen helps kids and beginners learn languages through real situations, fun stories, and interactive conversations — not just isolated words.",
   trialHref: "/onboarding",
+  updatesHref: "https://opensen.substack.com",
 } as const;
 
 export const heroCopy = {
-  headline: "Speak without translating in your head.",
+  headline: "Real sentences for real life",
   subheadline: siteConfig.description,
-  coreMessage: "Learn fewer patterns. Say more things.",
+  coreMessage: "Small sentences. Big adventures.",
 } as const;
 
 export const onboardingGoals = [
