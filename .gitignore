@@ -6,3 +6,4 @@ codedb.snapshot
 !.env.example
 .claude
 .neon
+node_modules/
