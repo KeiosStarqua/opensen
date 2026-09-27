@@ -17,8 +17,8 @@ export function LessonPreview() {
         <div className="overflow-hidden rounded-[20px] bg-white sm:rounded-[24px]">
           <div className="flex min-h-[210px] sm:min-h-[250px]">
             <aside className="flex w-[68px] shrink-0 flex-col gap-1 bg-[#f4faf6] px-1.5 py-3 sm:w-[78px] sm:px-2">
-              <p className="flex items-center gap-1 px-1 text-[10px] font-extrabold text-[#173028]">
-                <BrandMark className="h-3.5 w-3.5 shrink-0" />
+              <p className="flex flex-col items-center gap-0.5 text-[9px] font-extrabold leading-none text-[#173028]">
+                <BrandMark className="h-4 w-4" />
                 OpenSen
               </p>
               <SideLink label="Home" />
