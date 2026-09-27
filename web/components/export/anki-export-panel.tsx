@@ -1,43 +1,82 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
 import {
   createBrowserStorage,
-  createDefaultApiClient,
+  formatApiErrorMessage,
+  isOperationalApiError,
   resolveApiBaseUrl,
 } from "@/lib/api/client";
 import { getOrCreateLearnerId } from "@/lib/api/learner-id";
+import { ApiError } from "@/lib/api/types";
+import { captureOperationalError } from "@/lib/observability/operational-error";
 
 type Scope = "enrolled" | "all";
 
 export function AnkiExportPanel() {
-  useMemo(() => createDefaultApiClient(), []);
   const [scope, setScope] = useState<Scope>("enrolled");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function reportExportError(error: ApiError) {
+    if (!isOperationalApiError(error)) return;
+    captureOperationalError(error, {
+      surface: "anki-export",
+      kind: error.kind,
+      status: error.status,
+      path: "/api/export/anki",
+    });
+  }
 
   async function download() {
     setLoading(true);
     setMessage(null);
     const baseUrl = resolveApiBaseUrl();
     const userId = getOrCreateLearnerId(createBrowserStorage());
-    const response = await fetch(`${baseUrl}/api/export/anki?scope=${scope}`, {
-      headers: { "X-User-Id": userId },
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${baseUrl}/api/export/anki?scope=${scope}`, {
+        headers: { "X-User-Id": userId },
+      });
+    } catch {
+      const error = new ApiError("network", "Network request failed");
+      reportExportError(error);
+      setLoading(false);
+      setMessage(formatApiErrorMessage(error));
+      return;
+    }
     setLoading(false);
     if (!response.ok) {
-      setMessage(`Export failed (${response.status}).`);
+      const error = new ApiError(
+        "http",
+        `Export failed (${response.status}).`,
+        response.status,
+      );
+      reportExportError(error);
+      setMessage(formatApiErrorMessage(error));
       return;
     }
     const contentType = response.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {
-      const json = (await response.json()) as {
-        empty?: boolean;
-        noteCount?: number;
-      };
+      let json: { empty?: boolean; noteCount?: number };
+      try {
+        json = (await response.json()) as {
+          empty?: boolean;
+          noteCount?: number;
+        };
+      } catch {
+        const error = new ApiError(
+          "parse",
+          "Response was not valid JSON",
+          response.status,
+        );
+        reportExportError(error);
+        setMessage(formatApiErrorMessage(error));
+        return;
+      }
       if (json.empty) {
         setMessage("Nothing to export for this scope yet.");
         return;

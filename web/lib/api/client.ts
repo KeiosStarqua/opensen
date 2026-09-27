@@ -1,12 +1,34 @@
+import { captureOperationalError } from "@/lib/observability/operational-error";
+
 import { getOrCreateLearnerId } from "./learner-id";
 import type { ApiResult, BackendErrorBody } from "./types";
 import { ApiError } from "./types";
+
+export type ApiErrorReportContext = {
+  path: string;
+};
 
 export type ApiClientDeps = {
   fetch: typeof fetch;
   baseUrl: string;
   getUserId: () => string;
+  /**
+   * Called for operational failures only (network, parse, HTTP >= 500).
+   * `createDefaultApiClient` reports these to Sentry. HTTP 4xx is not reported.
+   */
+  reportError?: (error: ApiError, context: ApiErrorReportContext) => void;
 };
+
+export function isOperationalApiError(error: ApiError): boolean {
+  if (error.kind === "network" || error.kind === "parse") {
+    return true;
+  }
+  return (
+    error.kind === "http" &&
+    error.status !== undefined &&
+    error.status >= 500
+  );
+}
 
 export function resolveApiBaseUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_OPENSEN_API_URL?.trim();
@@ -32,7 +54,20 @@ export function createDefaultApiClient(
     overrides.getUserId ??
     (() => getOrCreateLearnerId(createBrowserStorage()));
 
-  return createApiClient({ fetch: fetchFn, baseUrl, getUserId });
+  return createApiClient({
+    fetch: fetchFn,
+    baseUrl,
+    getUserId,
+    reportError: (error, context) => {
+      captureOperationalError(error, {
+        surface: "api",
+        kind: error.kind,
+        status: error.status,
+        path: context.path,
+      });
+    },
+    ...overrides,
+  });
 }
 
 export type ApiClient = ReturnType<typeof createApiClient>;
@@ -49,14 +84,18 @@ export function createApiClient(deps: ApiClientDeps) {
       headers.set("Content-Type", "application/json");
     }
 
+    function fail(error: ApiError): ApiResult<T> {
+      if (isOperationalApiError(error)) {
+        deps.reportError?.(error, { path });
+      }
+      return { ok: false, error };
+    }
+
     let response: Response;
     try {
       response = await deps.fetch(url, { ...init, headers });
     } catch {
-      return {
-        ok: false,
-        error: new ApiError("network", "Network request failed"),
-      };
+      return fail(new ApiError("network", "Network request failed"));
     }
 
     const text = await response.text();
@@ -64,28 +103,26 @@ export function createApiClient(deps: ApiClientDeps) {
       if (response.ok) {
         return { ok: true, data: undefined as T };
       }
-      return {
-        ok: false,
-        error: new ApiError(
+      return fail(
+        new ApiError(
           "http",
           `Request failed with status ${response.status}`,
           response.status,
         ),
-      };
+      );
     }
 
     let parsed: unknown;
     try {
       parsed = JSON.parse(text);
     } catch {
-      return {
-        ok: false,
-        error: new ApiError(
+      return fail(
+        new ApiError(
           "parse",
           "Response was not valid JSON",
           response.status,
         ),
-      };
+      );
     }
 
     if (!response.ok) {
@@ -96,10 +133,7 @@ export function createApiClient(deps: ApiClientDeps) {
           : `Request failed with status ${response.status}`;
       const status =
         typeof body.status === "number" ? body.status : response.status;
-      return {
-        ok: false,
-        error: new ApiError("http", message, status),
-      };
+      return fail(new ApiError("http", message, status));
     }
 
     return { ok: true, data: parsed as T };

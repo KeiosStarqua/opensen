@@ -1,7 +1,19 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createApiClient, isRetryable, withRetry } from "./client";
+import { captureOperationalError } from "@/lib/observability/operational-error";
+
+import {
+  createApiClient,
+  createDefaultApiClient,
+  isOperationalApiError,
+  isRetryable,
+  withRetry,
+} from "./client";
 import { ApiError } from "./types";
+
+vi.mock("@/lib/observability/operational-error", () => ({
+  captureOperationalError: vi.fn(),
+}));
 
 const USER_ID = "11111111-1111-4111-8111-111111111111";
 
@@ -89,6 +101,96 @@ describe("createApiClient", () => {
     if (!result.ok) {
       expect(result.error.kind).toBe("network");
     }
+  });
+});
+
+describe("operational error reporting", () => {
+  const reportError = vi.fn();
+
+  beforeEach(() => {
+    reportError.mockClear();
+    vi.mocked(captureOperationalError).mockClear();
+  });
+
+  function clientWith(fetchMock: typeof fetch) {
+    return createApiClient({
+      fetch: fetchMock,
+      baseUrl: "http://api.test",
+      getUserId: () => USER_ID,
+      reportError,
+    });
+  }
+
+  it("reports network, parse, and HTTP 5xx", async () => {
+    await clientWith(async () => {
+      throw new TypeError("Failed to fetch");
+    }).request("/api/practice/due");
+    expect(reportError).toHaveBeenCalledTimes(1);
+    expect(reportError.mock.calls[0][0].kind).toBe("network");
+    expect(reportError.mock.calls[0][1]).toEqual({ path: "/api/practice/due" });
+
+    reportError.mockClear();
+    await clientWith(async () => new Response("not-json", { status: 200 })).request(
+      "/api/practice/due",
+    );
+    expect(reportError).toHaveBeenCalledTimes(1);
+    expect(reportError.mock.calls[0][0].kind).toBe("parse");
+
+    reportError.mockClear();
+    await clientWith(
+      async () =>
+        new Response(JSON.stringify({ error: "down", status: 503 }), {
+          status: 503,
+        }),
+    ).request("/api/practice/due");
+    expect(reportError).toHaveBeenCalledTimes(1);
+    expect(reportError.mock.calls[0][0].status).toBe(503);
+  });
+
+  it("does not report HTTP 4xx", async () => {
+    await clientWith(
+      async () =>
+        new Response(JSON.stringify({ error: "missing", status: 404 }), {
+          status: 404,
+        }),
+    ).request("/api/chunks/x");
+    expect(reportError).not.toHaveBeenCalled();
+    expect(isOperationalApiError(new ApiError("http", "missing", 404))).toBe(
+      false,
+    );
+  });
+
+  it("createDefaultApiClient sends operational failures to Sentry", async () => {
+    const client = createDefaultApiClient({
+      fetch: async () => {
+        throw new TypeError("Failed to fetch");
+      },
+      baseUrl: "http://api.test",
+      getUserId: () => USER_ID,
+    });
+    const result = await client.request("/api/practice/due");
+    expect(result.ok).toBe(false);
+    expect(captureOperationalError).toHaveBeenCalledWith(
+      expect.any(ApiError),
+      expect.objectContaining({
+        surface: "api",
+        kind: "network",
+        path: "/api/practice/due",
+      }),
+    );
+  });
+
+  it("createDefaultApiClient does not send HTTP 4xx to Sentry", async () => {
+    const client = createDefaultApiClient({
+      fetch: async () =>
+        new Response(JSON.stringify({ error: "nope", status: 400 }), {
+          status: 400,
+        }),
+      baseUrl: "http://api.test",
+      getUserId: () => USER_ID,
+    });
+    await client.request("/api/chunks/x");
+    expect(captureOperationalError).not.toHaveBeenCalled();
   });
 });
 

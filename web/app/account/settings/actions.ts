@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { AppRoutes } from "@/lib/app-routes";
 import { auth } from "@/lib/auth/server";
+import { captureOperationalError } from "@/lib/observability/operational-error";
 
 export async function updateDisplayName(
   _prevState: { error: string } | null,
@@ -16,7 +17,12 @@ export async function updateDisplayName(
 
   const { error } = await auth.updateUser({ name });
   if (error) {
-    return { error: error.message || "Could not update your name" };
+    const message = error.message || "Could not update your name";
+    captureOperationalError(new Error(message), {
+      surface: "auth",
+      action: "update-name",
+    });
+    return { error: message };
   }
 
   redirect(AppRoutes.account);

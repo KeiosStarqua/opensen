@@ -2,11 +2,13 @@ export {
   createApiClient,
   createDefaultApiClient,
   formatApiErrorMessage,
+  isOperationalApiError,
   isRetryable,
   resolveApiBaseUrl,
   withRetry,
   type ApiClient,
   type ApiClientDeps,
+  type ApiErrorReportContext,
 } from "./client";
 export { getOrCreateLearnerId, isValidLearnerId } from "./learner-id";
 export { ApiError, LEARNER_ID_STORAGE_KEY, type ApiResult } from "./types";

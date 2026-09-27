@@ -13,11 +13,4 @@ export const heroCopy = {
   coreMessage: "Small sentences. Big adventures.",
 } as const;
 
-export const onboardingGoals = [
-  "Travel",
-  "Work",
-  "Study abroad",
-  "Daily conversations",
-  "Dating and social life",
-  "Custom situation",
-] as const;
+export { onboardingGoalLabels as onboardingGoals } from "./onboarding-goals";
