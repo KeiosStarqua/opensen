@@ -20,6 +20,15 @@ export function getChunk(
   return client.request(`/api/chunks/${encodeURIComponent(id)}`);
 }
 
+export function getPatternById(
+  client: ApiClient,
+  patternId: string,
+): Promise<ApiResult<unknown>> {
+  return client.request(
+    `/api/chunks/patterns/${encodeURIComponent(patternId)}`,
+  );
+}
+
 export function getChunkPatterns(
   client: ApiClient,
   id: string,
