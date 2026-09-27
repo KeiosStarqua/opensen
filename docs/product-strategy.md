@@ -203,15 +203,15 @@ Vanity metrics such as "dialogues generated" will mislead the team. Do not optim
 
 **Headline**
 
-> Speak without translating in your head.
+> Real sentences for real life.
 
 **Subheadline**
 
-> OpenSen turns real-life situations into reusable sentence patterns you can remember, adapt, and speak automatically.
+> OpenSen helps kids and beginners learn languages through real situations, fun stories, and interactive conversations — not just isolated words.
 
 **Vietnamese**
 
-> OpenSen giúp bạn biến các tình huống thật thành những mẫu câu có thể ghi nhớ, hoán đổi và bật ra tự nhiên mà không cần dịch từng từ trong đầu.
+> OpenSen giúp trẻ em và người mới bắt đầu học ngôn ngữ qua tình huống thật, câu chuyện vui và hội thoại tương tác — không chỉ từng từ rời.
 
 ## Architecture direction
 

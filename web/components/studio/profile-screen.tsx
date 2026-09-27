@@ -1,9 +1,11 @@
 "use client";
 
+import { UserButton } from "@neondatabase/auth-ui";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
+import { authClient } from "@/lib/auth/client";
 import { topics } from "@/lib/studio/content";
 
 import { CoinIcon, FlameIcon, SentencesIcon, SettingsIcon, TopicGlyph } from "./icons";
@@ -12,6 +14,7 @@ import { SearchField } from "./ui";
 
 export function ProfileScreen() {
   const studio = useStudio();
+  const { data: session } = authClient.useSession();
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
   const rows = useMemo(
@@ -25,6 +28,13 @@ export function ProfileScreen() {
         <h1 className="text-3xl font-extrabold tracking-tight">My Progress</h1>
         <div className="flex items-center gap-2">
           <SearchField value={query} onChange={setQuery} className="w-full max-w-xs" label="Search topics" />
+          <UserButton size="icon" />
+          <Link
+            href={AppRoutes.account}
+            className="rounded-full bg-white px-4 py-2 text-sm font-extrabold text-sen-ink shadow-sm hover:bg-sen-soft"
+          >
+            Account
+          </Link>
           <Link
             href={AppRoutes.settings}
             aria-label="Settings"
@@ -34,6 +44,12 @@ export function ProfileScreen() {
           </Link>
         </div>
       </div>
+
+      {session?.user ? (
+        <p className="text-sm font-semibold text-sen-muted">
+          Signed in as {session.user.email}
+        </p>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-3">
         <Stat

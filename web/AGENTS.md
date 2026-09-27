@@ -20,6 +20,7 @@ Next.js **web client** for OpenSen: marketing/landing and the authenticated web 
 - Import alias: `@/*`
 - Landing and app share this project; prefer route groups (e.g. `(marketing)`, `(app)`) when splitting surfaces
 - Page analytics: `onedollarstats` initialized in root layout via `components/onedollarstats-analytics.tsx`; env vars documented in `.env.example` (`NEXT_PUBLIC_ONEDOLLARSTATS_*`)
+- Auth: Managed Better Auth via `@neondatabase/auth` and `@neondatabase/auth-ui`. Server instance in `lib/auth/server.ts` (`NEON_AUTH_BASE_URL`, fallback `VITE_NEON_AUTH_URL`, plus `NEON_AUTH_COOKIE_SECRET`). Browser client in `lib/auth/client.ts`. UI provider in `components/auth-provider.tsx`. Catch-all views: `app/auth/[path]` and `app/account/[path]`. Session proxy in `proxy.ts` protects app routes (study shell, onboarding, settings, account) and leaves `/` and `/auth/*` public. API proxy: `app/api/auth/[...path]`
 
 <!-- BEGIN:nextjs-agent-rules -->
 ## Next.js guidance
@@ -34,7 +35,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - All backend HTTP calls go through `lib/api/` (`createDefaultApiClient` or route helpers under `lib/api/routes/`). Do not scatter raw `fetch` with hand-rolled `X-User-Id` headers.
 - Temporary learner identity lives in `localStorage` (`opensen:learner-id`); only import learner-id helpers from client components or hooks.
 - The signed-in shell is the study UI in `components/studio/` and `components/app-shell.tsx`. Primary routes: `/home`, `/learn`, `/learn/[topic]`, `/learn/[topic]/[step]`, `/practice`, `/practice/speak`, `/practice/done`, `/explore`, `/library`, `/profile`. Lesson copy and the practice deck live in `lib/studio/content.ts`. Older recall, plan, situation, and chunk screens stay reachable from Explore (`/today`, `/plan`, `/situations`, `/patterns`).
+- Sign-in and account management use Neon Auth UI (`/auth/sign-in`, `/auth/sign-up`, `/account/settings`). Do not build a second auth form. After sign-in, return to the requested path when `redirectTo` is present, otherwise `/home`.
+- Learner API calls still send `X-User-Id` from the local learner id in `lib/api/` until the backend verifies the Neon session.
 - Study illustrations live in `public/studio/` and are mapped by `components/studio/scenes.tsx`. Sen is the cream round character with the green leaf beret, glossy black eyes, and rosy cheeks. New scenes stay in that pastel storybook style and contain no UI chrome or readable text. `docs/DESIGN.md` still governs the calmer recall and plan surfaces.
+- The marketing page is `components/landing-page.tsx`, with storybook art in `public/landing/`. Readable product copy on that page stays in HTML. Landing headlines live in `lib/site.ts` and match the Landing copy section of `docs/product-strategy.md`.
 
 ## Verification
 
