@@ -13,4 +13,8 @@ linear_issues:
 
 Wire onboarding form to `POST /api/dialogues/generate`, show dialogue + chunks, practice CTA via session focus queue when persistence returns `chunkIds`, client onboarding-complete flag.
 
-Definition of Done: generate flow, error handling, practice CTA, lint/build/test pass.
+Definition of Done
+
+- [x] Generate flow via `lib/api`, error handling, practice CTA (persistence chunkIds)
+- [x] `npm run test`, lint, build pass
+- [ ] Landing/`/today` skip onboarding redirect (defer partial — flag stored; full redirect in KEI-731)
