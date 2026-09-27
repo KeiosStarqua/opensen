@@ -101,7 +101,7 @@ export function HomeScreen() {
       </div>
 
       <section className="relative">
-        <div className="h-[280px] overflow-hidden rounded-[28px] shadow-sm sm:h-[320px]">
+        <div className="h-[220px] overflow-hidden rounded-[28px] shadow-sm sm:h-[280px] xl:h-[340px]">
           <HomeLandscape />
         </div>
         <article className="relative z-10 mt-4 rounded-[24px] bg-white p-4 shadow-[0_12px_30px_rgba(40,80,50,0.08)] lg:absolute lg:right-5 lg:top-1/2 lg:mt-0 lg:w-[340px] lg:-translate-y-1/2">

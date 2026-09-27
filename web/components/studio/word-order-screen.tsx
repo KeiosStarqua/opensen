@@ -8,8 +8,7 @@ import { AppRoutes } from "@/lib/app-routes";
 import { applyHint, openingPlacement, sameOrder, wordsOf } from "@/lib/studio/model";
 
 import { LightbulbIcon, SpeakerIcon } from "./icons";
-import { MascotGlyph } from "./mascot";
-import { CheckInScene } from "./scenes";
+import { AskHelpScene, SenMark } from "./scenes";
 import { speakText } from "./speak";
 import { useStudio } from "./studio-provider";
 import { PracticeHeader, PrimaryButton } from "./ui";
@@ -118,9 +117,7 @@ function Puzzle({
         <div className="grid items-center gap-6 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
             <div className="flex items-center gap-3">
-              <svg viewBox="-70 -70 140 150" className="h-14 w-14 shrink-0" aria-hidden>
-                <MascotGlyph />
-              </svg>
+              <SenMark />
               <button
                 type="button"
                 aria-label="Play the instruction"
@@ -166,10 +163,7 @@ function Puzzle({
             </div>
           </div>
           <div className="relative min-h-[220px] overflow-hidden rounded-[24px]">
-            <CheckInScene />
-            <span className="absolute right-4 top-4 grid h-12 w-12 place-items-center rounded-full bg-white text-2xl font-extrabold text-sen-primary shadow">
-              ?
-            </span>
+            <AskHelpScene />
           </div>
         </div>
         <p role="status" className="mt-4 min-h-5 text-sm font-bold">

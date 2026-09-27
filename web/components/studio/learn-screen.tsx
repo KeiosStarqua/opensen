@@ -6,7 +6,7 @@ import { AppRoutes } from "@/lib/app-routes";
 import { getTopic } from "@/lib/studio/content";
 
 import { PlaneIcon } from "./icons";
-import { AirportScene, HomeLandscape, StepArt } from "./scenes";
+import { StepArt, TopicBanner } from "./scenes";
 import { useStudio } from "./studio-provider";
 import { BackButton, Stars } from "./ui";
 
@@ -16,15 +16,14 @@ export function LearnScreen({ topicId }: { topicId: string }) {
   if (!topic) return null;
 
   const progress = studio.topicProgress[topic.id] ?? { done: 0, total: topic.lesson.steps.length };
-  const Banner = topic.id === "travel" ? AirportScene : HomeLandscape;
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-start gap-3">
         <BackButton href={AppRoutes.home} label="Back to home" />
         <div className="relative min-w-0 flex-1 overflow-hidden rounded-[28px] shadow-sm">
-          <div className="h-[300px]">
-            <Banner />
+          <div className="h-[220px] sm:h-[300px] xl:h-[360px]">
+            <TopicBanner topicId={topic.id} />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-black/10" />
           <div className="absolute left-6 top-6 right-6 flex items-start justify-between gap-4">
