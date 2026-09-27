@@ -16,7 +16,8 @@ import {
   loadDatabaseEnv,
   loadEnv,
 } from '../lib/env.js'
-import { notImplemented } from '../lib/errors.js'
+import { createDialoguesRepository } from '../db/dialogues-repository.js'
+import { resolveUserId } from '../lib/user-context.js'
 
 export type DialoguesRouteDeps = {
   loadEnv?: typeof loadEnv
@@ -44,13 +45,32 @@ export function createDialoguesRouter(deps: DialoguesRouteDeps = {}): Hono {
 
   const router = new Hono()
 
-  router.get('/', (c) => {
-    return c.json({ items: [], nextCursor: null })
+  router.get('/', async (c) => {
+    if (!isDialoguePersistenceAllowed(resolveEnv())) {
+      return c.json({ items: [], nextCursor: null })
+    }
+    const { DATABASE_URL } = resolveLoadDatabaseEnv()
+    const database = resolveGetDatabase()
+    const repository = createDialoguesRepository(database)
+    void DATABASE_URL
+    return c.json(await repository.list())
   })
 
-  router.get('/:id', (c) => {
+  router.get('/:id', async (c) => {
     const { id } = c.req.param()
-    notImplemented(`GET /api/dialogues/${id}`)
+    if (!isDialoguePersistenceAllowed(resolveEnv())) {
+      throw new HTTPException(501, {
+        message: 'Dialogue persistence is disabled',
+      })
+    }
+    resolveLoadDatabaseEnv()
+    const database = resolveGetDatabase()
+    const repository = createDialoguesRepository(database)
+    const detail = await repository.getById(id)
+    if (!detail) {
+      throw new HTTPException(404, { message: 'Dialogue not found' })
+    }
+    return c.json(detail)
   })
 
   router.post('/generate', async (c) => {
@@ -80,6 +100,17 @@ export function createDialoguesRouter(deps: DialoguesRouteDeps = {}): Hono {
       const database = resolveGetDatabase()
       const writer = resolveCreateWriter(database, DATABASE_URL)
       persistence = await writer.persist(result.pack, result.traces)
+      try {
+        const userId = resolveUserId(c)
+        const { enrollChunksForLearner } = await import(
+          '../db/enroll-chunks.js'
+        )
+        await enrollChunksForLearner(database, userId, persistence.chunkIds)
+      } catch (error) {
+        if (!(error instanceof HTTPException)) {
+          throw error
+        }
+      }
     }
 
     return c.json(

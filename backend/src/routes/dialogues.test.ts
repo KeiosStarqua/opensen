@@ -16,6 +16,28 @@ const baseEnv = {
   DIALOGUE_PERSISTENCE_MODE: 'disabled' as const,
 }
 
+describe('GET /', () => {
+  it('returns empty list when persistence is disabled', async () => {
+    const app = createDialoguesRouter({
+      loadEnv: () => ({ ...baseEnv, DIALOGUE_PERSISTENCE_MODE: 'disabled' }),
+    })
+    const response = await app.request('/')
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ items: [], nextCursor: null })
+  })
+
+})
+
+describe('GET /:id', () => {
+  it('returns 501 when persistence is disabled', async () => {
+    const app = createDialoguesRouter({
+      loadEnv: () => ({ ...baseEnv, DIALOGUE_PERSISTENCE_MODE: 'disabled' }),
+    })
+    const response = await app.request('/dia-1')
+    expect(response.status).toBe(501)
+  })
+})
+
 describe('POST /generate', () => {
   it('returns generated data without persistence when mode is disabled', async () => {
     const generatePack = vi.fn(async () => ({
