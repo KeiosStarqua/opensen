@@ -12,7 +12,14 @@ describe('GET /api/chunks', () => {
       loadDatabaseEnv: () => ({
         DATABASE_URL: 'postgresql://user:pass@localhost:5432/opensen_test',
       }),
-      createRepository: () => ({ list, getById: vi.fn(), getPatternsForChunk: vi.fn(), create: vi.fn(), update: vi.fn() }),
+      createRepository: () => ({
+        list,
+        getById: vi.fn(),
+        getPatternsForChunk: vi.fn(),
+        getPatternById: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+      }),
     })
 
     const response = await app.request('/')
@@ -35,6 +42,7 @@ describe('GET /api/chunks/:id', () => {
         list: vi.fn(),
         getById: vi.fn(async () => null),
         getPatternsForChunk: vi.fn(),
+        getPatternById: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
       }),
