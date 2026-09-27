@@ -10,6 +10,7 @@ import {
 } from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
 import { isCorrect, similarity } from "@/lib/practice/answer-matcher";
+import { consumePracticeFocusQueue } from "@/lib/practice/focus-queue";
 import { buildPracticeItem } from "@/lib/practice/practice-item";
 import type { DuePracticeItem, ReviewRating } from "@/lib/practice/types";
 
@@ -28,8 +29,16 @@ export function PracticeSession() {
     typeof window !== "undefined" &&
     typeof window.speechSynthesis !== "undefined";
 
-  const [phase, setPhase] = useState<Phase>("loading");
-  const [queue, setQueue] = useState<DuePracticeItem[]>([]);
+  const [initialFocusQueue] = useState(() => consumePracticeFocusQueue());
+  const hasInitialFocus =
+    initialFocusQueue !== null && initialFocusQueue.length > 0;
+
+  const [phase, setPhase] = useState<Phase>(() =>
+    hasInitialFocus ? "prompt" : "loading",
+  );
+  const [queue, setQueue] = useState<DuePracticeItem[]>(
+    () => initialFocusQueue ?? [],
+  );
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [matchScore, setMatchScore] = useState<number | null>(null);
@@ -63,6 +72,9 @@ export function PracticeSession() {
   }, [client]);
 
   useEffect(() => {
+    if (hasInitialFocus) {
+      return;
+    }
     let active = true;
     void (async () => {
       const result = await practiceApi.getPracticeDue(client, { limit: 20 });
@@ -83,7 +95,7 @@ export function PracticeSession() {
     return () => {
       active = false;
     };
-  }, [client]);
+  }, [client, hasInitialFocus]);
 
   useEffect(() => {
     if (phase !== "prompt" || !currentItem?.spokenText || !canSpeak) return;
