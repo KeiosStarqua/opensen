@@ -25,6 +25,7 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 - AI calls go through `src/ai/` only — never hardcode a vendor HTTP client in a route
 - Runtime database access: lazy `getDatabase()` in `src/db/client.ts` — Neon hosts use `drizzle-orm/neon-http`; local `postgresql://` URLs use postgres.js. Routes that do not persist data must not require `DATABASE_URL` at startup.
 - Migrations: checked-in SQL under `drizzle/`; apply with `npm run db:migrate` using `MIGRATION_DATABASE_URL` or `DATABASE_URL`
+- Neon project policy lives in `neon.ts` (`@neon/config`). Preview with `neon config plan`, apply with `neon config apply`. `neon link` writes connection strings to `.env.local` (gitignored); never commit them.
 
 ## Work Guidance
 
