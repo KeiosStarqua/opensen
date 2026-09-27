@@ -1,3 +1,5 @@
+import { BrandMark } from "@/components/brand-mark";
+
 type IconProps = { className?: string };
 
 function Stroke({ className, children }: IconProps & { children: React.ReactNode }) {
@@ -18,16 +20,7 @@ function Stroke({ className, children }: IconProps & { children: React.ReactNode
 }
 
 export function LogoMark({ className }: IconProps) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden>
-      <circle cx="16" cy="16" r="16" fill="#1f9d52" />
-      <path
-        d="M16.2 6.2c1.6 4.4 6.3 6.6 6.3 11.2a6.5 6.5 0 1 1-13 0c0-4.6 4.7-6.8 6.7-11.2z"
-        fill="white"
-      />
-      <path d="M16 12.5v8" stroke="#1f9d52" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
+  return <BrandMark className={className} />;
 }
 
 export function HomeIcon({ className }: IconProps) {

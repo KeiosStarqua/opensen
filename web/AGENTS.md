@@ -39,6 +39,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Learner API calls still send `X-User-Id` from the local learner id in `lib/api/` until the backend verifies the Neon session.
 - Study illustrations live in `public/studio/` and are mapped by `components/studio/scenes.tsx`. Sen is the cream round character with the green leaf beret, glossy black eyes, and rosy cheeks. New scenes stay in that pastel storybook style and contain no UI chrome or readable text. `docs/DESIGN.md` still governs the calmer recall and plan surfaces.
 - The marketing page is `components/landing-page.tsx`, with storybook art in `public/landing/`. Readable product copy on that page stays in HTML. Landing headlines live in `lib/site.ts` and match the Landing copy section of `docs/product-strategy.md`.
+- The brand mark is `public/brand/logo.png` (transparent square crop of the lotus). Render it through `components/brand-mark.tsx` (`BrandMark`, and `LogoMark` in the study shell). Favicon and Apple touch icon are `app/icon.png` and `app/apple-icon.png`.
 
 ## Verification
 

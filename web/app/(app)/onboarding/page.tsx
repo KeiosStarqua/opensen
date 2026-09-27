@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { BrandMark } from "@/components/brand-mark";
 import { OnboardingForm } from "@/components/onboarding-form";
 import { siteConfig } from "@/lib/site";
 
@@ -20,7 +21,8 @@ export default function OnboardingPage() {
           >
             ← Back to home
           </Link>
-          <p className="text-sm font-semibold text-slate-900">
+          <p className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <BrandMark className="h-6 w-6" />
             {siteConfig.name}
           </p>
         </div>

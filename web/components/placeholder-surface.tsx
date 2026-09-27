@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { BrandMark } from "@/components/brand-mark";
+
 type PlaceholderSurfaceProps = {
   title: string;
   description?: string;
@@ -25,7 +27,10 @@ export function PlaceholderSurface({
           >
             ← {backLabel}
           </Link>
-          <p className="text-sm font-semibold text-slate-900">OpenSen</p>
+          <p className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <BrandMark className="h-6 w-6" />
+            OpenSen
+          </p>
         </div>
       </header>
 

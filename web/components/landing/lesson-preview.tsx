@@ -1,5 +1,7 @@
 "use client";
 
+import { BrandMark } from "@/components/brand-mark";
+
 export function LessonPreview() {
   function speakLine() {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
@@ -15,7 +17,10 @@ export function LessonPreview() {
         <div className="overflow-hidden rounded-[20px] bg-white sm:rounded-[24px]">
           <div className="flex min-h-[210px] sm:min-h-[250px]">
             <aside className="flex w-[68px] shrink-0 flex-col gap-1 bg-[#f4faf6] px-1.5 py-3 sm:w-[78px] sm:px-2">
-              <p className="px-1 text-[10px] font-extrabold text-[#173028]">OpenSen</p>
+              <p className="flex items-center gap-1 px-1 text-[10px] font-extrabold text-[#173028]">
+                <BrandMark className="h-3.5 w-3.5 shrink-0" />
+                OpenSen
+              </p>
               <SideLink label="Home" />
               <SideLink label="Learn" active />
               <SideLink label="Practice" />

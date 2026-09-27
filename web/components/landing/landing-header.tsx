@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { BrandMark } from "@/components/brand-mark";
 import { siteConfig } from "@/lib/site";
 
 const links = [
@@ -21,7 +22,7 @@ export function LandingHeader() {
     <header className="sticky top-0 z-40 border-b border-[#e4eee6]/80 bg-[#f6f3ea]/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3.5 lg:px-8">
         <a href="#top" className="flex items-center gap-2.5">
-          <LeafMark className="h-8 w-8" />
+          <BrandMark className="h-8 w-8" />
           <span className="text-lg font-extrabold tracking-tight text-[#173028]">
             {siteConfig.name}
           </span>
@@ -115,19 +116,6 @@ export function LandingHeader() {
         </nav>
       ) : null}
     </header>
-  );
-}
-
-function LeafMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden>
-      <circle cx="16" cy="16" r="16" fill="#1c8f4e" />
-      <path
-        d="M16.2 7.2c3.6 3.8 5.6 7.2 5.6 11.1a5.8 5.8 0 0 1-11.6 0c0-3.9 2-7.3 6-11.1Z"
-        fill="#f3fbf4"
-      />
-      <path d="M16.2 11.2v9.2" stroke="#1c8f4e" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
   );
 }
 

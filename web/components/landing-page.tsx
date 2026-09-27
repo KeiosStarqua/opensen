@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { BrandMark } from "@/components/brand-mark";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { LessonPreview } from "@/components/landing/lesson-preview";
 import { PatternCard } from "@/components/landing/pattern-card";
@@ -290,9 +291,7 @@ export function LandingPage() {
       <footer className="border-t border-[#e4eee6]">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-8 sm:flex-row sm:items-center sm:justify-between lg:px-8">
           <div className="flex items-center gap-2.5">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#1c8f4e] text-sm text-white" aria-hidden>
-              S
-            </span>
+            <BrandMark className="h-8 w-8" />
             <div>
               <p className="font-extrabold">{siteConfig.name}</p>
               <p className="text-sm text-[#6a7b72]">{heroCopy.coreMessage}</p>

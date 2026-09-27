@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { BrandMark } from "@/components/brand-mark";
+
 export function AuthFrame({
   title,
   children,
@@ -12,7 +14,11 @@ export function AuthFrame({
 }) {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-[#f8f6f2] p-4 text-slate-900">
-      <Link href="/" className="text-lg font-semibold tracking-tight text-emerald-800">
+      <Link
+        href="/"
+        className="flex items-center gap-2 text-lg font-semibold tracking-tight text-emerald-800"
+      >
+        <BrandMark className="h-8 w-8" />
         OpenSen
       </Link>
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm">
