@@ -23,3 +23,10 @@ export function resolveUserId(c: Context): string {
 
   return parsed.data
 }
+
+export function optionalUserId(c: Context): string | null {
+  const raw = c.req.header(USER_ID_HEADER)?.trim()
+  if (!raw) return null
+  const parsed = userIdSchema.safeParse(raw)
+  return parsed.success ? parsed.data : null
+}
