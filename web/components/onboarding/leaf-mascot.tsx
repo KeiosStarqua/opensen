@@ -54,7 +54,7 @@ function LeafHat() {
   );
 }
 
-function Body({ pose }: { pose: LeafMascotPose }) {
+function Body() {
   return (
     <g>
       {/* head */}
@@ -157,7 +157,7 @@ export function LeafMascot({
   return (
     <svg viewBox="0 0 44 48" className={className} aria-hidden>
       <Arms pose={pose} />
-      <Body pose={pose} />
+      <Body />
       <LeafHat />
     </svg>
   );
