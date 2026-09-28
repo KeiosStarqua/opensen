@@ -170,7 +170,9 @@ export function OnboardingExperience() {
       </header>
 
       <main className="relative mx-auto max-w-3xl px-5 pb-16 sm:px-8">
-        {step !== "result" ? <StepProgress current={stepIndex} total={2} /> : null}
+        {step !== "result" ? (
+          <StepProgress current={stepIndex} total={2} labels={["Situation", "Practice"]} />
+        ) : null}
 
         {step === "goal" ? (
           <GoalStep
@@ -208,31 +210,49 @@ export function OnboardingExperience() {
   );
 }
 
-function StepProgress({ current, total }: { current: number; total: number }) {
+function StepProgress({
+  current,
+  total,
+  labels,
+}: {
+  current: number;
+  total: number;
+  labels: string[];
+}) {
   return (
-    <div className="mb-6 flex items-center gap-2" aria-hidden>
-      {Array.from({ length: total }, (_, index) => {
-        const stepNumber = index + 1;
-        const state =
-          stepNumber < current ? "done" : stepNumber === current ? "active" : "upcoming";
-        return (
-          <div
-            key={stepNumber}
-            className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-              state === "upcoming" ? "bg-sen-line" : "bg-sen-primary"
-            }`}
-          />
-        );
-      })}
+    <div className="mb-8">
+      <div className="flex items-center gap-2" role="progressbar" aria-valuenow={current} aria-valuemin={1} aria-valuemax={total}>
+        {Array.from({ length: total }, (_, index) => {
+          const stepNumber = index + 1;
+          const state =
+            stepNumber < current ? "done" : stepNumber === current ? "active" : "upcoming";
+          return (
+            <div
+              key={stepNumber}
+              className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
+                state === "upcoming" ? "bg-sen-line" : "bg-sen-primary"
+              }`}
+            />
+          );
+        })}
+      </div>
+      <div className="mt-2 flex items-center justify-between">
+        {labels.map((label, index) => {
+          const stepNumber = index + 1;
+          const isActive = stepNumber === current;
+          return (
+            <p
+              key={label}
+              className={`text-[11px] font-extrabold tracking-[0.14em] ${
+                isActive ? "text-sen-primary" : "text-sen-muted/70"
+              }`}
+            >
+              {stepNumber}. {label.toUpperCase()}
+            </p>
+          );
+        })}
+      </div>
     </div>
-  );
-}
-
-function StepLabel({ index, total }: { index: number; total: number }) {
-  return (
-    <p className="text-[11px] font-extrabold tracking-[0.18em] text-sen-primary">
-      STEP {index} OF {total}
-    </p>
   );
 }
 
@@ -248,8 +268,7 @@ function GoalStep({
   return (
     <div className="animate-[fade-in_0.35s_ease-out]">
       <div className="flex flex-col items-center text-center">
-        <LeafMascot pose="wave" className="h-24 w-24 sm:h-28 sm:w-28" />
-        <StepLabel index={1} total={2} />
+        <LeafMascot pose="wave" className="h-20 w-20 sm:h-24 sm:w-24" />
         <h1 className="mt-3 max-w-xl text-3xl font-extrabold leading-[1.12] tracking-tight sm:text-4xl">
           What do you want to speak English for?
         </h1>
@@ -348,117 +367,85 @@ function SituationStep({
 }) {
   const GoalIcon = goalIcons[goal.id];
   return (
-    <div className="grid animate-[fade-in_0.35s_ease-out] items-start gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(260px,0.9fr)] lg:gap-8">
-      <div>
-        <button
-          type="button"
-          onClick={onBack}
-          className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-sen-muted hover:text-sen-ink"
-        >
-          <ArrowLeftIcon size={14} />
-          Change goal
-        </button>
+    <div className="mx-auto max-w-xl animate-[fade-in_0.35s_ease-out]">
+      <button
+        type="button"
+        onClick={onBack}
+        className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-sen-muted hover:text-sen-ink"
+      >
+        <ArrowLeftIcon size={14} />
+        Change goal
+      </button>
 
-        <div className="rounded-[28px] bg-white p-5 shadow-[0_16px_40px_rgba(23,48,40,0.06)] sm:p-6">
-          <span className="inline-flex items-center gap-2 rounded-full bg-sen-soft px-3 py-1 text-xs font-extrabold text-sen-primary-dark">
-            <GoalIcon size={14} weight="fill" />
-            {goal.label}
-          </span>
-          <StepLabel index={2} total={2} />
-          <h2 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
-            What conversation do you need soon?
-          </h2>
-          <p className="mt-2 text-sm text-sen-muted">
-            Example: &quot;{goal.example}&quot;
+      <div className="rounded-[28px] bg-white p-5 shadow-[0_16px_40px_rgba(23,48,40,0.06)] sm:p-6">
+        <span className="inline-flex items-center gap-2 rounded-full bg-sen-soft px-3 py-1 text-xs font-extrabold text-sen-primary-dark">
+          <GoalIcon size={14} weight="fill" />
+          {goal.label}
+        </span>
+        <h2 className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
+          What conversation do you need soon?
+        </h2>
+        <p className="mt-2 text-sm text-sen-muted">
+          Tell OpenSen what you&apos;ll actually need to say. Example: &quot;{goal.example}&quot;
+        </p>
+
+        <form onSubmit={onSubmit}>
+          <label className="mt-4 block">
+            <span className="sr-only">Describe your upcoming conversation</span>
+            <textarea
+              rows={5}
+              maxLength={SITUATION_MAX_LENGTH}
+              value={situation}
+              onChange={(event) => onSituationChange(event.target.value)}
+              placeholder={goal.example}
+              autoFocus
+              className="w-full resize-none rounded-2xl border border-sen-line bg-[#fbfcfb] px-4 py-3 text-sm leading-6 text-sen-ink placeholder:text-sen-muted/70 focus:border-sen-primary focus:outline-none focus:ring-2 focus:ring-sen-soft"
+            />
+          </label>
+          <p
+            className={`text-right text-xs font-bold ${
+              situation.length > SITUATION_MAX_LENGTH - 40
+                ? "text-[#c47b12]"
+                : "text-sen-muted/80"
+            }`}
+          >
+            {situation.length}/{SITUATION_MAX_LENGTH}
           </p>
 
-          <form onSubmit={onSubmit}>
-            <label className="mt-4 block">
-              <span className="sr-only">Describe your upcoming conversation</span>
-              <textarea
-                rows={4}
-                maxLength={SITUATION_MAX_LENGTH}
-                value={situation}
-                onChange={(event) => onSituationChange(event.target.value)}
-                placeholder={goal.example}
-                autoFocus
-                className="w-full resize-none rounded-2xl border border-sen-line bg-[#fbfcfb] px-4 py-3 text-sm leading-6 text-sen-ink placeholder:text-sen-muted/70 focus:border-sen-primary focus:outline-none focus:ring-2 focus:ring-sen-soft"
-              />
-            </label>
-            <p
-              className={`text-right text-xs font-bold ${
-                situation.length > SITUATION_MAX_LENGTH - 40
-                  ? "text-[#c47b12]"
-                  : "text-sen-muted/80"
-              }`}
-            >
-              {situation.length}/{SITUATION_MAX_LENGTH}
-            </p>
+          <p className="mt-1 rounded-xl bg-sen-soft/60 px-3 py-2 text-xs leading-5 text-sen-muted">
+            💡 Example: &quot;{goal.example}&quot;
+          </p>
 
-            {error ? (
-              <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-800">
-                {error}{" "}
-                <button
-                  type="button"
-                  className="font-extrabold underline"
-                  onClick={onDismissError}
-                >
-                  Dismiss
-                </button>
-              </p>
-            ) : null}
-
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          {error ? (
+            <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-800">
+              {error}{" "}
               <button
-                type="submit"
-                disabled={!canGenerate}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-sen-primary px-5 py-3 text-sm font-extrabold text-white hover:bg-sen-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sen-primary disabled:cursor-not-allowed disabled:bg-[#c5d5cb]"
+                type="button"
+                className="font-extrabold underline"
+                onClick={onDismissError}
               >
-                {loading ? "Generating…" : "Generate my practice set"}
-                {loading ? null : <ArrowRightIcon size={16} weight="bold" />}
+                Dismiss
               </button>
-              <Link
-                href={AppRoutes.situations}
-                className="text-sm font-extrabold text-sen-primary underline decoration-sen-primary/40 underline-offset-4 hover:decoration-sen-primary"
-              >
-                Browse situations instead
-              </Link>
-            </div>
-          </form>
-        </div>
-      </div>
+            </p>
+          ) : null}
 
-      <ScenePanel goal={goal} className="hidden lg:block" />
-      <ScenePanel goal={goal} className="lg:hidden" />
-    </div>
-  );
-}
-
-function ScenePanel({ goal, className }: { goal: OnboardingGoal; className?: string }) {
-  return (
-    <div className={className}>
-      <div className="relative h-56 overflow-hidden rounded-[28px] lg:h-[420px]">
-        <img
-          src={goal.scene}
-          alt={goal.sceneAlt}
-          className="h-full w-full object-cover object-[center_78%]"
-        />
-        <div className="absolute left-3 top-3 max-w-[230px] rounded-2xl rounded-bl-md bg-white/95 px-3 py-2.5 shadow-[0_10px_24px_rgba(23,48,40,0.12)]">
-          <p className="flex items-start gap-2 text-sm font-extrabold leading-snug text-sen-ink">
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
             <button
-              type="button"
-              onClick={() => speak(goal.prompt)}
-              aria-label={`Play: ${goal.prompt}`}
-              className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sen-soft text-sen-primary hover:bg-[#d4f0de]"
+              type="submit"
+              disabled={!canGenerate}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-sen-primary px-5 py-3 text-sm font-extrabold text-white hover:bg-sen-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sen-primary disabled:cursor-not-allowed disabled:bg-[#c5d5cb]"
             >
-              <SpeakerHighIcon size={14} weight="fill" />
+              {loading ? "Generating…" : "Generate my practice set"}
+              {loading ? null : <ArrowRightIcon size={16} weight="bold" />}
             </button>
-            <span>{goal.prompt}</span>
-          </p>
-          <p className="mt-1.5 text-[11px] leading-snug text-sen-muted">
-            <span className="font-extrabold text-sen-primary">Nghĩa là:</span> {goal.meaning}
-          </p>
-        </div>
+            <Link
+              href={AppRoutes.situations}
+              className="text-sm font-extrabold text-sen-primary underline decoration-sen-primary/40 underline-offset-4 hover:decoration-sen-primary"
+            >
+              Browse situations instead
+            </Link>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -491,11 +478,33 @@ function ResultStep({
 
   return (
     <div ref={ref} className="scroll-mt-6 animate-[fade-in_0.35s_ease-out]">
-      <div className="flex flex-col items-center text-center">
-        <LeafMascot pose="cheer" className="h-24 w-24 sm:h-28 sm:w-28" />
-        <p className="mt-2 text-[11px] font-extrabold tracking-[0.16em] text-sen-primary">
-          READY · YOUR PRACTICE SET
-        </p>
+      <div className="relative h-48 overflow-hidden rounded-[28px] sm:h-64">
+        <img
+          src={goal.scene}
+          alt={goal.sceneAlt}
+          className="h-full w-full object-cover object-[center_78%]"
+        />
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent p-4 sm:p-5">
+          <p className="text-[11px] font-extrabold tracking-[0.16em] text-white/90">
+            READY · YOUR PRACTICE SET
+          </p>
+        </div>
+        <div className="absolute left-3 top-3 max-w-[230px] rounded-2xl rounded-bl-md bg-white/95 px-3 py-2.5 shadow-[0_10px_24px_rgba(23,48,40,0.12)]">
+          <p className="flex items-start gap-2 text-sm font-extrabold leading-snug text-sen-ink">
+            <button
+              type="button"
+              onClick={() => speak(goal.prompt)}
+              aria-label={`Play: ${goal.prompt}`}
+              className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sen-soft text-sen-primary hover:bg-[#d4f0de]"
+            >
+              <SpeakerHighIcon size={14} weight="fill" />
+            </button>
+            <span>{goal.prompt}</span>
+          </p>
+          <p className="mt-1.5 text-[11px] leading-snug text-sen-muted">
+            <span className="font-extrabold text-sen-primary">Nghĩa là:</span> {goal.meaning}
+          </p>
+        </div>
       </div>
 
       <section className="mt-4 rounded-[28px] bg-sen-soft p-5 sm:p-6">
