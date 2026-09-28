@@ -20,6 +20,7 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 - Production host: `https://api.opensen.taquangkhoi.com/`
 - Keep `typescript` pinned to the 6.x line until Vercel's Node builder supports TypeScript 7's native compiler API.
 - Route prefixes match product surfaces: `/api/situations`, `/api/chunks`, `/api/dialogues`, `/api/practice`, `/api/export`
+- Interactive API docs: `GET /docs` renders a [Scalar](https://github.com/scalar/scalar) reference from `GET /openapi.json`. The spec is a hand-authored OpenAPI 3.1 module in `src/openapi.ts` mirroring the route Zod schemas; docs stay an edge concern (wired in `src/index.ts`), so route handlers carry no doc plumbing. When a route's request/response contract changes, update `src/openapi.ts` in the same change. The `servers[0]` base URL is derived from the request host at runtime.
 - Prefer Web Standards APIs (Request/Response); avoid Node-only APIs that break Vercel Functions unless required
 - List/detail stubs may return empty collections or `501` until persistence lands; `POST /api/dialogues/generate` is live via the AI layer and can persist when `DIALOGUE_PERSISTENCE_MODE` is `internal` or `ephemeral`
 - Practice review routes (`GET /api/practice/due`, `POST /api/practice/reviews`, `GET /api/practice/plan`) require `DATABASE_URL` and an `X-User-Id` header until authenticated ownership ships

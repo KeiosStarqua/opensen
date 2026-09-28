@@ -1,8 +1,10 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
+import { Scalar } from '@scalar/hono-api-reference'
 import { loadEnv } from './lib/env.js'
 import { errorHandler } from './lib/errors.js'
+import { buildOpenApiDocument } from './openapi.js'
 import { chunks } from './routes/chunks.js'
 import { dialogues } from './routes/dialogues.js'
 import { exportRoutes } from './routes/export.js'
@@ -35,7 +37,8 @@ app.onError(errorHandler)
 app.get('/', (c) => {
   return c.json({
     name: 'OpenSen API',
-    docs: '/docs (repository)',
+    docs: '/docs',
+    openapi: '/openapi.json',
     health: '/health',
     api: {
       situations: '/api/situations',
@@ -46,6 +49,20 @@ app.get('/', (c) => {
     },
   })
 })
+
+app.get('/openapi.json', (c) => {
+  const url = new URL(c.req.url)
+  const baseUrl = `${url.protocol}//${url.host}`
+  return c.json(buildOpenApiDocument(baseUrl))
+})
+
+app.get(
+  '/docs',
+  Scalar({
+    url: '/openapi.json',
+    pageTitle: 'OpenSen API Reference',
+  }),
+)
 
 app.route('/', health)
 app.route('/api/situations', situations)

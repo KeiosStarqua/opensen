@@ -20,7 +20,7 @@ the JavaScript compiler API, which the native TypeScript 7 package does not prov
 npm run dev
 ```
 
-Open `http://localhost:3000` — root returns the API index; `GET /health` is the liveness check (not a database readiness probe).
+Open `http://localhost:3000` — root returns the API index; `GET /health` is the liveness check (not a database readiness probe). Interactive API docs live at `GET /docs` (Scalar UI), backed by the OpenAPI 3.1 spec at `GET /openapi.json`.
 
 ## Scripts
 
@@ -120,6 +120,8 @@ curl -s http://localhost:3000/api/dialogues/generate \
 
 | Prefix | Feature |
 |--------|---------|
+| `/docs` | Interactive API reference (Scalar) |
+| `/openapi.json` | OpenAPI 3.1 spec |
 | `/health` | Liveness |
 | `/api/situations` | Situation Coverage (stub) |
 | `/api/chunks` | Chunk Library (stub) |

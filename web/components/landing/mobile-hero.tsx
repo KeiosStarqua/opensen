@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { MobileSpotlight } from "@/components/landing/mobile-spotlight";
 import { heroCopy, siteConfig } from "@/lib/site";
+import { usePrimaryCta } from "@/lib/use-primary-cta";
 import { topics } from "@/lib/studio/content";
 
 const trusts = [
@@ -36,6 +37,7 @@ const slides = [
 ] as const;
 
 export function MobileHero() {
+  const cta = usePrimaryCta("Start learning free");
   const situations = topics.length;
   const sentences = topics.reduce(
     (count, topic) =>
@@ -92,13 +94,13 @@ export function MobileHero() {
 
           <div className="mt-3 flex items-center gap-2">
             <Link
-              href={siteConfig.trialHref}
+              href={cta.href}
               className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#178a45] py-2 pl-1.5 pr-3.5 text-[13px] font-extrabold text-white shadow-[0_8px_18px_rgba(23,138,69,0.28)] hover:bg-[#12753a]"
             >
               <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20" aria-hidden>
                 <PlayIcon className="ml-0.5 h-3.5 w-3.5" />
               </span>
-              <span className="whitespace-nowrap">Start learning free</span>
+              <span className="whitespace-nowrap">{cta.label}</span>
             </Link>
             <a
               href="#spotlight"

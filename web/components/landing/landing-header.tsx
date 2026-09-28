@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { BrandMark } from "@/components/brand-mark";
 import { siteConfig } from "@/lib/site";
+import { usePrimaryCta } from "@/lib/use-primary-cta";
 
 const links = [
   { href: "#top", label: "Home" },
@@ -17,6 +18,7 @@ const links = [
 export function LandingHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const cta = usePrimaryCta("Get started");
 
   return (
     <header className="sticky top-0 z-40 border-b border-[#e4eee6]/80 bg-[#f6f3ea]/90 backdrop-blur-md">
@@ -73,10 +75,10 @@ export function LandingHeader() {
           </div>
 
           <Link
-            href={siteConfig.trialHref}
+            href={cta.href}
             className="inline-flex items-center rounded-full bg-[#178a45] px-3 py-1.5 text-xs font-extrabold text-white hover:bg-[#12753a] sm:px-4 sm:py-2 sm:text-sm"
           >
-            Get started
+            {cta.label}
             <span aria-hidden className="ml-1.5">
               →
             </span>

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import { BrandMark } from "@/components/brand-mark";
@@ -6,6 +8,7 @@ import { LessonPreview } from "@/components/landing/lesson-preview";
 import { MobileHero } from "@/components/landing/mobile-hero";
 import { PatternCard } from "@/components/landing/pattern-card";
 import { heroCopy, siteConfig } from "@/lib/site";
+import { usePrimaryCta } from "@/lib/use-primary-cta";
 
 const trusts = [
   { label: "Fun & engaging", icon: "spark" },
@@ -23,6 +26,10 @@ const benefits = [
 ] as const;
 
 export function LandingPage() {
+  const heroCta = usePrimaryCta("Start learning free");
+  const kidsCta = usePrimaryCta("Explore the worlds");
+  const pricingCta = usePrimaryCta("Start learning free");
+
   return (
     <div id="top" className="scroll-smooth bg-[#f6f3ea] text-[#173028]">
       <LandingHeader />
@@ -45,10 +52,10 @@ export function LandingPage() {
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link
-                href={siteConfig.trialHref}
+                href={heroCta.href}
                 className="inline-flex items-center justify-center rounded-full bg-[#178a45] px-5 py-3 text-sm font-extrabold text-white hover:bg-[#12753a]"
               >
-                Start learning free
+                {heroCta.label}
                 <span aria-hidden className="ml-2">
                   →
                 </span>
@@ -196,10 +203,10 @@ export function LandingPage() {
                 </p>
               </div>
               <Link
-                href={siteConfig.trialHref}
+                href={kidsCta.href}
                 className="mt-5 inline-flex items-center rounded-full bg-[#178a45] px-5 py-3 text-sm font-extrabold text-white hover:bg-[#12753a]"
               >
-                Explore the worlds
+                {kidsCta.label}
                 <span aria-hidden className="ml-2">
                   →
                 </span>
@@ -277,10 +284,10 @@ export function LandingPage() {
                 <li>Speaking practice on the web</li>
               </ul>
               <Link
-                href={siteConfig.trialHref}
+                href={pricingCta.href}
                 className="mt-6 inline-flex items-center rounded-full bg-[#178a45] px-5 py-3 text-sm font-extrabold text-white hover:bg-[#12753a]"
               >
-                Start learning free
+                {pricingCta.label}
                 <span aria-hidden className="ml-2">
                   →
                 </span>

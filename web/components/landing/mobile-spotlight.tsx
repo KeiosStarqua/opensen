@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 
-import { siteConfig } from "@/lib/site";
+import { usePrimaryCta } from "@/lib/use-primary-cta";
 
 export type SpotlightSlide = {
   image: string;
@@ -13,6 +13,7 @@ export type SpotlightSlide = {
 };
 
 export function MobileSpotlight({ slides }: { slides: SpotlightSlide[] }) {
+  const cta = usePrimaryCta();
   const scroller = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
 
@@ -55,7 +56,7 @@ export function MobileSpotlight({ slides }: { slides: SpotlightSlide[] }) {
         {slides.map((slide) => (
           <a
             key={slide.title}
-            href={siteConfig.trialHref}
+            href={cta.href}
             className="flex w-[calc(100%-0.25rem)] shrink-0 snap-center items-center gap-3 rounded-[24px] bg-white p-2.5 shadow-[0_10px_28px_rgba(23,48,40,0.08)]"
           >
             <div className="relative h-[92px] w-[118px] shrink-0 overflow-hidden rounded-[18px] bg-[#fff6ea]">
