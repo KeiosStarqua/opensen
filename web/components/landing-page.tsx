@@ -73,7 +73,7 @@ export function LandingPage() {
 
           <div className="relative lg:pb-6">
             <img
-              src="/landing/landing-hero-world.png"
+              src="/landing/landing-hero-world.jpg"
               alt="Sen reading on a rock beside a lake, with a village, castle, and airplane beyond"
               className="w-full"
             />
@@ -101,7 +101,7 @@ export function LandingPage() {
 
           <div className="mx-auto mt-10 grid max-w-6xl gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <FeatureCard
-              image="/landing/landing-card-airport.png"
+              image="/landing/landing-card-airport.jpg"
               imageAlt="Sen with a backpack waving in front of an airplane"
               title="Real-life situations"
               detail="Learn from everyday contexts like travel, food, school, and more."
@@ -109,7 +109,7 @@ export function LandingPage() {
             <article className="flex h-full flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_10px_30px_rgba(23,48,40,0.05)]">
               <div className="relative aspect-[4/3] bg-[#fffaf3]">
                 <img
-                  src="/landing/landing-card-talk.png"
+                  src="/landing/landing-card-talk.jpg"
                   alt="A girl talking with Sen"
                   className="h-full w-full object-cover object-[center_30%]"
                 />
@@ -128,7 +128,7 @@ export function LandingPage() {
             <article className="flex h-full flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_10px_30px_rgba(23,48,40,0.05)]">
               <div className="relative aspect-[4/3]">
                 <img
-                  src="/landing/landing-card-world.png"
+                  src="/landing/landing-card-world.jpg"
                   alt="A path through green hills leading to a castle by a lake"
                   className="h-full w-full object-cover"
                 />
@@ -148,7 +148,7 @@ export function LandingPage() {
             <article className="flex h-full flex-col overflow-hidden rounded-[28px] bg-[#f7f8f2] shadow-[0_10px_30px_rgba(23,48,40,0.05)]">
               <div className="relative aspect-[4/3]">
                 <img
-                  src="/landing/landing-sen-headphones.png"
+                  src="/landing/landing-sen-headphones.jpg"
                   alt="Sen wearing headphones"
                   className="h-full w-full object-contain object-bottom"
                 />
@@ -183,7 +183,7 @@ export function LandingPage() {
               </p>
               <div className="relative mt-6">
                 <img
-                  src="/landing/landing-journey-boat.png"
+                  src="/landing/landing-journey-boat.jpg"
                   alt="Sen rowing a wooden boat across a lake toward a castle"
                   className="w-full"
                 />
@@ -241,7 +241,7 @@ export function LandingPage() {
                 </p>
                 <div className="mt-4 flex items-center gap-3">
                   <img
-                    src="/landing/landing-parent-avatar.png"
+                    src="/landing/landing-parent-avatar.jpg"
                     alt=""
                     className="h-11 w-11 rounded-full object-cover"
                   />

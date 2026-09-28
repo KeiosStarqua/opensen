@@ -38,7 +38,7 @@ export function LessonPreview() {
                 <div className="h-full w-1/4 rounded-full bg-[#1c8f4e]" />
               </div>
               <img
-                src="/landing/landing-airport-screen.png"
+                src="/landing/landing-airport-screen.jpg"
                 alt="Sen waving on the grass in front of an airplane and airport terminal"
                 className="mt-2 h-full min-h-[140px] w-full flex-1 object-cover object-[center_60%] sm:min-h-[170px]"
               />
@@ -54,7 +54,7 @@ export function LessonPreview() {
             <span>2 / 8</span>
           </div>
           <img
-            src="/landing/sen-bust.png"
+            src="/landing/sen-bust.jpg"
             alt=""
             className="mx-auto mt-1 h-14 w-14 rounded-full object-cover object-[center_20%]"
           />

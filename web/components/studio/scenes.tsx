@@ -7,7 +7,7 @@ function SceneImage({ src, className }: { src: string; className?: string }) {
 export function HomeLandscape() {
   return (
     <SceneImage
-      src="/studio/home-hero.png"
+      src="/studio/home-hero.jpg"
       className="h-full w-full object-cover object-[center_58%]"
     />
   );
@@ -16,32 +16,32 @@ export function HomeLandscape() {
 export function AirportScene() {
   return (
     <SceneImage
-      src="/studio/airport-hero.png"
+      src="/studio/airport-hero.jpg"
       className="h-full w-full object-cover object-[center_52%]"
     />
   );
 }
 
 export function CheckInScene({ className }: { className?: string }) {
-  return <SceneImage src="/studio/check-in.png" className={className ?? "h-full w-full object-cover"} />;
+  return <SceneImage src="/studio/check-in.jpg" className={className ?? "h-full w-full object-cover"} />;
 }
 
 export function AskHelpScene({ className }: { className?: string }) {
-  return <SceneImage src="/studio/ask-help.png" className={className ?? "h-full w-full object-cover"} />;
+  return <SceneImage src="/studio/ask-help.jpg" className={className ?? "h-full w-full object-cover"} />;
 }
 
 const stepArt: Record<StudioStep["art"], string> = {
-  counter: "/studio/check-in.png",
-  help: "/studio/ask-help.png",
-  bag: "/studio/step-baggage.png",
-  security: "/studio/step-security.png",
-  gate: "/studio/step-boarding.png",
-  table: "/studio/step-table.png",
-  menu: "/studio/step-menu.png",
-  pay: "/studio/step-pay.png",
-  shop: "/studio/step-shop.png",
-  town: "/studio/step-town.png",
-  class: "/studio/step-class.png",
+  counter: "/studio/check-in.jpg",
+  help: "/studio/ask-help.jpg",
+  bag: "/studio/step-baggage.jpg",
+  security: "/studio/step-security.jpg",
+  gate: "/studio/step-boarding.jpg",
+  table: "/studio/step-table.jpg",
+  menu: "/studio/step-menu.jpg",
+  pay: "/studio/step-pay.jpg",
+  shop: "/studio/step-shop.jpg",
+  town: "/studio/step-town.jpg",
+  class: "/studio/step-class.jpg",
 };
 
 export function StepArt({ art }: { art: StudioStep["art"] }) {
@@ -49,17 +49,17 @@ export function StepArt({ art }: { art: StudioStep["art"] }) {
 }
 
 const topicBanner: Record<string, string> = {
-  travel: "/studio/airport-hero.png",
-  restaurant: "/studio/step-table.png",
-  shopping: "/studio/step-shop.png",
-  daily: "/studio/step-town.png",
-  school: "/studio/step-class.png",
+  travel: "/studio/airport-hero.jpg",
+  restaurant: "/studio/step-table.jpg",
+  shopping: "/studio/step-shop.jpg",
+  daily: "/studio/step-town.jpg",
+  school: "/studio/step-class.jpg",
 };
 
 export function TopicBanner({ topicId }: { topicId: string }) {
   return (
     <SceneImage
-      src={topicBanner[topicId] ?? "/studio/home-hero.png"}
+      src={topicBanner[topicId] ?? "/studio/home-hero.jpg"}
       className="h-full w-full object-cover object-[center_55%]"
     />
   );
@@ -67,18 +67,18 @@ export function TopicBanner({ topicId }: { topicId: string }) {
 
 export function CelebrateScene() {
   return (
-    <img src="/studio/celebrate.png" alt="" className="mx-auto h-44 w-44 rounded-[28px] object-cover" />
+    <img src="/studio/celebrate.jpg" alt="" className="mx-auto h-44 w-44 rounded-[28px] object-cover" />
   );
 }
 
 export function SpeakScene() {
-  return <img src="/studio/speak.png" alt="" className="mx-auto h-40 w-40 rounded-[28px] object-cover" />;
+  return <img src="/studio/speak.jpg" alt="" className="mx-auto h-40 w-40 rounded-[28px] object-cover" />;
 }
 
 export function SenMark({ className }: { className?: string }) {
   return (
     <img
-      src="/studio/sen-bust.png"
+      src="/studio/sen-bust.jpg"
       alt=""
       className={className ?? "h-14 w-14 shrink-0 rounded-full object-cover object-[center_30%]"}
     />
