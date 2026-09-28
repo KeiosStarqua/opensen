@@ -14,6 +14,7 @@ import {
   SpeakerHighIcon,
   type Icon,
 } from "@phosphor-icons/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -268,7 +269,14 @@ function GoalStep({
   return (
     <div className="animate-[fade-in_0.35s_ease-out]">
       <div className="flex flex-col items-center text-center">
-        <LeafMascot pose="wave" className="h-20 w-20 sm:h-24 sm:w-24" />
+        <Image
+          src="/onboarding/onboarding-mascot-wave.png"
+          alt="Sen waving hello"
+          width={96}
+          height={96}
+          priority
+          className="h-20 w-20 sm:h-24 sm:w-24"
+        />
         <h1 className="mt-3 max-w-xl text-3xl font-extrabold leading-[1.12] tracking-tight sm:text-4xl">
           What do you want to speak English for?
         </h1>
