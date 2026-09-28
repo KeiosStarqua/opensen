@@ -13,21 +13,21 @@ const trusts = [
 
 const slides = [
   {
-    image: "/landing/landing-cafe-chat.png",
+    image: "/landing/landing-cafe-chat.jpg",
     alt: "Sen ordering a coffee from a barista",
     line: "Can I have a coffee, please?",
     title: "Learn with real conversations",
     detail: "See how OpenSen turns daily situations into fun learning experiences.",
   },
   {
-    image: "/landing/landing-card-airport.png",
+    image: "/landing/landing-card-airport.jpg",
     alt: "Sen with a backpack in front of an airplane",
     line: "May I see your passport?",
     title: "Sentences for real places",
     detail: "Travel, food, school, and the lines you actually need to say.",
   },
   {
-    image: "/landing/landing-card-world.png",
+    image: "/landing/landing-card-world.jpg",
     alt: "A path through green hills toward a castle",
     line: "One step at a time",
     title: "A path that feels like play",
@@ -53,7 +53,7 @@ export function MobileHero() {
     <div className="relative overflow-hidden lg:hidden">
       <section className="relative">
         <img
-          src="/landing/landing-hero-mobile-bg.png"
+          src="/landing/landing-hero-mobile-bg.jpg"
           alt=""
           className="absolute inset-0 h-full w-full object-cover object-[center_28%]"
         />

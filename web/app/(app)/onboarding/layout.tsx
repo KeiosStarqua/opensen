@@ -12,7 +12,7 @@ export default function OnboardingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`${nunito.variable} font-studio min-h-full bg-[#f6f4ee] text-[#173028]`}>
+    <div className={`${nunito.variable} font-studio min-h-full bg-sen-cream text-sen-ink`}>
       {children}
     </div>
   );

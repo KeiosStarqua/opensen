@@ -127,6 +127,13 @@ UI icons on every frontend (`web/`, `mobile/`) come from [Phosphor Icons](https:
 - Brand mark, mascot, and storybook illustrations stay custom art. They are not UI icons.
 - Package, import, and weight rules for each stack live in [`web/AGENTS.md`](web/AGENTS.md) and [`mobile/AGENTS.md`](mobile/AGENTS.md).
 
+### Image generation
+
+Any generated raster asset (mascot art, onboarding scenes, landing/studio illustrations, etc.) must use **gpt-image-2 or higher** (including gpt-image-2 thinking mode). Do not use DALL-E 2, DALL-E 3, gpt-image-1, or gpt-image-1-mini for new or regenerated product art.
+
+- Use gpt-image-2 thinking mode for text-heavy or layout-sensitive compositions (infographics, diagrams).
+- Match the existing Sen mascot style when regenerating character art: soft cream-yellow bean body, green leaf beret, black dot eyes, pink blush cheeks, warm pastel watercolor illustration.
+
 ## Child DOX Index
 
 | Path | Scope |

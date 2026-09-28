@@ -23,7 +23,7 @@ export const onboardingGoals = [
   {
     id: "travel",
     label: "Travel",
-    scene: "/onboarding/onboarding-travel.png",
+    scene: "/onboarding/onboarding-travel.jpg",
     sceneAlt: "Sen holding a map in an airport terminal, with a plane outside the window",
     prompt: "May I see your passport?",
     meaning: "Tôi có thể xem hộ chiếu của bạn không?",
@@ -44,7 +44,7 @@ export const onboardingGoals = [
   {
     id: "work",
     label: "Work",
-    scene: "/onboarding/onboarding-work.png",
+    scene: "/onboarding/onboarding-work.jpg",
     sceneAlt: "Sen holding a notebook in a bright office lobby",
     prompt: "Nice to meet you. I'm on the design team.",
     meaning: "Rất vui được gặp bạn. Tôi thuộc nhóm thiết kế.",
@@ -65,7 +65,7 @@ export const onboardingGoals = [
   {
     id: "study",
     label: "Study abroad",
-    scene: "/onboarding/onboarding-study.png",
+    scene: "/onboarding/onboarding-study.jpg",
     sceneAlt: "Sen with a book on a leafy campus path",
     prompt: "I'm particularly interested in this course.",
     meaning: "Tôi đặc biệt quan tâm đến khóa học này.",
@@ -84,7 +84,7 @@ export const onboardingGoals = [
   {
     id: "daily",
     label: "Daily conversations",
-    scene: "/onboarding/onboarding-daily.png",
+    scene: "/onboarding/onboarding-daily.jpg",
     sceneAlt: "Sen waving at a sunny cafe counter",
     prompt: "I'd like a latte, please.",
     meaning: "Cho tôi một ly latte.",
@@ -100,7 +100,7 @@ export const onboardingGoals = [
   {
     id: "social",
     label: "Dating and social life",
-    scene: "/onboarding/onboarding-social.png",
+    scene: "/onboarding/onboarding-social.jpg",
     sceneAlt: "Sen at a small outdoor cafe table with two cups",
     prompt: "Are you free this weekend?",
     meaning: "Cuối tuần này bạn có rảnh không?",
@@ -116,7 +116,7 @@ export const onboardingGoals = [
   {
     id: "custom",
     label: "Custom situation",
-    scene: "/onboarding/onboarding-custom.png",
+    scene: "/onboarding/onboarding-custom.jpg",
     sceneAlt: "Sen reading a blank notebook in a garden",
     prompt: "Here's the situation I need.",
     meaning: "Đây là tình huống tôi cần.",
