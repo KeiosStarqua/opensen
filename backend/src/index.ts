@@ -17,20 +17,22 @@ const env = loadEnv()
 const app = new Hono()
 
 app.use('*', logger())
-app.use(
-  '/api/*',
-  cors({
-    origin: env.CORS_ORIGINS,
-    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-User-Id',
-      'sentry-trace',
-      'baggage',
-    ],
-  }),
-)
+// Browser clients (web app, Flutter web preview) call both the API and the
+// health probes, so CORS covers `/health*` as well as `/api/*`.
+const corsMiddleware = cors({
+  origin: env.CORS_ORIGINS,
+  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-User-Id',
+    'sentry-trace',
+    'baggage',
+  ],
+})
+app.use('/api/*', corsMiddleware)
+app.use('/health', corsMiddleware)
+app.use('/health/*', corsMiddleware)
 
 app.onError(errorHandler)
 
