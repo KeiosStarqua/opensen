@@ -18,12 +18,13 @@ Full product docs: [`docs/`](docs/).
 
 ## Mobile app
 
-The Flutter app lives in [`mobile/`](mobile/). v1 works fully offline: bundled situations, local SQLite, FSRS scheduling and system text-to-speech.
+The Flutter app lives in [`mobile/`](mobile/). v1 works fully offline: bundled situations, local SQLite, FSRS scheduling and system text-to-speech. It talks to the API at `https://api.opensen.taquangkhoi.com/` (override with `--dart-define=OPENSEN_API_URL=...`) only to show server status in Settings.
 
 ```bash
 cd mobile
 flutter pub get
 flutter run          # Android / iOS / macOS; Windows & Linux need a system SQLite library
+flutter run -d chrome  # UI preview in the browser (SQLite WASM, no speech)
 flutter analyze
 flutter test
 ```
