@@ -133,6 +133,8 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
+          const SectionHeader('Server'),
+          const _ServerStatusTile(),
           const SectionHeader('Data'),
           ListTile(
             leading: Icon(Icons.restart_alt, color: theme.colorScheme.error),
@@ -153,8 +155,9 @@ class SettingsScreen extends ConsumerWidget {
           const ListTile(
             title: Text('OpenSen'),
             subtitle: Text(
-              'Situation → Sentence → Slot → Speak. Fully offline: your '
-              'content and progress never leave this device.',
+              'Situation → Sentence → Slot → Speak. Works fully offline: your '
+              'content and progress stay on this device. The app only checks '
+              'whether the OpenSen server is online.',
             ),
           ),
         ],
@@ -175,5 +178,46 @@ class SettingsScreen extends ConsumerWidget {
     invalidateChunkViews(ref);
     ref.invalidate(enrolledChunkIdsProvider);
     if (context.mounted) showSnack(context, 'Progress reset');
+  }
+}
+
+/// Base URL plus the latest health probe; tap to check again.
+class _ServerStatusTile extends ConsumerWidget {
+  const _ServerStatusTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final baseUrl = ref.watch(serverRepositoryProvider).baseUrl;
+    final status = ref.watch(serverStatusProvider);
+    final theme = Theme.of(context);
+    final String label;
+    final Color? color;
+    switch (status) {
+      case AsyncData(:final value) when value.healthy:
+        label = 'Online';
+        color = theme.colorScheme.primary;
+      case AsyncData(:final value):
+        label = value.reachable
+            ? 'Online, content unavailable · ${value.problem ?? ''}'
+            : 'Offline · ${value.problem ?? ''}';
+        color = theme.colorScheme.error;
+      case AsyncError(:final error):
+        label = 'Check failed · $error';
+        color = theme.colorScheme.error;
+      default:
+        label = 'Checking…';
+        color = null;
+    }
+    return ListTile(
+      title: const Text('OpenSen API'),
+      subtitle: Text('$baseUrl\n$label', style: TextStyle(color: color)),
+      isThreeLine: true,
+      trailing: TextButton(
+        onPressed: status.isLoading
+            ? null
+            : () => ref.invalidate(serverStatusProvider),
+        child: const Text('Check'),
+      ),
+    );
   }
 }

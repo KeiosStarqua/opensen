@@ -32,6 +32,8 @@ dependencies:
   # Hands the Anki export file to other apps.
   share_plus: ^11.0.0
   uuid: ^4.5.1
+  # JSON transport to the OpenSen API (`lib/data/remote/`).
+  http: 1.6.0
 
 dev_dependencies:
   flutter_test:

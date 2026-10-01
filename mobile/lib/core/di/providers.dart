@@ -1,12 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
+import '../../data/remote/api_client.dart';
+import '../../data/remote/http_server_repository.dart';
 import '../../data/repositories/sqlite_content_repository.dart';
 import '../../data/repositories/sqlite_practice_repository.dart';
 import '../../data/repositories/sqlite_settings_repository.dart';
 import '../../domain/entities/learner_settings.dart';
 import '../../domain/repositories/content_repository.dart';
+import '../../domain/entities/server_status.dart';
 import '../../domain/repositories/practice_repository.dart';
+import '../../domain/repositories/server_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../../domain/services/clock.dart';
 import '../../domain/services/fsrs/fsrs_parameters.dart';
@@ -17,6 +21,7 @@ import '../../domain/usecases/create_custom_chunk.dart';
 import '../../domain/usecases/export_anki.dart';
 import '../../domain/usecases/record_review.dart';
 import '../../domain/usecases/start_practice_session.dart';
+import '../config/api_config.dart';
 import '../platform/export_sink.dart';
 import '../platform/speech_synthesizer.dart';
 import '../util/uuid_id_generator.dart';
@@ -66,6 +71,23 @@ final speechSynthesizerProvider = Provider<SpeechSynthesizer>((ref) {
 });
 
 final exportSinkProvider = Provider<ExportSink>((ref) => const ShareExportSink());
+
+// ------------------------------------------------------------------- server
+
+final apiClientProvider = Provider<OpenSenApiClient>((ref) {
+  final client = OpenSenApiClient(baseUri: Uri.parse(openSenApiUrl));
+  ref.onDispose(client.close);
+  return client;
+});
+
+final serverRepositoryProvider = Provider<ServerRepository>(
+  (ref) => HttpServerRepository(ref.watch(apiClientProvider)),
+);
+
+/// Re-run with `ref.invalidate(serverStatusProvider)`.
+final serverStatusProvider = FutureProvider<ServerStatus>(
+  (ref) => ref.watch(serverRepositoryProvider).checkStatus(),
+);
 
 // ------------------------------------------------------------------- settings
 

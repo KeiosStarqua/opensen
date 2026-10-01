@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:opensen/domain/entities/learner_settings.dart';
+import 'package:opensen/domain/entities/server_status.dart';
 import 'package:opensen/features/shell/app_shell.dart';
 
 import '../helpers/fakes.dart';
@@ -137,5 +138,32 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Continue'), findsOneWidget);
     expect(find.textContaining('You said:'), findsOneWidget);
+  });
+
+  testWidgets('settings shows the server status and re-checks on tap',
+      (tester) async {
+    final harness = TestHarness();
+    harness.server.status = const ServerStatus(
+      reachable: true,
+      contentAvailable: false,
+      problem: 'Content: 500 Internal Server Error',
+    );
+    await pumpApp(tester, harness);
+
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('OpenSen API'));
+
+    expect(find.textContaining('https://api.test/'), findsOneWidget);
+    expect(find.textContaining('content unavailable'), findsOneWidget);
+    expect(harness.server.checks, 1);
+
+    harness.server.status =
+        const ServerStatus(reachable: true, contentAvailable: true);
+    await tester.tap(find.text('Check'));
+    await tester.pumpAndSettle();
+    expect(harness.server.checks, 2);
+    expect(find.textContaining('Online'), findsOneWidget);
+    expect(find.textContaining('content unavailable'), findsNothing);
   });
 }

@@ -13,9 +13,11 @@ import 'package:opensen/domain/entities/dialogue.dart';
 import 'package:opensen/domain/entities/learner_settings.dart';
 import 'package:opensen/domain/entities/practice.dart';
 import 'package:opensen/domain/entities/sentence_pattern.dart';
+import 'package:opensen/domain/entities/server_status.dart';
 import 'package:opensen/domain/entities/situation.dart';
 import 'package:opensen/domain/repositories/content_repository.dart';
 import 'package:opensen/domain/repositories/practice_repository.dart';
+import 'package:opensen/domain/repositories/server_repository.dart';
 import 'package:opensen/domain/repositories/settings_repository.dart';
 import 'package:opensen/domain/services/clock.dart';
 import 'package:opensen/domain/services/dialogue_composer.dart';
@@ -319,6 +321,25 @@ class RecordingExportSink implements ExportSink {
   }
 }
 
+/// Answers status checks without touching the network.
+class FakeServerRepository implements ServerRepository {
+  FakeServerRepository([
+    this.status = const ServerStatus(reachable: true, contentAvailable: true),
+  ]);
+
+  ServerStatus status;
+  int checks = 0;
+
+  @override
+  String get baseUrl => 'https://api.test/';
+
+  @override
+  Future<ServerStatus> checkStatus() async {
+    checks++;
+    return status;
+  }
+}
+
 /// Wiring for widget tests: seed-backed in-memory repositories, a silent
 /// speech engine, deterministic ids and a fixed clock.
 class TestHarness {
@@ -338,6 +359,7 @@ class TestHarness {
   final FixedClock clock;
   final LearnerSettings initialSettings;
   final RecordingExportSink exportSink = RecordingExportSink();
+  final FakeServerRepository server = FakeServerRepository();
 
   Widget buildApp() => ProviderScope(
         overrides: [
@@ -351,6 +373,7 @@ class TestHarness {
             (ref) => const SilentSpeechSynthesizer(),
           ),
           exportSinkProvider.overrideWith((ref) => exportSink),
+          serverRepositoryProvider.overrideWith((ref) => server),
         ],
         child: const OpenSenApp(),
       );

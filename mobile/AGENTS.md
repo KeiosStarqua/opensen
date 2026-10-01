@@ -18,6 +18,7 @@ Flutter **mobile client** for OpenSen. v1 is **fully offline**: bundled situatio
 - Package name: `opensen`. Match UI and domain naming to [`docs/features.md`](../docs/features.md).
 - **Layers (Clean Architecture, no code generation):**
   - `lib/domain/` — pure Dart. Entities, repository interfaces, services (`fsrs/`, `slot_template`, `dialogue_composer`, `drill_generator`, `drill_session`, `practice_item_factory`, `practice_session`, `answer_matcher`, `anki_deck_formatter`, `situation_matcher`, `clock`, `id_generator`) and use cases. No Flutter, plugin or `sqflite` imports.
+  - `lib/data/remote/` — OpenSen API over `http`: `OpenSenApiClient` (base URL, JSON, `ApiException` kinds `http`/`network`/`parse`) and `HttpServerRepository` (`/health` + `/api/situations` probe behind domain `ServerRepository`). Every backend call goes through `OpenSenApiClient`; base URL is `--dart-define=OPENSEN_API_URL=…`, default `https://api.opensen.taquangkhoi.com/` (`core/config/api_config.dart`). The app stays offline-first: content and progress remain in SQLite, Settings → Server only shows reachability.
   - `lib/data/` — SQLite implementation. Imports `sqflite_common` only (never the `sqflite` plugin) so repositories run on the host with `sqflite_common_ffi`. Schema lives in `db/app_database.dart`; seed parsing/import in `seed/`.
   - `lib/core/` — composition root: `bootstrap.dart` (open DB, import seed, load settings), `db/database_factory.dart` (conditional import: `sqflite`/FFI on native, WASM on web — the only place that picks a factory), `di/providers.dart` (all Riverpod providers and use-case wiring), `routing/`, `theme/`, `platform/` (TTS via `flutter_tts`, share via `share_plus`), `util/` (uuid).
   - `lib/features/<surface>/` — screens and per-feature providers only. Business rules go in `domain`.
@@ -27,7 +28,8 @@ Flutter **mobile client** for OpenSen. v1 is **fully offline**: bundled situatio
 - **Scheduling:** FSRS-5 in `domain/services/fsrs/` (published default weights, learning steps 1m/10m, relearning 10m). Intervals are derived from stability at scheduling time; `user_chunks` stores state, `review_history` is append-only. Do not hand-roll a different scheduler; swap implementations behind `FsrsScheduler`.
 - **Persistence rules:** ids are client-generated UUIDs; timestamps are ISO-8601 UTC strings; template rows are `INSERT OR IGNORE` on re-seed; learner data is deleted explicitly by repositories (no FK cascades). Settings live in the `meta` table under `settings.*`.
 - **Plan membership:** a chunk is in the Practice Plan only when a `user_chunks` row exists (explicit enrolment). Due = `next_review IS NULL OR next_review <= now`.
-- **Platform seams:** `SpeechSynthesizer` and `ExportSink` are the only plugin-facing abstractions; tests override them (`SilentSpeechSynthesizer`, recording sink).
+- **Platform seams:** `SpeechSynthesizer` and `ExportSink` are the only plugin-facing abstractions; tests override them (`SilentSpeechSynthesizer`, recording sink). Network goes through `ServerRepository`; widget tests override it with `FakeServerRepository` and must never hit the real API.
+- **Network permissions:** `android/app/src/main/AndroidManifest.xml` declares `INTERNET`; both macOS entitlements declare `com.apple.security.network.client`.
 
 ## Work Guidance
 

@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Calls the OpenSen API (lib/data/remote/). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="opensen"
         android:name="${applicationName}"
