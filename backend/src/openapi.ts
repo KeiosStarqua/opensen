@@ -114,6 +114,50 @@ export function buildOpenApiDocument(baseUrl?: string) {
           },
         },
       },
+      '/health/db': {
+        get: {
+          tags: ['Meta'],
+          summary: 'Database readiness check',
+          description:
+            'Confirms DATABASE_URL is configured and the database accepts a query. Every /api/* route depends on this; check it first when routes return a generic 500.',
+          responses: {
+            '200': {
+              description: 'Database is reachable.',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      ok: { type: 'boolean' },
+                      service: { type: 'string' },
+                      timestamp: { type: 'string', format: 'date-time' },
+                    },
+                    required: ['ok', 'service', 'timestamp'],
+                  },
+                },
+              },
+            },
+            '503': {
+              description: 'DATABASE_URL is missing/invalid, or the database query failed.',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      ok: { type: 'boolean' },
+                      service: { type: 'string' },
+                      timestamp: { type: 'string', format: 'date-time' },
+                      error: { type: 'string' },
+                      detail: { type: 'string' },
+                    },
+                    required: ['ok', 'service', 'timestamp', 'error'],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       '/api/situations': {
         get: {
           tags: ['Situations'],

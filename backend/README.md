@@ -20,7 +20,7 @@ the JavaScript compiler API, which the native TypeScript 7 package does not prov
 npm run dev
 ```
 
-Open `http://localhost:3000` — root returns the API index; `GET /health` is the liveness check (not a database readiness probe). Interactive API docs live at `GET /docs` (Scalar UI), backed by the OpenAPI 3.1 spec at `GET /openapi.json`.
+Open `http://localhost:3000` — root returns the API index; `GET /health` is the liveness check (not a database readiness probe). `GET /health/db` is the readiness probe — it confirms `DATABASE_URL` is configured and the database accepts a query; check it first when `/api/*` routes return a generic 500. Interactive API docs live at `GET /docs` (Scalar UI), backed by the OpenAPI 3.1 spec at `GET /openapi.json`.
 
 ## Scripts
 

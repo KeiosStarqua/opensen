@@ -42,6 +42,7 @@ app.get('/', (c) => {
     docs: '/docs',
     openapi: '/openapi.json',
     health: '/health',
+    healthDb: '/health/db',
     api: {
       situations: '/api/situations',
       chunks: '/api/chunks',

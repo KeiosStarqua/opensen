@@ -124,7 +124,12 @@ export async function importMobileCatalog(
       }
     }
 
+    const patternById = new Map(bundle.patterns.map((p) => [p.id, p]))
+
     for (const chunk of bundle.chunks) {
+      const pattern = chunk.patternId
+        ? patternById.get(chunk.patternId)
+        : undefined
       await tx
         .insert(chunks)
         .values({
@@ -136,8 +141,8 @@ export async function importMobileCatalog(
           patternId: chunk.patternId
             ? uuidFromSeed('pat', chunk.patternId)
             : null,
-          level: chunk.level,
-          register: chunk.register,
+          level: chunk.level ?? pattern?.level ?? 'B1',
+          register: chunk.register ?? pattern?.register ?? 'neutral',
           ownerId: null,
           visibility: 'public',
           sourceTemplateId: null,

@@ -35,8 +35,9 @@ export type MobileSeedBundle = {
     id: string
     text: string
     meaning: string
-    level: string
-    register: 'casual' | 'neutral' | 'polite' | 'formal'
+    /** Omitted on pattern-derived chunks; inherited from the pattern. */
+    level?: string
+    register?: 'casual' | 'neutral' | 'polite' | 'formal'
     patternId?: string
     situationId?: string
     type?: string
