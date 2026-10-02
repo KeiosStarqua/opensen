@@ -24,13 +24,9 @@ app.use('*', logger())
 const corsMiddleware = cors({
   origin: env.CORS_ORIGINS,
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-User-Id',
-    'sentry-trace',
-    'baggage',
-  ],
+  allowHeaders: ['Content-Type', 'Authorization', 'sentry-trace', 'baggage'],
+  // Chromium caps preflight caching at 2 hours.
+  maxAge: 7200,
 })
 app.use('/api/*', corsMiddleware)
 app.use('/health', corsMiddleware)

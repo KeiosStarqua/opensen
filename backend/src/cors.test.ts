@@ -29,6 +29,29 @@ describe('CORS', () => {
     },
   )
 
+  it('allows the bearer header, drops X-User-Id, and caches preflights', async () => {
+    const res = await app.request('/api/practice/due', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: ORIGIN,
+        'Access-Control-Request-Method': 'GET',
+        'Access-Control-Request-Headers': 'authorization',
+      },
+    })
+    const allowed = res.headers.get('access-control-allow-headers')?.toLowerCase()
+    expect(allowed).toContain('authorization')
+    expect(allowed).not.toContain('x-user-id')
+    expect(res.headers.get('access-control-max-age')).toBe('7200')
+  })
+
+  it('keeps CORS headers on a 401 so the browser can read it', async () => {
+    const res = await app.request('/api/practice/due', {
+      headers: { Origin: ORIGIN },
+    })
+    expect(res.status).toBe(401)
+    expect(res.headers.get('access-control-allow-origin')).toBe(ORIGIN)
+  })
+
   it('sets the allow-origin header on a plain /health GET', async () => {
     const res = await app.request('/health', { headers: { Origin: ORIGIN } })
     expect(res.status).toBe(200)
