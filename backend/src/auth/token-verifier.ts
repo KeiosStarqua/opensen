@@ -31,13 +31,14 @@ const subjectSchema = z.string().uuid()
 
 /**
  * Verifies Neon Auth (Managed Better Auth) session JWTs: EdDSA signatures from
- * `<baseUrl>/.well-known/jwks.json`, with `iss` and `aud` equal to the auth URL origin.
+ * `<baseUrl>/.well-known/jwks.json`, with `iss` and `aud` bound to this auth instance.
  */
 export function createNeonAuthVerifier(
   options: NeonAuthVerifierOptions,
 ): TokenVerifier {
   const baseUrl = options.baseUrl.replace(/\/$/, '')
-  const origin = new URL(baseUrl).origin
+  // Neon documents the origin as `iss`, but live tokens carry the full auth URL.
+  const instance = [baseUrl, new URL(baseUrl).origin]
   const keySet =
     options.keySet ??
     createRemoteJWKSet(new URL(`${baseUrl}/.well-known/jwks.json`))
@@ -46,8 +47,8 @@ export function createNeonAuthVerifier(
     let subject: unknown
     try {
       const { payload } = await jwtVerify(token, keySet, {
-        issuer: origin,
-        audience: origin,
+        issuer: instance,
+        audience: instance,
         algorithms: ['EdDSA'],
       })
       subject = payload.sub

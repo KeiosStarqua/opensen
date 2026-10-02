@@ -49,6 +49,21 @@ describe('createNeonAuthVerifier', () => {
     await expect(verify(await sign())).resolves.toEqual({ userId: USER_ID })
   })
 
+  it('accepts the full auth URL as issuer, as live Neon Auth tokens use', async () => {
+    const token = await sign({ iss: BASE_URL })
+    await expect(verify(token)).resolves.toEqual({ userId: USER_ID })
+  })
+
+  it('rejects Neon Auth anonymous tokens', async () => {
+    const token = await sign({ sub: 'anonymous', iss: BASE_URL })
+    await expect(verify(token)).rejects.toBeInstanceOf(InvalidTokenError)
+  })
+
+  it('rejects an issuer on the same host but another path', async () => {
+    const token = await sign({ iss: `${ORIGIN}/otherdb/auth` })
+    await expect(verify(token)).rejects.toBeInstanceOf(InvalidTokenError)
+  })
+
   it('rejects an expired token', async () => {
     const expired = await sign({ exp: Math.floor(Date.now() / 1000) - 60 })
     await expect(verify(expired)).rejects.toBeInstanceOf(InvalidTokenError)
