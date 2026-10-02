@@ -1,6 +1,6 @@
 import { captureOperationalError } from "@/lib/observability/operational-error";
 
-import { getOrCreateLearnerId } from "./learner-id";
+import { getSessionToken } from "./session-token";
 import type { ApiResult, BackendErrorBody } from "./types";
 import { ApiError } from "./types";
 
@@ -11,7 +11,8 @@ export type ApiErrorReportContext = {
 export type ApiClientDeps = {
   fetch: typeof fetch;
   baseUrl: string;
-  getUserId: () => string;
+  /** Bearer token for the signed-in learner; null sends the request anonymously. */
+  getAccessToken: () => Promise<string | null>;
   /**
    * Called for operational failures only (network, parse, HTTP >= 500).
    * `createDefaultApiClient` reports these to Sentry. HTTP 4xx is not reported.
@@ -47,26 +48,17 @@ export function resolveApiBaseUrl(): string {
     : LOCAL_API_URL;
 }
 
-export function createBrowserStorage(): Storage {
-  if (typeof window === "undefined") {
-    throw new Error("Browser storage is only available in the client");
-  }
-  return window.localStorage;
-}
-
 export function createDefaultApiClient(
   overrides: Partial<ApiClientDeps> = {},
 ): ApiClient {
   const baseUrl = overrides.baseUrl ?? resolveApiBaseUrl();
   const fetchFn = overrides.fetch ?? fetch;
-  const getUserId =
-    overrides.getUserId ??
-    (() => getOrCreateLearnerId(createBrowserStorage()));
+  const getAccessToken = overrides.getAccessToken ?? getSessionToken;
 
   return createApiClient({
     fetch: fetchFn,
     baseUrl,
-    getUserId,
+    getAccessToken,
     reportError: (error, context) => {
       captureOperationalError(error, {
         surface: "api",
@@ -88,7 +80,10 @@ export function createApiClient(deps: ApiClientDeps) {
   ): Promise<ApiResult<T>> {
     const url = `${deps.baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
     const headers = new Headers(init.headers);
-    headers.set("X-User-Id", deps.getUserId());
+    const token = await deps.getAccessToken();
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
     if (init.body !== undefined && init.body !== null && !headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
     }

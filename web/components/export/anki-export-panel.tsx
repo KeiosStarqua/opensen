@@ -5,12 +5,11 @@ import { useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
 import {
-  createBrowserStorage,
   formatApiErrorMessage,
   isOperationalApiError,
   resolveApiBaseUrl,
 } from "@/lib/api/client";
-import { getOrCreateLearnerId } from "@/lib/api/learner-id";
+import { getSessionToken } from "@/lib/api/session-token";
 import { ApiError } from "@/lib/api/types";
 import { captureOperationalError } from "@/lib/observability/operational-error";
 
@@ -35,11 +34,11 @@ export function AnkiExportPanel() {
     setLoading(true);
     setMessage(null);
     const baseUrl = resolveApiBaseUrl();
-    const userId = getOrCreateLearnerId(createBrowserStorage());
     let response: Response;
     try {
+      const token = await getSessionToken();
       response = await fetch(`${baseUrl}/api/export/anki?scope=${scope}`, {
-        headers: { "X-User-Id": userId },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
     } catch {
       const error = new ApiError("network", "Network request failed");

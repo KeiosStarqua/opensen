@@ -16,21 +16,22 @@ vi.mock("@/lib/observability/operational-error", () => ({
   captureOperationalError: vi.fn(),
 }));
 
-const USER_ID = "11111111-1111-4111-8111-111111111111";
+const TOKEN = "header.payload.signature";
 
 describe("createApiClient", () => {
-  it("attaches X-User-Id on GET", async () => {
+  it("attaches the session bearer token on GET", async () => {
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       expect(init?.headers).toBeInstanceOf(Headers);
       const headers = init?.headers as Headers;
-      expect(headers.get("X-User-Id")).toBe(USER_ID);
+      expect(headers.get("Authorization")).toBe(`Bearer ${TOKEN}`);
+      expect(headers.has("X-User-Id")).toBe(false);
       return new Response(JSON.stringify({ ok: true }), { status: 200 });
     });
 
     const client = createApiClient({
       fetch: fetchMock as typeof fetch,
       baseUrl: "http://api.test",
-      getUserId: () => USER_ID,
+      getAccessToken: async () => TOKEN,
     });
 
     const result = await client.request<{ ok: boolean }>("/api/practice/due");
@@ -38,6 +39,23 @@ describe("createApiClient", () => {
     if (result.ok) {
       expect(result.data.ok).toBe(true);
     }
+  });
+
+  it("sends no Authorization header when signed out", async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      expect((init?.headers as Headers).has("Authorization")).toBe(false);
+      return new Response(JSON.stringify({ items: [] }), { status: 200 });
+    });
+
+    const client = createApiClient({
+      fetch: fetchMock as typeof fetch,
+      baseUrl: "http://api.test",
+      getAccessToken: async () => null,
+    });
+
+    const result = await client.request("/api/situations");
+    expect(result.ok).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("parses 501 HTTP errors", async () => {
@@ -54,7 +72,7 @@ describe("createApiClient", () => {
     const client = createApiClient({
       fetch: fetchMock as typeof fetch,
       baseUrl: "http://api.test",
-      getUserId: () => USER_ID,
+      getAccessToken: async () => TOKEN,
     });
 
     const result = await client.request("/api/situations/x");
@@ -78,7 +96,7 @@ describe("createApiClient", () => {
       const client = createApiClient({
         fetch: fetchMock as typeof fetch,
         baseUrl: "http://api.test",
-        getUserId: () => USER_ID,
+        getAccessToken: async () => TOKEN,
       });
       const result = await client.request("/api/chunks/x");
       expect(result.ok).toBe(false);
@@ -95,7 +113,7 @@ describe("createApiClient", () => {
     const client = createApiClient({
       fetch: fetchMock as typeof fetch,
       baseUrl: "http://api.test",
-      getUserId: () => USER_ID,
+      getAccessToken: async () => TOKEN,
     });
     const result = await client.request("/api/practice/due");
     expect(result.ok).toBe(false);
@@ -117,7 +135,7 @@ describe("operational error reporting", () => {
     return createApiClient({
       fetch: fetchMock,
       baseUrl: "http://api.test",
-      getUserId: () => USER_ID,
+      getAccessToken: async () => TOKEN,
       reportError,
     });
   }
@@ -167,7 +185,7 @@ describe("operational error reporting", () => {
         throw new TypeError("Failed to fetch");
       },
       baseUrl: "http://api.test",
-      getUserId: () => USER_ID,
+      getAccessToken: async () => TOKEN,
     });
     const result = await client.request("/api/practice/due");
     expect(result.ok).toBe(false);
@@ -188,7 +206,7 @@ describe("operational error reporting", () => {
           status: 400,
         }),
       baseUrl: "http://api.test",
-      getUserId: () => USER_ID,
+      getAccessToken: async () => TOKEN,
     });
     await client.request("/api/chunks/x");
     expect(captureOperationalError).not.toHaveBeenCalled();
