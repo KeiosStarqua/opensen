@@ -8,7 +8,7 @@ import {
   type PracticeReviewRepository,
 } from '../db/practice-review-repository.js'
 import { loadDatabaseEnv } from '../lib/env.js'
-import { resolveUserId } from '../lib/user-context.js'
+import { requireUserId } from '../auth/session.js'
 import { dueQuerySchema, reviewRequestSchema } from '../practice/schemas.js'
 
 export type PracticeRouteDeps = {
@@ -33,7 +33,7 @@ export function createPracticeRouter(deps: PracticeRouteDeps = {}): Hono {
   const router = new Hono()
 
   router.get('/due', async (c) => {
-    const userId = resolveUserId(c)
+    const userId = requireUserId(c)
     const parsed = dueQuerySchema.safeParse({
       limit: c.req.query('limit'),
       cursor: c.req.query('cursor'),
@@ -60,7 +60,7 @@ export function createPracticeRouter(deps: PracticeRouteDeps = {}): Hono {
   })
 
   router.post('/reviews', async (c) => {
-    const userId = resolveUserId(c)
+    const userId = requireUserId(c)
 
     let body: unknown
     try {
@@ -99,7 +99,7 @@ export function createPracticeRouter(deps: PracticeRouteDeps = {}): Hono {
   })
 
   router.get('/plan', async (c) => {
-    const userId = resolveUserId(c)
+    const userId = requireUserId(c)
     const { DATABASE_URL } = resolveLoadDatabaseEnv()
     const database = resolveGetDatabase()
     const repository = resolveCreateRepository(database, DATABASE_URL)

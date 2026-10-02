@@ -2,6 +2,8 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { Scalar } from '@scalar/hono-api-reference'
+import { authenticate } from './auth/session.js'
+import { createNeonAuthVerifier } from './auth/token-verifier.js'
 import { loadEnv } from './lib/env.js'
 import { errorHandler } from './lib/errors.js'
 import { buildOpenApiDocument } from './openapi.js'
@@ -33,6 +35,15 @@ const corsMiddleware = cors({
 app.use('/api/*', corsMiddleware)
 app.use('/health', corsMiddleware)
 app.use('/health/*', corsMiddleware)
+
+app.use(
+  '/api/*',
+  authenticate(
+    env.NEON_AUTH_BASE_URL
+      ? createNeonAuthVerifier({ baseUrl: env.NEON_AUTH_BASE_URL })
+      : null,
+  ),
+)
 
 app.onError(errorHandler)
 

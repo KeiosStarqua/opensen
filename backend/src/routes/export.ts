@@ -5,7 +5,7 @@ import { getDatabase } from '../db/client.js'
 import { listAnkiNotes } from '../db/export-repository.js'
 import { formatAnkiDeck } from '../export/anki-deck-formatter.js'
 import { loadDatabaseEnv } from '../lib/env.js'
-import { resolveUserId } from '../lib/user-context.js'
+import { requireUserId } from '../auth/session.js'
 
 export const exportRoutes = new Hono()
 
@@ -14,7 +14,7 @@ const querySchema = z.object({
 })
 
 exportRoutes.get('/anki', async (c) => {
-  const userId = resolveUserId(c)
+  const userId = requireUserId(c)
   const parsed = querySchema.safeParse({ scope: c.req.query('scope') })
   if (!parsed.success) {
     throw new HTTPException(400, { message: 'Invalid scope query' })

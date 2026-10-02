@@ -43,6 +43,11 @@ const envSchema = z.object({
   DIALOGUE_PERSISTENCE_MODE: z
     .enum(['disabled', 'internal', 'ephemeral'])
     .default('disabled'),
+  NEON_AUTH_BASE_URL: z
+    .string()
+    .optional()
+    .transform((value) => (value?.trim() ? value.trim() : undefined))
+    .pipe(z.string().url().optional()),
 })
 
 const databaseEnvSchema = z.object({

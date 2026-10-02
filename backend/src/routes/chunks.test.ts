@@ -53,7 +53,7 @@ describe('GET /api/chunks/:id', () => {
 })
 
 describe('POST /api/chunks', () => {
-  it('requires X-User-Id', async () => {
+  it('requires a signed-in learner', async () => {
     const app = createChunksRouter({
       loadDatabaseEnv: () => ({
         DATABASE_URL: 'postgresql://user:pass@localhost:5432/opensen_test',

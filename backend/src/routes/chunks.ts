@@ -8,7 +8,7 @@ import {
   type ChunksRepository,
 } from '../db/chunks-repository.js'
 import { loadDatabaseEnv } from '../lib/env.js'
-import { optionalUserId, resolveUserId } from '../lib/user-context.js'
+import { optionalUserId, requireUserId } from '../auth/session.js'
 
 const listQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),
@@ -132,7 +132,7 @@ export function createChunksRouter(deps: ChunksRouteDeps = {}): Hono {
   })
 
   router.post('/', async (c) => {
-    const userId = resolveUserId(c)
+    const userId = requireUserId(c)
 
     let body: unknown
     try {
@@ -176,7 +176,7 @@ export function createChunksRouter(deps: ChunksRouteDeps = {}): Hono {
     resolveLoadDatabaseEnv()
     const database = resolveGetDatabase()
     const repository = resolveCreateRepository(database)
-    const userId = resolveUserId(c)
+    const userId = requireUserId(c)
     const updated = await repository.update(userId, id, parsed.data)
     if (!updated) {
       throw new HTTPException(404, { message: 'Chunk not found or not editable' })
