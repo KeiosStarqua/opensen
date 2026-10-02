@@ -37,7 +37,7 @@ OpenSen's Practice Plan needs a backend that schedules chunk reviews with FSRS (
 
 Routes mount at `/api/practice` (`backend/src/index.ts:48`). The router defines `GET /due`, `POST /reviews`, and `GET /plan` (`backend/src/routes/practice.ts:35-109`). Each handler resolves the learner id, validates input with Zod, wires `getDatabase()` and `createPracticeReviewRepository()`, and delegates all business logic to the repository — routes never call `ts-fsrs` or write SQL directly.
 
-Until authenticated ownership ships, every practice route requires an `X-User-Id` header (case-insensitive `x-user-id` per Hono). `resolveUserId` reads that header, returns 401 when missing, and 400 when the value is not a UUID (`backend/src/lib/user-context.ts:8-24`). Practice routes invoke it at the start of each handler (`backend/src/routes/practice.ts:36, 63, 102`).
+Every practice route requires a signed-in learner. The `/api/*` `authenticate` middleware verifies `Authorization: Bearer <Neon Auth JWT>` and stores the JWT `sub` as the learner id (`backend/src/auth/session.ts`). Practice handlers call `requireUserId(c)` first, which returns 401 for anonymous requests (`backend/src/routes/practice.ts`).
 
 Persistence schema (`backend/src/db/schema/practice.ts`):
 
@@ -129,9 +129,9 @@ API accepts only `forgot`, `hard`, `good`, `easy` (`backend/src/practice/types.t
 
 `ratingToInteger` stores the numeric `Grade` in `review_history.rating` (`backend/src/practice/fsrs-scheduler.ts:111-113`). Integration test expects `good` → rating `3` (`backend/src/db/practice-review-repository.postgres.integration.test.ts:71`).
 
-### 6. `X-User-Id` until auth ships
+### 6. Learner identity from the verified session
 
-All three practice handlers call `resolveUserId(c)` before repository work. Route tests pass `x-user-id` and assert 401 without it (`backend/src/routes/practice.test.ts:54-56, 138-143`). Document the header in API contracts and `backend/AGENTS.md` until session/JWT ownership replaces it.
+All three practice handlers call `requireUserId(c)` before repository work. Route tests wrap the router with `signedInAs(router, userId)` (`backend/src/auth/test-support.ts`) and assert 401 for an unwrapped, anonymous request (`backend/src/routes/practice.test.ts`).
 
 ### 7. Testing strategy
 
@@ -160,7 +160,6 @@ Run integration suite with `npm run test:db` against a disposable Postgres with 
 
 - Adding practice endpoints (e.g. bulk due, review preview, FSRS parameter tuning): extend `PracticeReviewRepository`, keep routes thin.
 - Changing how "due" is defined (e.g. timezone boundaries, max daily reviews): adjust `listDueItems` / `fetchPlanStats` predicates and document client expectations — do not scatter due logic in routes.
-- Introducing real auth: replace `resolveUserId` header parsing with session/user middleware; repository methods already take `userId` as an explicit argument.
 - Linking reviews to recall attempts: pass `practiceAttemptId` through `POST /reviews` (optional in schema `backend/src/practice/schemas.ts:7`) into `review_history` (`backend/src/db/schema/practice.ts:82-85`).
 - Swapping FSRS libraries: reimplement `toFsrsCard`, `applyReview`, and rating mappers in `fsrs-scheduler.ts`; keep `user_chunks` / `review_history` column meanings stable unless migrating data.
 
@@ -172,10 +171,10 @@ Request:
 
 ```http
 GET /api/practice/due?limit=20
-X-User-Id: 11111111-1111-4111-8111-111111111111
+Authorization: Bearer <neon-auth-session-jwt>
 ```
 
-Handler flow: `resolveUserId` → `dueQuerySchema` (default `limit=20`) → `repository.listDue(userId, 20, undefined)` (`backend/src/routes/practice.ts:35-59`).
+Handler flow: `requireUserId` → `dueQuerySchema` (default `limit=20`) → `repository.listDue(userId, 20, undefined)` (`backend/src/routes/practice.ts:35-59`).
 
 Follow-up page when `nextCursor` is non-null:
 
@@ -192,7 +191,7 @@ Request:
 ```http
 POST /api/practice/reviews
 Content-Type: application/json
-X-User-Id: 11111111-1111-4111-8111-111111111111
+Authorization: Bearer <neon-auth-session-jwt>
 
 {"chunkId":"22222222-2222-4222-8222-222222222222","rating":"good"}
 ```
@@ -205,7 +204,7 @@ Using `forgot` instead of `good` maps to `Rating.Again` at the scheduler (`backe
 
 ```http
 GET /api/practice/plan
-X-User-Id: 11111111-1111-4111-8111-111111111111
+Authorization: Bearer <neon-auth-session-jwt>
 ```
 
 Returns `total`, `byStatus`, `dueNow`, `dueNext7Days`, `reviewedToday` (`backend/src/practice/types.ts:32-38`). `dueNow` uses the same null-or-past `nextReview` rule as `listDue` (`backend/src/db/practice-review-repository.ts:259-267`). `reviewedToday` counts `review_history` rows since UTC midnight (`backend/src/db/practice-review-repository.ts:282-290`).

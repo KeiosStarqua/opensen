@@ -17,7 +17,7 @@ import {
   loadEnv,
 } from '../lib/env.js'
 import { createDialoguesRepository } from '../db/dialogues-repository.js'
-import { resolveUserId } from '../lib/user-context.js'
+import { optionalUserId } from '../auth/session.js'
 
 export type DialoguesRouteDeps = {
   loadEnv?: typeof loadEnv
@@ -100,16 +100,12 @@ export function createDialoguesRouter(deps: DialoguesRouteDeps = {}): Hono {
       const database = resolveGetDatabase()
       const writer = resolveCreateWriter(database, DATABASE_URL)
       persistence = await writer.persist(result.pack, result.traces)
-      try {
-        const userId = resolveUserId(c)
+      const userId = optionalUserId(c)
+      if (userId) {
         const { enrollChunksForLearner } = await import(
           '../db/enroll-chunks.js'
         )
         await enrollChunksForLearner(database, userId, persistence.chunkIds)
-      } catch (error) {
-        if (!(error instanceof HTTPException)) {
-          throw error
-        }
       }
     }
 

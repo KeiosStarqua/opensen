@@ -22,5 +22,3 @@ export type BackendErrorBody = {
   error: string;
   status: number;
 };
-
-export const LEARNER_ID_STORAGE_KEY = "opensen:learner-id";

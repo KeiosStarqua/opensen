@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { signedInAs } from '../auth/test-support.js'
 import { createPracticeRouter } from './practice.js'
 import type { PracticeReviewRepository } from '../db/practice-review-repository.js'
 
@@ -43,17 +44,18 @@ describe('practice routes', () => {
       })),
     })
 
-    const app = createPracticeRouter({
-      getDatabase: () => ({} as never),
-      createRepository: () => repository,
-      loadDatabaseEnv: () => ({
-        DATABASE_URL: 'postgresql://user:pass@localhost:5432/opensen_test',
+    const app = signedInAs(
+      createPracticeRouter({
+        getDatabase: () => ({} as never),
+        createRepository: () => repository,
+        loadDatabaseEnv: () => ({
+          DATABASE_URL: 'postgresql://user:pass@localhost:5432/opensen_test',
+        }),
       }),
-    })
+      userId,
+    )
 
-    const response = await app.request('/due', {
-      headers: { 'x-user-id': userId },
-    })
+    const response = await app.request('/due')
 
     expect(response.status).toBe(200)
     const body = await response.json()
@@ -78,20 +80,20 @@ describe('practice routes', () => {
       })),
     })
 
-    const app = createPracticeRouter({
-      getDatabase: () => ({} as never),
-      createRepository: () => repository,
-      loadDatabaseEnv: () => ({
-        DATABASE_URL: 'postgresql://user:pass@localhost:5432/opensen_test',
+    const app = signedInAs(
+      createPracticeRouter({
+        getDatabase: () => ({} as never),
+        createRepository: () => repository,
+        loadDatabaseEnv: () => ({
+          DATABASE_URL: 'postgresql://user:pass@localhost:5432/opensen_test',
+        }),
       }),
-    })
+      userId,
+    )
 
     const response = await app.request('/reviews', {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-user-id': userId,
-      },
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ chunkId, rating: 'good' }),
     })
 
@@ -117,17 +119,18 @@ describe('practice routes', () => {
       })),
     })
 
-    const app = createPracticeRouter({
-      getDatabase: () => ({} as never),
-      createRepository: () => repository,
-      loadDatabaseEnv: () => ({
-        DATABASE_URL: 'postgresql://user:pass@localhost:5432/opensen_test',
+    const app = signedInAs(
+      createPracticeRouter({
+        getDatabase: () => ({} as never),
+        createRepository: () => repository,
+        loadDatabaseEnv: () => ({
+          DATABASE_URL: 'postgresql://user:pass@localhost:5432/opensen_test',
+        }),
       }),
-    })
+      userId,
+    )
 
-    const response = await app.request('/plan', {
-      headers: { 'x-user-id': userId },
-    })
+    const response = await app.request('/plan')
 
     expect(response.status).toBe(200)
     const body = await response.json()
@@ -135,7 +138,7 @@ describe('practice routes', () => {
     expect(body.dueNow).toBe(2)
   })
 
-  it('rejects requests without x-user-id', async () => {
+  it('rejects anonymous requests', async () => {
     const app = createPracticeRouter()
 
     const response = await app.request('/due')
@@ -144,16 +147,16 @@ describe('practice routes', () => {
 
   it('rejects invalid review payloads', async () => {
     const repository = buildRepository()
-    const app = createPracticeRouter({
-      createRepository: () => repository,
-    })
+    const app = signedInAs(
+      createPracticeRouter({
+        createRepository: () => repository,
+      }),
+      userId,
+    )
 
     const response = await app.request('/reviews', {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-user-id': userId,
-      },
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ chunkId, rating: 'perfect' }),
     })
 

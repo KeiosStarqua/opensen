@@ -2,6 +2,8 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { Scalar } from '@scalar/hono-api-reference'
+import { authenticate } from './auth/session.js'
+import { createNeonAuthVerifier } from './auth/token-verifier.js'
 import { loadEnv } from './lib/env.js'
 import { errorHandler } from './lib/errors.js'
 import { buildOpenApiDocument } from './openapi.js'
@@ -22,17 +24,22 @@ app.use('*', logger())
 const corsMiddleware = cors({
   origin: env.CORS_ORIGINS,
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-User-Id',
-    'sentry-trace',
-    'baggage',
-  ],
+  allowHeaders: ['Content-Type', 'Authorization', 'sentry-trace', 'baggage'],
+  // Chromium caps preflight caching at 2 hours.
+  maxAge: 7200,
 })
 app.use('/api/*', corsMiddleware)
 app.use('/health', corsMiddleware)
 app.use('/health/*', corsMiddleware)
+
+app.use(
+  '/api/*',
+  authenticate(
+    env.NEON_AUTH_BASE_URL
+      ? createNeonAuthVerifier({ baseUrl: env.NEON_AUTH_BASE_URL })
+      : null,
+  ),
+)
 
 app.onError(errorHandler)
 

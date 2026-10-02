@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
-import { LEARNER_ID_STORAGE_KEY } from "@/lib/api/types";
 import { ONBOARDING_COMPLETE_KEY } from "@/lib/onboarding-storage";
 import {
   applyThemeMode,
@@ -22,7 +21,6 @@ export function SettingsForm() {
   const [settings, setSettings] = useState<LearnerSettings>(() =>
     typeof window === "undefined" ? DEFAULTS : getLearnerSettings(),
   );
-  const [confirmReset, setConfirmReset] = useState(false);
 
   function update(patch: Partial<LearnerSettings>) {
     const next = saveLearnerSettings(patch);
@@ -36,16 +34,6 @@ export function SettingsForm() {
     update({ onboardingComplete: false });
     window.localStorage.removeItem(ONBOARDING_COMPLETE_KEY);
     router.push(AppRoutes.onboarding);
-  }
-
-  function resetLearnerId() {
-    if (!confirmReset) {
-      setConfirmReset(true);
-      return;
-    }
-    window.localStorage.removeItem(LEARNER_ID_STORAGE_KEY);
-    setConfirmReset(false);
-    router.push(AppRoutes.home);
   }
 
   return (
@@ -128,13 +116,6 @@ export function SettingsForm() {
           className="rounded-lg border px-4 py-2 text-sm font-medium"
         >
           Redo onboarding
-        </button>
-        <button
-          type="button"
-          onClick={resetLearnerId}
-          className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-800"
-        >
-          {confirmReset ? "Confirm reset learner id" : "Reset temporary learner id"}
         </button>
       </div>
       <Link href={AppRoutes.export} className="text-sm text-emerald-800 underline">

@@ -20,20 +20,10 @@ const errorResponse = {
   required: ['error', 'status'],
 } as const
 
-const userIdHeader = {
-  name: 'X-User-Id',
-  in: 'header',
-  required: true,
-  description: 'Learner UUID. Identifies the owner for user-scoped operations.',
-  schema: { type: 'string', format: 'uuid' },
-} as const
+const signedIn = [{ bearerAuth: [] }]
 
-const optionalUserIdHeader = {
-  ...userIdHeader,
-  required: false,
-  description:
-    'Optional learner UUID. When present, responses include per-user state (e.g. enrollment).',
-} as const
+// Anonymous callers are served; a valid token adds per-learner state.
+const signedInOptional = [{}, { bearerAuth: [] }]
 
 const limitParam = {
   name: 'limit',
@@ -61,8 +51,10 @@ export function buildOpenApiDocument(baseUrl?: string) {
         'training via the chunking method. Serves the mobile/web clients for ' +
         'situations, chunk library, AI dialogue generation, FSRS practice, and ' +
         'Anki export.\n\n' +
-        'User-scoped endpoints require an `X-User-Id` header (learner UUID) ' +
-        'until authenticated ownership ships.',
+        'User-scoped endpoints require `Authorization: Bearer <jwt>` with a ' +
+        'Neon Auth session token. Endpoints marked optional accept anonymous ' +
+        'calls and add per-learner state when a token is sent. An invalid or ' +
+        'expired token is rejected with 401 on every `/api` route.',
     },
     servers: [
       { url: baseUrl ?? 'https://api.opensen.taquangkhoi.com', description: 'Production' },
@@ -221,8 +213,8 @@ export function buildOpenApiDocument(baseUrl?: string) {
             cursorParam,
             { name: 'q', in: 'query', required: false, description: 'Free-text search.', schema: { type: 'string' } },
             { name: 'register', in: 'query', required: false, schema: { type: 'string' } },
-            optionalUserIdHeader,
           ],
+          security: signedInOptional,
           responses: {
             '200': {
               description: 'A page of chunks.',
@@ -234,7 +226,7 @@ export function buildOpenApiDocument(baseUrl?: string) {
         post: {
           tags: ['Chunks'],
           summary: 'Create a chunk',
-          parameters: [userIdHeader],
+          security: signedIn,
           requestBody: {
             required: true,
             content: {
@@ -259,8 +251,8 @@ export function buildOpenApiDocument(baseUrl?: string) {
           summary: 'Get chunk detail',
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
-            optionalUserIdHeader,
           ],
+          security: signedInOptional,
           responses: {
             '200': { description: 'Chunk detail.', content: { 'application/json': { schema: { type: 'object' } } } },
             '404': { $ref: '#/components/responses/NotFound' },
@@ -272,8 +264,8 @@ export function buildOpenApiDocument(baseUrl?: string) {
           description: 'Update text and/or meaning. At least one field is required.',
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
-            userIdHeader,
           ],
+          security: signedIn,
           requestBody: {
             required: true,
             content: {
@@ -292,6 +284,7 @@ export function buildOpenApiDocument(baseUrl?: string) {
           responses: {
             '200': { description: 'Chunk updated.', content: { 'application/json': { schema: { type: 'object' } } } },
             '400': { $ref: '#/components/responses/BadRequest' },
+            '401': { $ref: '#/components/responses/Unauthorized' },
             '404': { $ref: '#/components/responses/NotFound' },
           },
         },
@@ -362,7 +355,7 @@ export function buildOpenApiDocument(baseUrl?: string) {
           description:
             'Runs the AI pipeline to produce a memorization-ready dialogue plus ' +
             'extracted chunks. Persists and enrolls chunks when persistence is enabled.',
-          parameters: [optionalUserIdHeader],
+          security: signedInOptional,
           requestBody: {
             required: true,
             content: {
@@ -384,8 +377,8 @@ export function buildOpenApiDocument(baseUrl?: string) {
         get: {
           tags: ['Practice'],
           summary: 'List due reviews',
+          security: signedIn,
           parameters: [
-            userIdHeader,
             { name: 'limit', in: 'query', required: false, schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 } },
             cursorParam,
           ],
@@ -400,7 +393,7 @@ export function buildOpenApiDocument(baseUrl?: string) {
         post: {
           tags: ['Practice'],
           summary: 'Record a review',
-          parameters: [userIdHeader],
+          security: signedIn,
           requestBody: {
             required: true,
             content: {
@@ -421,7 +414,7 @@ export function buildOpenApiDocument(baseUrl?: string) {
         get: {
           tags: ['Practice'],
           summary: 'Get practice plan stats',
-          parameters: [userIdHeader],
+          security: signedIn,
           responses: {
             '200': { description: 'Aggregate plan statistics.', content: { 'application/json': { schema: { type: 'object' } } } },
             '401': { $ref: '#/components/responses/Unauthorized' },
@@ -435,8 +428,8 @@ export function buildOpenApiDocument(baseUrl?: string) {
           description:
             'Returns a tab-separated Anki import file. When the learner has no ' +
             'matching notes, returns `{ empty: true, noteCount: 0 }` as JSON.',
+          security: signedIn,
           parameters: [
-            userIdHeader,
             {
               name: 'scope',
               in: 'query',
@@ -464,13 +457,22 @@ export function buildOpenApiDocument(baseUrl?: string) {
       },
     },
     components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description:
+            'Neon Auth session JWT (EdDSA), e.g. `session.token` from the Neon Auth client `getSession()`. Expires after 15 minutes.',
+        },
+      },
       responses: {
         BadRequest: {
           description: 'Invalid request.',
           content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
         },
         Unauthorized: {
-          description: 'Missing or invalid X-User-Id header.',
+          description: 'Missing, invalid, or expired bearer token.',
           content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
         },
         NotFound: {
