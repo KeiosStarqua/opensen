@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { captureOperationalError } from "@/lib/observability/operational-error";
 
@@ -7,6 +7,7 @@ import {
   createDefaultApiClient,
   isOperationalApiError,
   isRetryable,
+  resolveApiBaseUrl,
   withRetry,
 } from "./client";
 import { ApiError } from "./types";
@@ -191,6 +192,30 @@ describe("operational error reporting", () => {
     });
     await client.request("/api/chunks/x");
     expect(captureOperationalError).not.toHaveBeenCalled();
+  });
+});
+
+describe("resolveApiBaseUrl", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("prefers NEXT_PUBLIC_OPENSEN_API_URL and trims a trailing slash", () => {
+    vi.stubEnv("NEXT_PUBLIC_OPENSEN_API_URL", "http://api.test/");
+    vi.stubEnv("NODE_ENV", "production");
+    expect(resolveApiBaseUrl()).toBe("http://api.test");
+  });
+
+  it("defaults to the public API in production", () => {
+    vi.stubEnv("NEXT_PUBLIC_OPENSEN_API_URL", "");
+    vi.stubEnv("NODE_ENV", "production");
+    expect(resolveApiBaseUrl()).toBe("https://api.opensen.taquangkhoi.com");
+  });
+
+  it("defaults to the local Hono server outside production", () => {
+    vi.stubEnv("NEXT_PUBLIC_OPENSEN_API_URL", "");
+    vi.stubEnv("NODE_ENV", "development");
+    expect(resolveApiBaseUrl()).toBe("http://localhost:3000");
   });
 });
 

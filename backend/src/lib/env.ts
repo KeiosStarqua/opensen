@@ -14,12 +14,16 @@ const postgresUrlSchema = trimmedNonEmptyString.pipe(
   ),
 )
 
+// Browser origins allowed when CORS_ORIGINS is unset: local web dev and the
+// production web app (https://opensen.taquangkhoi.com).
+const DEFAULT_CORS_ORIGINS = 'http://localhost:3000,https://opensen.taquangkhoi.com'
+
 const envSchema = z.object({
   CORS_ORIGINS: z
     .string()
     .optional()
     .transform((value) =>
-      (value ?? 'http://localhost:3000')
+      (value ?? DEFAULT_CORS_ORIGINS)
         .split(',')
         .map((origin) => origin.trim())
         .filter(Boolean),

@@ -30,12 +30,21 @@ export function isOperationalApiError(error: ApiError): boolean {
   );
 }
 
+export const PRODUCTION_API_URL = "https://api.opensen.taquangkhoi.com";
+export const LOCAL_API_URL = "http://localhost:3000";
+
+/**
+ * `NEXT_PUBLIC_OPENSEN_API_URL` wins when set. Otherwise production builds use
+ * the public API and local development uses the Hono dev server.
+ */
 export function resolveApiBaseUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_OPENSEN_API_URL?.trim();
   if (fromEnv) {
     return fromEnv.replace(/\/$/, "");
   }
-  return "http://localhost:3000";
+  return process.env.NODE_ENV === "production"
+    ? PRODUCTION_API_URL
+    : LOCAL_API_URL;
 }
 
 export function createBrowserStorage(): Storage {

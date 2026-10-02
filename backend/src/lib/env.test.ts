@@ -18,6 +18,7 @@ describe('loadEnv', () => {
 
     expect(env.AI_PROVIDER).toBe('openrouter')
     expect(env.CORS_ORIGINS).toContain('http://localhost:3000')
+    expect(env.CORS_ORIGINS).toContain('https://opensen.taquangkhoi.com')
     expect(env.DIALOGUE_PERSISTENCE_MODE).toBe('disabled')
   })
 })
