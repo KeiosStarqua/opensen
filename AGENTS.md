@@ -119,6 +119,11 @@ Apply these on all product code (`backend/`, `mobile/`, `web/`). Prefer depth an
 
 Child `AGENTS.md` files may add stack-specific seams (e.g. AI only via `backend/src/ai/`); they must not weaken these principles.
 
+### Commits
+
+- Commit as you edit: each logical change (one feature slice, fix, refactor, or doc update) lands as its own atomic commit that builds and passes its checks on its own.
+- Do not batch unrelated edits into one commit, and do not leave a session's work as one large uncommitted diff.
+
 ### Icons
 
 UI icons on every frontend (`web/`, `mobile/`) come from [Phosphor Icons](https://phosphoricons.com) ([overview](https://github.com/phosphor-icons/homepage)). Any control, nav item, status, or empty state that needs an icon uses Phosphor.
