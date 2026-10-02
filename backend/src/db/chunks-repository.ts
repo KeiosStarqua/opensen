@@ -1,5 +1,6 @@
 import { and, asc, eq, ilike, inArray, or, sql } from 'drizzle-orm'
 import type { Database } from './client.js'
+import { ensureLearner } from './ensure-learner.js'
 import {
   chunks,
   patternIntents,
@@ -276,6 +277,8 @@ export function createChunksRepository(database: Database): ChunksRepository {
     },
 
     async create(userId, input) {
+      await ensureLearner(database, userId)
+
       const patternId = crypto.randomUUID()
       const chunkId = crypto.randomUUID()
 
