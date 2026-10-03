@@ -54,10 +54,25 @@ const databaseEnvSchema = z.object({
   DATABASE_URL: postgresUrlSchema,
 })
 
-const migrationEnvSchema = z.object({
-  MIGRATION_DATABASE_URL: postgresUrlSchema.optional(),
-  DATABASE_URL: postgresUrlSchema,
-})
+const migrationEnvSchema = z
+  .object({
+    MIGRATION_DATABASE_URL: postgresUrlSchema.optional(),
+    DATABASE_URL_UNPOOLED: postgresUrlSchema.optional(),
+    DATABASE_URL: postgresUrlSchema.optional(),
+  })
+  .refine(
+    (env) =>
+      Boolean(
+        env.MIGRATION_DATABASE_URL ||
+          env.DATABASE_URL_UNPOOLED ||
+          env.DATABASE_URL,
+      ),
+    {
+      message:
+        'Set MIGRATION_DATABASE_URL, DATABASE_URL_UNPOOLED, or DATABASE_URL',
+      path: ['DATABASE_URL'],
+    },
+  )
 
 const testDatabaseEnvSchema = z.object({
   TEST_DATABASE_URL: postgresUrlSchema,
@@ -103,7 +118,18 @@ export function resolveMigrationDatabaseUrl(
   source: NodeJS.ProcessEnv = process.env,
 ): string {
   const env = loadMigrationEnv(source)
-  return env.MIGRATION_DATABASE_URL ?? env.DATABASE_URL
+  const url =
+    env.MIGRATION_DATABASE_URL ??
+    env.DATABASE_URL_UNPOOLED ??
+    env.DATABASE_URL
+
+  if (!url) {
+    throw new Error(
+      'Set MIGRATION_DATABASE_URL, DATABASE_URL_UNPOOLED, or DATABASE_URL',
+    )
+  }
+
+  return url
 }
 
 function extractDatabaseName(url: string): string {

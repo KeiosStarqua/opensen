@@ -53,10 +53,11 @@ Phase 1 stores the content graph, practice engine, and embedding dedup metadata 
 | Variable | Role |
 |----------|------|
 | `DATABASE_URL` | Runtime connection string. On Vercel, use the Neon pooled HTTP/WebSocket endpoint. For local PostgreSQL, a standard `postgresql://` URL uses the postgres.js driver fallback. |
-| `MIGRATION_DATABASE_URL` | Optional direct Neon connection for DDL migrations (bypasses transaction poolers). Local development can omit this and use `DATABASE_URL` for both runtime and migrations. |
+| `DATABASE_URL_UNPOOLED` | Direct Neon endpoint written by `neon link`. Database CLI scripts use it for DDL when `MIGRATION_DATABASE_URL` is unset. |
+| `MIGRATION_DATABASE_URL` | Optional direct connection override for DDL migrations. Local development can omit this and `DATABASE_URL_UNPOOLED` and use `DATABASE_URL` for both runtime and migrations. |
 | `TEST_DATABASE_URL` | Disposable integration-test database only (e.g. `opensen_test`). Never point this at production. |
 
-Never commit credentials. Copy from `.env.example` into local `.env`.
+Never commit credentials. `neon link` writes connection strings to `.env.local`. Copy non-secret defaults from `.env.example` into `.env` when you need them. CLI scripts load `.env.local`, then `.env`.
 
 ### Roles (production)
 

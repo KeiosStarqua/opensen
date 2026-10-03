@@ -1,6 +1,6 @@
-import 'dotenv/config'
 import postgres from 'postgres'
 import { resolveMigrationDatabaseUrl } from '../lib/env.js'
+import { loadLocalEnv } from '../lib/load-local-env.js'
 
 type PreflightResult = {
   postgresVersion: string
@@ -40,6 +40,7 @@ export async function runDatabasePreflight(
 }
 
 if (process.argv[1]?.includes('preflight.ts')) {
+  loadLocalEnv()
   runDatabasePreflight()
     .then((result) => {
       console.log(JSON.stringify(result, null, 2))

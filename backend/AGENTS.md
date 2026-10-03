@@ -29,7 +29,8 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 - Route tests that need a learner wrap the router with `signedInAs(router, userId)` from `src/auth/test-support.ts`
 - AI calls go through `src/ai/` only — never hardcode a vendor HTTP client in a route
 - Runtime database access: lazy `getDatabase()` in `src/db/client.ts` — Neon hosts use `drizzle-orm/neon-http`; local `postgresql://` URLs use postgres.js. Routes that do not persist data must not require `DATABASE_URL` at startup.
-- Migrations: checked-in SQL under `drizzle/`; apply with `npm run db:migrate` using `MIGRATION_DATABASE_URL` or `DATABASE_URL`
+- Migrations: checked-in SQL under `drizzle/`; apply with `npm run db:migrate` from `backend/`. CLI database scripts (`db:migrate`, `db:preflight`, `db:generate`, `db:studio`, `seed:mobile-catalog`) load `.env.local` then `.env` via `src/lib/load-local-env.ts`. Variables already in the shell win. Load those files only from CLI entrypoints — importing `migrate.ts` must not inject `.env.local` into tests.
+- Migration connection order: `MIGRATION_DATABASE_URL`, then `DATABASE_URL_UNPOOLED` (what `neon link` writes for the direct endpoint), then `DATABASE_URL`. `neon link` writes both URLs into gitignored `.env.local`. The linked file currently targets branch `production`, so `npm run db:migrate` with that file applies DDL to production.
 - Drizzle lives in this package, not the repo root. Kit config: `drizzle.config.ts` (`schema` → `src/db/schema/index.ts`, `out` → `drizzle/`). Run `drizzle-kit` and `npm run db:migrate` from `backend/`.
 - Neon CLI link is the gitignored repo-root `.neon` (already linked; do not re-link). Project `little-tree-71151135` (`opensen`), org `org-rough-water-40798621`, region `aws-us-east-2`, Postgres 18. Default branch `production` (`br-small-mouse-aynnq03c`). `neon status` works from the repo root because it walks up to that link. Project policy is `backend/neon.ts` (`@neon/config`); preview with `neon config plan`, apply with `neon config apply` from `backend/`. `neon link` writes connection strings to `.env.local` (gitignored); never commit them.
 
@@ -41,7 +42,7 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 - `DIALOGUE_PERSISTENCE_MODE` — `disabled` (default), `internal`, or `ephemeral`; persistence runs only in the latter two
 - AI: `AI_PROVIDER` + `AI_MODEL`; OpenRouter needs `OPENROUTER_API_KEY`
 - Auth env: `NEON_AUTH_BASE_URL`, the same Managed Better Auth URL as web's `NEON_AUTH_BASE_URL`. It is optional at startup so anonymous routes keep working without it, but it is required in every deployed environment.
-- Database env: `DATABASE_URL` (runtime), optional `MIGRATION_DATABASE_URL` (DDL), `TEST_DATABASE_URL` (integration tests only — must target `opensen_test` or `*_test`)
+- Database env: `DATABASE_URL` (runtime, pooled on Neon), optional `DATABASE_URL_UNPOOLED` (direct Neon endpoint from `neon link`), optional `MIGRATION_DATABASE_URL` (DDL override), `TEST_DATABASE_URL` (integration tests only — must target `opensen_test` or `*_test`)
 
 ## Verification
 

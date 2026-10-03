@@ -1,8 +1,8 @@
-import 'dotenv/config'
 import postgres from 'postgres'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import { resolveMigrationDatabaseUrl } from '../lib/env.js'
+import { loadLocalEnv } from '../lib/load-local-env.js'
 
 export async function runMigrations(): Promise<void> {
   const databaseUrl = resolveMigrationDatabaseUrl()
@@ -17,6 +17,7 @@ export async function runMigrations(): Promise<void> {
 }
 
 if (process.argv[1]?.includes('migrate.ts')) {
+  loadLocalEnv()
   runMigrations()
     .then(() => {
       console.log('Migrations applied successfully.')

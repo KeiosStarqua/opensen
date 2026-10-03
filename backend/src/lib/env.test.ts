@@ -58,6 +58,21 @@ describe('loadMigrationEnv', () => {
       MIGRATION_DATABASE_URL: env.MIGRATION_DATABASE_URL,
     })).toBe('postgresql://user:pass@localhost:5432/opensen_direct')
   })
+
+  it('prefers the Neon direct URL over the pooled DATABASE_URL', () => {
+    expect(
+      resolveMigrationDatabaseUrl({
+        DATABASE_URL:
+          'postgresql://user:pass@localhost:5432/opensen',
+        DATABASE_URL_UNPOOLED:
+          'postgresql://user:pass@localhost:5432/opensen_direct',
+      }),
+    ).toBe('postgresql://user:pass@localhost:5432/opensen_direct')
+  })
+
+  it('rejects a migration env with no connection string', () => {
+    expect(() => resolveMigrationDatabaseUrl({})).toThrow('DATABASE_URL')
+  })
 })
 
 describe('isDialoguePersistenceAllowed', () => {
