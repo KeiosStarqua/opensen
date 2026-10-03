@@ -1,4 +1,8 @@
 import { AppLink } from "@/components/app-link";
+import {
+  LibrarySentenceRowsSkeleton,
+  SaveStarSkeleton,
+} from "@/components/shell/shell-loading";
 import { useMemo, useState } from "react";
 import { PlusIcon } from "@phosphor-icons/react";
 
@@ -89,7 +93,7 @@ export function LibraryScreen() {
       ) : null}
       {filter === "saved" ? (
         <SavedList
-          pending={saved.list.isPending && !rows}
+          pending={saved.list.isPending && !rows && !listError}
           error={listError}
           entries={visibleSaved}
           disabled={saved.pending}
@@ -99,6 +103,7 @@ export function LibraryScreen() {
         <CatalogList
           items={visibleCatalog}
           isSaved={(text) => saved.isSaved(text)}
+          savePending={saved.list.isPending && !rows && !listError}
           disabled={!rows || saved.pending}
           onToggle={saved.toggleText}
         />
@@ -125,15 +130,15 @@ function SavedList({
   disabled: boolean;
   onUnsave: (id: string) => void;
 }) {
-  if (pending) {
-    return <p className="font-semibold text-sen-muted">Loading your sentences…</p>;
-  }
   if (error) {
     return (
       <p className="rounded-[22px] bg-white px-5 py-4 font-semibold text-sen-heart shadow-sm" role="alert">
         {error}
       </p>
     );
+  }
+  if (pending) {
+    return <LibrarySentenceRowsSkeleton />;
   }
   if (entries.length === 0) {
     return (
@@ -166,11 +171,13 @@ function SavedList({
 function CatalogList({
   items,
   isSaved,
+  savePending,
   disabled,
   onToggle,
 }: {
   items: LibraryItem[];
   isSaved: (text: string) => boolean;
+  savePending: boolean;
   disabled: boolean;
   onToggle: (text: string) => void;
 }) {
@@ -182,21 +189,29 @@ function CatalogList({
     );
   }
   return (
-    <ul className="space-y-3">
-      {items.map((item) => {
-        const saved = isSaved(item.text);
-        return (
-          <LibrarySentenceRow
-            key={item.id}
-            text={item.text}
-            subtitle={`${item.topicName} · ${item.lessonTitle}`}
-            saved={saved}
-            disabled={disabled}
-            onToggle={() => onToggle(item.text)}
-          />
-        );
-      })}
-    </ul>
+    <>
+      {savePending ? (
+        <p className="sr-only" role="status">
+          Loading which sentences are saved
+        </p>
+      ) : null}
+      <ul className="space-y-3">
+        {items.map((item) => {
+          const saved = isSaved(item.text);
+          return (
+            <LibrarySentenceRow
+              key={item.id}
+              text={item.text}
+              subtitle={`${item.topicName} · ${item.lessonTitle}`}
+              saved={saved}
+              savePending={savePending}
+              disabled={disabled}
+              onToggle={() => onToggle(item.text)}
+            />
+          );
+        })}
+      </ul>
+    </>
   );
 }
 
@@ -204,6 +219,7 @@ function LibrarySentenceRow({
   text,
   subtitle,
   saved,
+  savePending = false,
   disabled,
   onToggle,
   href,
@@ -211,6 +227,7 @@ function LibrarySentenceRow({
   text: string;
   subtitle: string;
   saved: boolean;
+  savePending?: boolean;
   disabled: boolean;
   onToggle: () => void;
   href?: string;
@@ -235,18 +252,22 @@ function LibrarySentenceRow({
         )}
         <p className="text-xs font-semibold text-sen-muted">{subtitle}</p>
       </div>
-      <button
-        type="button"
-        aria-pressed={saved}
-        aria-label={saved ? "Unsave sentence" : "Save sentence"}
-        disabled={disabled}
-        onClick={onToggle}
-        className={`grid h-10 w-10 place-items-center rounded-full ${
-          saved ? "text-sen-gold" : "text-[#c5d0c8]"
-        }`}
-      >
-        <StarIcon filled={saved} className="h-5 w-5" />
-      </button>
+      {savePending ? (
+        <SaveStarSkeleton announce={false} />
+      ) : (
+        <button
+          type="button"
+          aria-pressed={saved}
+          aria-label={saved ? "Unsave sentence" : "Save sentence"}
+          disabled={disabled}
+          onClick={onToggle}
+          className={`grid h-10 w-10 place-items-center rounded-full ${
+            saved ? "text-sen-gold" : "text-[#c5d0c8]"
+          }`}
+        >
+          <StarIcon filled={saved} className="h-5 w-5" />
+        </button>
+      )}
     </li>
   );
 }

@@ -2,6 +2,7 @@ import { useAppNavigate } from "@/lib/use-app-navigate";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 
+import { SaveStarSkeleton } from "@/components/shell/shell-loading";
 import { AppRoutes } from "@/lib/app-routes";
 import { useSavedSentenceListActions } from "@/lib/query/hooks/saved-sentences";
 import { getStep } from "@/lib/studio/content";
@@ -32,6 +33,8 @@ export function SentenceScreen({
   const safeIndex = Math.min(Math.max(index, 0), step.sentences.length - 1);
   const sentence = step.sentences[safeIndex];
   const saved = savedSentences.isSaved(sentence.text);
+  const savePending =
+    savedSentences.list.isPending && !savedSentences.rows && !savedSentences.listError;
 
   function goNext() {
     if (safeIndex < step.sentences.length - 1) {
@@ -58,18 +61,22 @@ export function SentenceScreen({
           <span className="text-sm font-extrabold text-sen-primary">
             {safeIndex + 1} / {step.sentences.length}
           </span>
-          <button
-            type="button"
-            aria-pressed={saved}
-            aria-label={saved ? "Remove from saved sentences" : "Save sentence"}
-            disabled={!savedSentences.rows || savedSentences.pending}
-            onClick={() => savedSentences.toggleText(sentence.text)}
-            className={`grid h-10 w-10 place-items-center rounded-full bg-white shadow-sm ${
-              saved ? "text-sen-gold" : "text-[#c5d0c8]"
-            }`}
-          >
-            <StarIcon filled={saved} className="h-5 w-5" />
-          </button>
+          {savePending ? (
+            <SaveStarSkeleton />
+          ) : (
+            <button
+              type="button"
+              aria-pressed={saved}
+              aria-label={saved ? "Remove from saved sentences" : "Save sentence"}
+              disabled={!savedSentences.rows || savedSentences.pending}
+              onClick={() => savedSentences.toggleText(sentence.text)}
+              className={`grid h-10 w-10 place-items-center rounded-full bg-white shadow-sm ${
+                saved ? "text-sen-gold" : "text-[#c5d0c8]"
+              }`}
+            >
+              <StarIcon filled={saved} className="h-5 w-5" />
+            </button>
+          )}
         </div>
       </div>
       {savedSentences.listError ?? savedSentences.error ? (

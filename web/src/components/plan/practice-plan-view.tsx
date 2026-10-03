@@ -1,4 +1,8 @@
 import { AppLink } from "@/components/app-link";
+import {
+  PlanDueListSkeleton,
+  PracticePlanSkeleton,
+} from "@/components/shell/shell-loading";
 import { useAppNavigate } from "@/lib/use-app-navigate";
 
 import { AppRoutes } from "@/lib/app-routes";
@@ -13,15 +17,15 @@ export function PracticePlanView() {
   const stats = plan.data ?? null;
   const items = due.data ?? [];
   const error = stats ? null : queryErrorMessage(plan.error);
-  const loading = plan.isPending;
+  const loading = plan.isPending && !error;
+  const dueError = due.data ? null : queryErrorMessage(due.error);
+  const dueLoading = due.isPending && !dueError;
 
   function startPractice() {
     if (items.length === 0) return;
     savePracticeFocusQueue(items);
     navigate(AppRoutes.practiceSession);
   }
-
-  if (loading) return <p className="text-slate-600">Loading plan…</p>;
 
   if (error) {
     return (
@@ -31,6 +35,15 @@ export function PracticePlanView() {
           Ensure `DATABASE_URL` is configured on the API and you have enrolled
           chunks (generate a dialogue or practice from Library).
         </p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-semibold">Plan</h1>
+        <PracticePlanSkeleton />
       </div>
     );
   }
@@ -85,23 +98,27 @@ export function PracticePlanView() {
       ) : null}
       <section>
         <h2 className="text-lg font-semibold">Up next</h2>
-        <ul className="mt-2 divide-y rounded-xl border bg-white">
-          {items.slice(0, 20).map((item) => (
-            <li key={item.chunkId} className="px-4 py-3 text-sm">
-              <AppLink
-                href={AppRoutes.chunk(item.chunkId)}
-                className="font-medium text-emerald-900"
-              >
-                {item.text}
-              </AppLink>
-              <p className="text-slate-600">{item.meaning}</p>
-              <p className="text-xs text-slate-500">
-                {item.status}
-                {item.dueAt ? ` · due ${new Date(item.dueAt).toLocaleString()}` : " · new"}
-              </p>
-            </li>
-          ))}
-        </ul>
+        {dueLoading ? (
+          <PlanDueListSkeleton />
+        ) : (
+          <ul className="mt-2 divide-y rounded-xl border bg-white">
+            {items.slice(0, 20).map((item) => (
+              <li key={item.chunkId} className="px-4 py-3 text-sm">
+                <AppLink
+                  href={AppRoutes.chunk(item.chunkId)}
+                  className="font-medium text-emerald-900"
+                >
+                  {item.text}
+                </AppLink>
+                <p className="text-slate-600">{item.meaning}</p>
+                <p className="text-xs text-slate-500">
+                  {item.status}
+                  {item.dueAt ? ` · due ${new Date(item.dueAt).toLocaleString()}` : " · new"}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );

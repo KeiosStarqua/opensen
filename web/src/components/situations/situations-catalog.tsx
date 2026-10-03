@@ -1,4 +1,5 @@
 import { AppLink } from "@/components/app-link";
+import { SituationCardsSkeleton } from "@/components/shell/shell-loading";
 
 import { AppRoutes } from "@/lib/app-routes";
 import { queryErrorMessage } from "@/lib/query/api-query";
@@ -12,16 +13,16 @@ export function SituationsCatalog() {
   // A failed background refetch keeps the cached catalog on screen.
   const error = data ? null : queryErrorMessage(queryError);
 
-  if (loading) {
-    return <p className="text-slate-600">Loading situations…</p>;
-  }
-
   if (error) {
     return (
       <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
         {error}
       </div>
     );
+  }
+
+  if (loading) {
+    return <SituationCardsSkeleton />;
   }
 
   if (items.length === 0) {

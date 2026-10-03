@@ -1,4 +1,5 @@
 import { AppLink } from "@/components/app-link";
+import { DueRowsSkeleton, TodayPlanSkeleton } from "@/components/shell/shell-loading";
 import { useAppNavigate } from "@/lib/use-app-navigate";
 
 import { AppRoutes } from "@/lib/app-routes";
@@ -14,7 +15,9 @@ export function TodayDashboard() {
   // A failed due list keeps the dashboard usable; only the plan gates it.
   const dueItems = due.data ?? [];
   const error = queryErrorMessage(plan.error);
-  const loading = plan.isPending;
+  const loading = plan.isPending && !error;
+  const dueError = due.data ? null : queryErrorMessage(due.error);
+  const dueLoading = due.isPending && !dueError;
 
   function retry() {
     void plan.refetch();
@@ -49,7 +52,7 @@ export function TodayDashboard() {
       ) : null}
 
       {loading ? (
-        <p className="text-slate-600">Loading…</p>
+        <TodayPlanSkeleton />
       ) : stats && stats.total === 0 ? (
         <div className="space-y-4 rounded-xl border border-dashed border-slate-300 p-6">
           <p className="text-slate-700">
@@ -89,7 +92,9 @@ export function TodayDashboard() {
               Start practice
             </button>
           </section>
-          {dueItems.length > 0 ? (
+          {dueLoading ? (
+            <DueRowsSkeleton />
+          ) : dueItems.length > 0 ? (
             <section>
               <h2 className="text-lg font-semibold">Due now</h2>
               <ul className="mt-2 space-y-2">

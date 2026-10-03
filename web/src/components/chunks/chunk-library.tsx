@@ -1,4 +1,5 @@
 import { AppLink } from "@/components/app-link";
+import { ChunkListSkeleton } from "@/components/shell/shell-loading";
 import { useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
@@ -15,7 +16,7 @@ export function ChunkLibrary() {
   });
   const items = chunks.data ?? [];
   const error = queryErrorMessage(chunks.error);
-  const loading = chunks.isPending;
+  const loading = chunks.isPending && !error;
 
   return (
     <div className="space-y-6">
@@ -50,7 +51,7 @@ export function ChunkLibrary() {
       {error ? (
         <p className="text-sm text-red-700">{error}</p>
       ) : loading ? (
-        <p className="text-slate-600">Loading chunks…</p>
+        <ChunkListSkeleton />
       ) : items.length === 0 ? (
         <p className="text-slate-600">
           No chunks yet. Generate a dialogue or create a custom chunk.
