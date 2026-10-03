@@ -27,9 +27,9 @@ export function reportUnexpectedQueryError(
 }
 
 /**
- * One client per mounted `QueryProvider`. The provider lives in the `(app)`
- * layout, so leaving the signed-in app (sign-out redirects to `/auth/*`)
- * drops the cache and the next learner starts empty.
+ * One client per mounted `QueryProvider`. The signed-in app provider lives in
+ * the `(app)` layout, so leaving it (sign-out redirects to `/auth/*`) drops
+ * that cache. Marketing mounts a separate client for the landing CTA.
  */
 export function createQueryClient(): QueryClient {
   return new QueryClient({

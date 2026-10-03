@@ -71,6 +71,11 @@ export function buildOpenApiDocument(baseUrl?: string) {
         description:
           'Sentences a learner typed or pasted from outside the app. Each row belongs to one account.',
       },
+      {
+        name: 'Onboarding',
+        description:
+          'Whether this account has finished onboarding. Stored on the learner row so it follows them across devices.',
+      },
       { name: 'Export', description: 'Export chunks to external study tools.' },
     ],
     paths: {
@@ -206,6 +211,53 @@ export function buildOpenApiDocument(baseUrl?: string) {
               },
             },
             '404': { $ref: '#/components/responses/NotFound' },
+          },
+        },
+      },
+      '/api/onboarding': {
+        get: {
+          tags: ['Onboarding'],
+          summary: 'Read whether the signed-in learner finished onboarding',
+          description:
+            'A learner with no users row yet is not finished. Completion is per account, not per browser.',
+          security: signedIn,
+          responses: {
+            '200': {
+              description: 'Onboarding status for this account.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/OnboardingStatus' },
+                },
+              },
+            },
+            '401': { $ref: '#/components/responses/Unauthorized' },
+          },
+        },
+        put: {
+          tags: ['Onboarding'],
+          summary: 'Set whether the signed-in learner finished onboarding',
+          description:
+            'Creates the learner row if needed. `complete: false` clears the flag so the wizard can run again.',
+          security: signedIn,
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/SetOnboardingStatus' },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Updated onboarding status.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/OnboardingStatus' },
+                },
+              },
+            },
+            '400': { $ref: '#/components/responses/BadRequest' },
+            '401': { $ref: '#/components/responses/Unauthorized' },
           },
         },
       },
@@ -567,6 +619,20 @@ export function buildOpenApiDocument(baseUrl?: string) {
           properties: {
             items: { type: 'array', items: { type: 'object' } },
             nextCursor: { type: ['string', 'null'] },
+          },
+        },
+        OnboardingStatus: {
+          type: 'object',
+          required: ['complete'],
+          properties: {
+            complete: { type: 'boolean' },
+          },
+        },
+        SetOnboardingStatus: {
+          type: 'object',
+          required: ['complete'],
+          properties: {
+            complete: { type: 'boolean' },
           },
         },
         SavedSentence: {

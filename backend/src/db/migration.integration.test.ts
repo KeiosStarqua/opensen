@@ -64,6 +64,28 @@ describe('Phase 1 migrations', () => {
     }
   })
 
+  it('adds users.onboarding_completed_at as a nullable timestamp', async () => {
+    const columns = await sql<{
+      column_name: string
+      is_nullable: string
+      data_type: string
+    }[]>`
+      select column_name, is_nullable, data_type
+      from information_schema.columns
+      where table_schema = 'public'
+        and table_name = 'users'
+        and column_name = 'onboarding_completed_at'
+    `
+
+    expect(columns).toEqual([
+      {
+        column_name: 'onboarding_completed_at',
+        is_nullable: 'YES',
+        data_type: 'timestamp with time zone',
+      },
+    ])
+  })
+
   it('stores embeddings.vector as vector(1536)', async () => {
     const columns = await sql<{
       column_name: string

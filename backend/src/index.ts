@@ -11,6 +11,7 @@ import { chunks } from './routes/chunks.js'
 import { dialogues } from './routes/dialogues.js'
 import { exportRoutes } from './routes/export.js'
 import { health } from './routes/health.js'
+import { onboarding } from './routes/onboarding.js'
 import { practice } from './routes/practice.js'
 import { savedSentences } from './routes/saved-sentences.js'
 import { situations } from './routes/situations.js'
@@ -57,6 +58,7 @@ app.get('/', (c) => {
       dialogues: '/api/dialogues',
       practice: '/api/practice',
       savedSentences: '/api/saved-sentences',
+      onboarding: '/api/onboarding',
       export: '/api/export',
     },
   })
@@ -82,6 +84,7 @@ app.route('/api/chunks', chunks)
 app.route('/api/dialogues', dialogues)
 app.route('/api/practice', practice)
 app.route('/api/saved-sentences', savedSentences)
+app.route('/api/onboarding', onboarding)
 app.route('/api/export', exportRoutes)
 
 export default app

@@ -29,7 +29,7 @@ import {
   type OnboardingGoal,
   type OnboardingPreviewLine,
 } from "@/lib/onboarding-goals";
-import { markOnboardingComplete } from "@/lib/onboarding-storage";
+import { useSetOnboardingComplete } from "@/lib/query/hooks/onboarding";
 import { captureOperationalError } from "@/lib/observability/operational-error";
 import { savePracticeFocusQueue } from "@/lib/practice/focus-queue";
 import type { DuePracticeItem } from "@/lib/practice/types";
@@ -64,6 +64,7 @@ function speak(text: string) {
 
 export function OnboardingExperience() {
   const router = useRouter();
+  const setOnboardingComplete = useSetOnboardingComplete();
   const resultRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<WizardStep>("goal");
   const [selectedLabel, setSelectedLabel] = useState<string>(onboardingGoals[0].label);
@@ -114,7 +115,7 @@ export function OnboardingExperience() {
       {
         onSuccess: () => {
           setStep("result");
-          markOnboardingComplete();
+          setOnboardingComplete.mutate(true);
         },
       },
     );

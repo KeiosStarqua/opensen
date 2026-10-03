@@ -1,9 +1,8 @@
 "use client";
 
 import { AppRoutes } from "@/lib/app-routes";
-import { ONBOARDING_COMPLETE_KEY } from "@/lib/onboarding-storage";
 import { siteConfig } from "@/lib/site";
-import { useOnboardingComplete } from "@/lib/use-onboarding-complete";
+import { useOnboardingStatus } from "@/lib/query/hooks/onboarding";
 
 export type PrimaryCta = {
   href: string;
@@ -11,19 +10,14 @@ export type PrimaryCta = {
 };
 
 /**
- * Landing-page primary CTA: returning users who already finished onboarding
- * jump straight into the app instead of being sent through onboarding again.
+ * Landing-page primary CTA. A signed-in learner who already finished
+ * onboarding on this account opens the app. Everyone else starts onboarding.
  */
 export function usePrimaryCta(getStartedLabel = "Get started"): PrimaryCta {
-  const done = useOnboardingComplete();
+  const status = useOnboardingStatus();
 
-  if (done) {
+  if (status.data?.complete) {
     return { href: AppRoutes.home, label: "Open App" };
   }
   return { href: siteConfig.trialHref, label: getStartedLabel };
 }
-
-// Re-exported so callers only need one import for the storage key if they
-// need to react to onboarding completion elsewhere (e.g. dispatching a
-// "storage" event manually after same-tab writes).
-export { ONBOARDING_COMPLETE_KEY };

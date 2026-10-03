@@ -87,6 +87,13 @@ describe('ownership columns', () => {
   })
 })
 
+describe('learner onboarding', () => {
+  it('stores completion on the account, not a separate preferences row', () => {
+    expect(users.onboardingCompletedAt.name).toBe('onboarding_completed_at')
+    expect(users.onboardingCompletedAt.notNull).toBe(false)
+  })
+})
+
 describe('saved sentences', () => {
   it('is a learner-owned table, separate from catalog chunks', () => {
     expect(getTableName(savedSentences)).toBe('saved_sentences')

@@ -6,6 +6,8 @@ import { useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
 import { ONBOARDING_COMPLETE_KEY } from "@/lib/onboarding-storage";
+import { queryErrorMessage } from "@/lib/query/api-query";
+import { useSetOnboardingComplete } from "@/lib/query/hooks/onboarding";
 import {
   applyThemeMode,
   getLearnerSettings,
@@ -18,6 +20,7 @@ const DEFAULTS = getLearnerSettings();
 
 export function SettingsForm() {
   const router = useRouter();
+  const setOnboardingComplete = useSetOnboardingComplete();
   const [settings, setSettings] = useState<LearnerSettings>(() =>
     typeof window === "undefined" ? DEFAULTS : getLearnerSettings(),
   );
@@ -30,10 +33,14 @@ export function SettingsForm() {
     }
   }
 
+  const redoError = queryErrorMessage(setOnboardingComplete.error);
+
   function redoOnboarding() {
     update({ onboardingComplete: false });
     window.localStorage.removeItem(ONBOARDING_COMPLETE_KEY);
-    router.push(AppRoutes.onboarding);
+    setOnboardingComplete.mutate(false, {
+      onSuccess: () => router.push(AppRoutes.onboarding),
+    });
   }
 
   return (
@@ -113,10 +120,12 @@ export function SettingsForm() {
         <button
           type="button"
           onClick={redoOnboarding}
+          disabled={setOnboardingComplete.isPending}
           className="rounded-lg border px-4 py-2 text-sm font-medium"
         >
           Redo onboarding
         </button>
+        {redoError ? <p className="text-sm text-red-700">{redoError}</p> : null}
       </div>
       <Link href={AppRoutes.export} className="text-sm text-emerald-800 underline">
         Export to Anki

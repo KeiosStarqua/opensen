@@ -41,6 +41,7 @@ Identity, goals, and preferences. Example: Nguyễn wants travel communication i
 | `target_language` | L2 (e.g. English) |
 | `level` | Current proficiency |
 | `created_at` | Account creation time |
+| `onboarding_completed_at` | When this account finished onboarding. Null means the wizard is still due. The flag follows the account across devices |
 
 ### `user_preferences`
 

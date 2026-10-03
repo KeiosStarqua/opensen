@@ -26,6 +26,10 @@ export const queryKeys = {
     list: () => ["savedSentences", "list"] as const,
     detail: (id: string) => ["savedSentences", "detail", id] as const,
   },
+  onboarding: {
+    all: ["onboarding"] as const,
+    status: () => ["onboarding", "status"] as const,
+  },
   practice: {
     all: ["practice"] as const,
     plan: () => ["practice", "plan"] as const,

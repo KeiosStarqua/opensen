@@ -1,5 +1,7 @@
 import { Caveat, Nunito } from "next/font/google";
 
+import { QueryProvider } from "@/lib/query/query-provider";
+
 const nunito = Nunito({
   subsets: ["latin"],
   weight: ["500", "600", "700", "800"],
@@ -18,8 +20,10 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`${nunito.variable} ${caveat.variable} font-studio`}>
-      {children}
-    </div>
+    <QueryProvider>
+      <div className={`${nunito.variable} ${caveat.variable} font-studio`}>
+        {children}
+      </div>
+    </QueryProvider>
   );
 }

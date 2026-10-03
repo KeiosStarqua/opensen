@@ -103,6 +103,8 @@ Page analytics is `onedollarstats` in the root layout. Error monitoring is `@sen
 | `POST /api/dialogues/generate` | AI dialogue pack | Anonymous. A signed-in caller enrolls persisted chunks. |
 | `GET /api/dialogues`, `GET /api/dialogues/:id` | Stored dialogues | Anonymous. Empty list or `501` while persistence is off. |
 | `GET /api/practice/due`, `GET /api/practice/plan`, `POST /api/practice/reviews` | Due queue, plan, FSRS grade | Signed in. |
+| `GET /api/saved-sentences`, `GET /api/saved-sentences/:id`, `POST /api/saved-sentences` | Sentences the learner saved from outside the app | Signed in. |
+| `GET /api/onboarding`, `PUT /api/onboarding` | Whether this account finished onboarding | Signed in. |
 | `GET /api/export/anki` | Anki deck text for enrolled or all chunks | Signed in. |
 
 `GET /openapi.json` is a hand-authored OpenAPI 3.1 document in `src/openapi.ts`. `GET /docs` renders it with Scalar. Route handlers do not carry doc annotations; a contract change updates `src/openapi.ts` in the same change.
@@ -115,7 +117,7 @@ CORS applies to `/api/*`, `/health`, and `/health/*`. Default origins are `http:
 
 No header means anonymous. A malformed, invalid, or expired token is 401 on every `/api` route, including routes that also allow anonymous calls. A token while `NEON_AUTH_BASE_URL` is unset is 503. A JWKS outage is 500.
 
-The Postgres `users` row is a shadow of that `sub`. `ensureLearner` inserts it on the first owned write, with placeholder profile fields. Account name and email live in Neon Auth (`auth.updateUser` on the web). `user_preferences` exists in the schema and has no route writer.
+The Postgres `users` row is a shadow of that `sub`. `ensureLearner` inserts it on the first owned write, with placeholder profile fields. Account name and email live in Neon Auth (`auth.updateUser` on the web). `users.onboarding_completed_at` is the account onboarding flag (`GET`/`PUT /api/onboarding`); null means the wizard is still due. `user_preferences` exists in the schema and has no route writer.
 
 ## Where business rules live
 
@@ -144,7 +146,7 @@ Drizzle schema modules under `backend/src/db/schema/`: `users`, `content`, `gene
 
 Migrations are checked-in SQL under `backend/drizzle/`. Apply them from `backend/` with `npm run db:migrate`. CLI scripts load gitignored `.env.local` then `.env`; a variable already in the shell wins. Connection order for DDL is `MIGRATION_DATABASE_URL`, then `DATABASE_URL_UNPOOLED`, then `DATABASE_URL`. Neon project policy is `backend/neon.ts`.
 
-Tables that exist and are written by current routes: situations, intents, sentence patterns, pattern intents, slots, variants, chunks, dialogues, dialogue lines, line chunks, AI generation traces, `users` (via `ensureLearner`), `user_chunks`, `review_history`.
+Tables that exist and are written by current routes: situations, intents, sentence patterns, pattern intents, slots, variants, chunks, dialogues, dialogue lines, line chunks, AI generation traces, `users` (via `ensureLearner`, and `onboarding_completed_at` via `PUT /api/onboarding`), `user_chunks`, `review_history`.
 
 Tables that exist in Drizzle and are not written by a route today: `user_preferences`, `practice_items`, `practice_attempts`, `embeddings` (pgvector `vector(1536)`). `words`, `chunk_words`, and `audio_assets` are described in the database document and are not in the Drizzle schema.
 

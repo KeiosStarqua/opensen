@@ -16,6 +16,10 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
+  /** Set when this account finishes onboarding. Null means the wizard is still due. */
+  onboardingCompletedAt: timestamp('onboarding_completed_at', {
+    withTimezone: true,
+  }),
 })
 
 export const userPreferences = pgTable('user_preferences', {
