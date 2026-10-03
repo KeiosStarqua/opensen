@@ -12,6 +12,12 @@ export type AnkiExportScope = "enrolled" | "all";
 /** `downloaded` started a file download; `empty` means the scope has no notes. */
 export type AnkiExportOutcome = "downloaded" | "empty";
 
+export const ANKI_PACKAGE_MEDIA_TYPE = "application/apkg";
+
+export function ankiExportFilename(scope: AnkiExportScope): string {
+  return `opensen-anki-${scope}.apkg`;
+}
+
 function reportExportError(error: ApiError) {
   if (!isOperationalApiError(error)) return;
   captureOperationalError(error, {
@@ -28,10 +34,12 @@ function fail(error: ApiError): never {
 }
 
 /**
- * Anki deck download. The response is a file, not JSON, so this is the one
- * raw `fetch` to the API; it still sends the session bearer.
+ * Anki package download. The response is an `.apkg` file, not JSON, so this
+ * is the one raw `fetch` to the API; it still sends the session bearer.
  */
-async function downloadAnkiDeck(scope: AnkiExportScope): Promise<AnkiExportOutcome> {
+export async function downloadAnkiDeck(
+  scope: AnkiExportScope,
+): Promise<AnkiExportOutcome> {
   const baseUrl = resolveApiBaseUrl();
   let response: Response;
   try {
@@ -59,11 +67,13 @@ async function downloadAnkiDeck(scope: AnkiExportScope): Promise<AnkiExportOutco
       return "empty";
     }
   }
-  const blob = await response.blob();
+  const blob = new Blob([await response.arrayBuffer()], {
+    type: ANKI_PACKAGE_MEDIA_TYPE,
+  });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `opensen-anki-${scope}.txt`;
+  anchor.download = ankiExportFilename(scope);
   anchor.click();
   URL.revokeObjectURL(url);
   return "downloaded";
