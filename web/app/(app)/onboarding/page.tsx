@@ -1,4 +1,5 @@
 import { OnboardingExperience } from "@/components/onboarding/onboarding-experience";
+import { OnboardingGate } from "@/components/onboarding/onboarding-gate";
 
 export const metadata = {
   title: "Start practicing",
@@ -7,5 +8,9 @@ export const metadata = {
 };
 
 export default function OnboardingPage() {
-  return <OnboardingExperience />;
+  return (
+    <OnboardingGate>
+      <OnboardingExperience />
+    </OnboardingGate>
+  );
 }
