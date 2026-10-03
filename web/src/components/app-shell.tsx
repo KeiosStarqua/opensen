@@ -5,6 +5,8 @@ import { SignOutButton } from "@/components/auth/sign-out-button";
 import { flushSync } from "react-dom";
 
 import { AppRoutes, shellTabRoutes } from "@/lib/app-routes";
+import { authClient } from "@/lib/auth/client";
+import { sidebarAccountLabel } from "@/lib/auth/sidebar-account-label";
 
 import {
   ExploreIcon,
@@ -30,9 +32,18 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  accountName,
+}: {
+  children: React.ReactNode;
+  /** Session name from the shell loader, used until `useSession` has a user. */
+  accountName?: string | null;
+}) {
   const pathname = useLocation({ select: (location) => location.pathname });
   const { resetPracticeDeck } = useStudio();
+  const { data: session } = authClient.useSession();
+  const accountLabel = sidebarAccountLabel(session?.user ? session.user.name : accountName);
   const profileActive = pathname === AppRoutes.profile;
 
   return (
@@ -79,8 +90,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               profileActive ? "bg-sen-soft text-sen-primary" : "text-[#5e6f66] hover:bg-[#f4f8f5]"
             }`}
           >
-            <ProfileAvatar className="h-9 w-9" />
-            Profile
+            <ProfileAvatar className="h-9 w-9 shrink-0" />
+            <span className="min-w-0 truncate" title={accountLabel}>
+              {accountLabel}
+            </span>
           </AppLink>
         </div>
       </aside>
@@ -126,7 +139,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         })}
         <AppLink
           href={AppRoutes.profile}
-          aria-label="Profile"
+          aria-label={accountLabel}
           aria-current={profileActive ? "page" : undefined}
           className={`grid h-11 w-11 place-items-center rounded-xl ${
             profileActive ? "bg-sen-soft text-sen-primary" : "text-[#5e6f66]"
