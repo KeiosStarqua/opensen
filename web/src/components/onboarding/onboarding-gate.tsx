@@ -1,7 +1,7 @@
 import { useAppNavigate } from "@/lib/use-app-navigate";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { ONBOARDING_COMPLETE_KEY, onboardingEntryHref } from "@/lib/onboarding-storage";
+import { clearOnboardingComplete, onboardingEntryHref } from "@/lib/onboarding-storage";
 import {
   useOnboardingStatus,
   useSetOnboardingComplete,
@@ -41,7 +41,7 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
     legacySyncStarted.current = true;
     setComplete.mutate(true, {
       onSuccess: () => {
-        window.localStorage.removeItem(ONBOARDING_COMPLETE_KEY);
+        clearOnboardingComplete();
       },
     });
   }, [needsLegacySync, setComplete]);
