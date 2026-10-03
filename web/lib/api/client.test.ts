@@ -58,6 +58,24 @@ describe("createApiClient", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it("calls fetch unbound, as browsers require for window.fetch", async () => {
+    const browserLikeFetch = function (this: unknown) {
+      if (this !== undefined && this !== globalThis) {
+        throw new TypeError("Failed to execute 'fetch' on 'Window': Illegal invocation");
+      }
+      return Promise.resolve(new Response(JSON.stringify({ items: [] }), { status: 200 }));
+    } as unknown as typeof fetch;
+
+    const client = createApiClient({
+      fetch: browserLikeFetch,
+      baseUrl: "http://api.test",
+      getAccessToken: async () => null,
+    });
+
+    const result = await client.request("/api/saved-sentences");
+    expect(result.ok).toBe(true);
+  });
+
   it("parses 501 HTTP errors", async () => {
     const fetchMock = vi.fn(async () =>
       new Response(

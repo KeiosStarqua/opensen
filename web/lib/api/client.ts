@@ -95,6 +95,10 @@ export function reportApiError(
 export type ApiClient = ReturnType<typeof createApiClient>;
 
 export function createApiClient(deps: ApiClientDeps) {
+  // Browsers throw "Illegal invocation" when `window.fetch` runs with `this`
+  // bound to another object, so it must not be called as `deps.fetch(...)`.
+  const fetchFn = deps.fetch;
+
   async function request<T>(
     path: string,
     init: RequestInit = {},
@@ -117,7 +121,7 @@ export function createApiClient(deps: ApiClientDeps) {
 
     let response: Response;
     try {
-      response = await deps.fetch(url, { ...init, headers });
+      response = await fetchFn(url, { ...init, headers });
     } catch (caught) {
       const error = new ApiError(
         "network",
