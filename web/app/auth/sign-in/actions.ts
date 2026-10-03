@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth/server";
 import { safeNextPath } from "@/lib/auth/redirect";
-import { captureOperationalError } from "@/lib/observability/operational-error";
+import { reportAuthFormError } from "@/lib/observability/auth-form-error";
 
 export async function signInWithEmail(
   _prevState: { error: string } | null,
@@ -17,10 +17,7 @@ export async function signInWithEmail(
 
   if (error) {
     const message = error.message || "Failed to sign in. Try again";
-    captureOperationalError(new Error(message), {
-      surface: "auth",
-      action: "sign-in",
-    });
+    reportAuthFormError("sign-in", message, { sdkError: error });
     return { error: message };
   }
 

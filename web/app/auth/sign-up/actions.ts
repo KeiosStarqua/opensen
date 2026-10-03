@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth/server";
 import { safeNextPath } from "@/lib/auth/redirect";
-import { captureOperationalError } from "@/lib/observability/operational-error";
+import { reportAuthFormError } from "@/lib/observability/auth-form-error";
 
 export async function signUpWithEmail(
   _prevState: { error: string } | null,
@@ -13,7 +13,9 @@ export async function signUpWithEmail(
   const email = formData.get("email") as string;
 
   if (!email) {
-    return { error: "Email address must be provided." };
+    const message = "Email address must be provided.";
+    reportAuthFormError("sign-up", message, { reason: "empty-field" });
+    return { error: message };
   }
 
   const { error } = await auth.signUp.email({
@@ -24,10 +26,7 @@ export async function signUpWithEmail(
 
   if (error) {
     const message = error.message || "Failed to create account";
-    captureOperationalError(new Error(message), {
-      surface: "auth",
-      action: "sign-up",
-    });
+    reportAuthFormError("sign-up", message, { sdkError: error });
     return { error: message };
   }
 
