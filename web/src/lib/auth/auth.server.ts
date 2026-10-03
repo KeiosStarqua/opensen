@@ -82,11 +82,23 @@ export function getAuth(): NeonAuthServer {
   return cachedServer;
 }
 
+/**
+ * The `session_data` cookie cache answers `get-session` without the
+ * `set-auth-jwt` header, so the browser client would keep the opaque session
+ * token and send it to the API as a bearer, which the API rejects.
+ */
+function bypassSessionCookieCache(request: Request, path: string): Request {
+  if (path !== "get-session" || request.method !== "GET") return request;
+  const url = new URL(request.url);
+  url.searchParams.set("disableCookieCache", "true");
+  return new Request(url, request);
+}
+
 /** Proxies a browser `/api/auth/<path>` call to Neon Auth. */
 export function proxyAuthRequest(request: Request, path: string): Promise<Response> {
   const config = proxyConfig();
   return handleAuthProxyRequest({
-    request,
+    request: bypassSessionCookieCache(request, path),
     path,
     baseUrl: config.baseUrl,
     cookieSecret: config.cookieSecret,
