@@ -14,7 +14,7 @@ export function PracticePlanView() {
   const due = usePracticeDue(50);
   const stats = plan.data ?? null;
   const items = due.data ?? [];
-  const error = queryErrorMessage(plan.error);
+  const error = stats ? null : queryErrorMessage(plan.error);
   const loading = plan.isPending;
 
   function startPractice() {

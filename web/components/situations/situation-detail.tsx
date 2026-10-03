@@ -9,7 +9,7 @@ import { useSituation } from "@/lib/query/hooks/situations";
 export function SituationDetail({ situationId }: { situationId: string }) {
   const { data: detail, error: queryError, isPending: loading } =
     useSituation(situationId);
-  const error = queryErrorMessage(queryError);
+  const error = detail ? null : queryErrorMessage(queryError);
 
   if (loading) {
     return <p className="text-slate-600">Loading…</p>;

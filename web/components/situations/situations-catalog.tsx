@@ -10,9 +10,12 @@ import { queryErrorMessage } from "@/lib/query/api-query";
 import { useSituationsList } from "@/lib/query/hooks/situations";
 
 export function SituationsCatalog() {
-  const { data: items = [], error: queryError, isPending: loading } =
-    useSituationsList({ limit: 50 });
-  const error = queryErrorMessage(queryError);
+  const { data, error: queryError, isPending: loading } = useSituationsList({
+    limit: 50,
+  });
+  const items = data ?? [];
+  // A failed background refetch keeps the cached catalog on screen.
+  const error = data ? null : queryErrorMessage(queryError);
 
   useEffect(() => {
     if (queryError instanceof ApiError) {
