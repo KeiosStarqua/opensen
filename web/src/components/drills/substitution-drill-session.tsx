@@ -1,4 +1,5 @@
 import { AppLink } from "@/components/app-link";
+import { DrillPromptSkeleton } from "@/components/practice/practice-loading";
 import { useEffect, useMemo, useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
@@ -84,7 +85,12 @@ export function SubstitutionDrillSession({ patternId }: { patternId: string }) {
   }
 
   if (!current && !done) {
-    return <p className="text-slate-600">Loading drill…</p>;
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold">Substitution drill</h1>
+        <DrillPromptSkeleton />
+      </div>
+    );
   }
 
   if (done) {
