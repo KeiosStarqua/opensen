@@ -74,7 +74,7 @@ The signed-in shell (`components/studio/`, `components/app-shell.tsx`) has two s
 
 **Studio** uses static lesson copy in `lib/studio/content.ts` and in-memory session state in `StudioProvider` (hearts, streak, saved sentences, word-order deck). It does not read Postgres. Routes: `/home`, `/learn`, `/learn/[topic]`, `/learn/[topic]/[step]`, `/practice`, `/practice/speak`, `/practice/done`, `/explore`, `/library`, `/profile`.
 
-**API-backed study** is linked from Explore and from direct routes: `/today`, `/plan`, `/situations`, `/patterns`, `/chunks`, `/dialogues`, `/drills/[patternId]`, `/practice/session`, `/export`, `/settings`, `/onboarding`. These screens call `lib/api/routes/*`.
+**API-backed study** is linked from Explore and from direct routes: `/today`, `/plan`, `/situations`, `/patterns`, `/chunks`, `/dialogues`, `/drills/[patternId]`, `/practice/session`, `/export`, `/settings`, `/onboarding`. These screens call `lib/api/routes/*` through TanStack Query hooks in `lib/query/hooks/`. `QueryProvider`, mounted by `app/(app)/layout.tsx`, holds the cache for the signed-in session, so Today, Plan, and Library share fetched data, and a review, chunk edit, or persisted dialogue invalidates the screens it affects.
 
 Browser-local pieces on the API-backed path:
 
