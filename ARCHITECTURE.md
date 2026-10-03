@@ -103,7 +103,7 @@ Page analytics is `onedollarstats` in the root route. Error monitoring is `@sent
 | `POST /api/dialogues/generate` | AI dialogue pack | Anonymous. A signed-in caller enrolls persisted chunks. |
 | `GET /api/dialogues`, `GET /api/dialogues/:id` | Stored dialogues | Anonymous. Empty list or `501` while persistence is off. |
 | `GET /api/practice/due`, `GET /api/practice/plan`, `POST /api/practice/reviews` | Due queue, plan, FSRS grade | Signed in. |
-| `GET /api/saved-sentences`, `GET /api/saved-sentences/:id`, `POST /api/saved-sentences` | Sentences the learner saved from outside the app | Signed in. |
+| `GET /api/saved-sentences`, `GET /api/saved-sentences/:id`, `POST /api/saved-sentences`, `PATCH /api/saved-sentences/:id` | Sentences the learner saved from outside the app. Patch replaces the owner’s text. | Signed in. |
 | `GET /api/onboarding`, `PUT /api/onboarding` | Whether this account finished onboarding | Signed in. |
 | `GET /api/export/anki` | Anki deck text for enrolled or all chunks | Signed in. |
 

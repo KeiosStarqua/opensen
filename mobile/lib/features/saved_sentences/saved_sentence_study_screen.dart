@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/di/providers.dart';
 import '../../core/theme/phosphor_icons.dart';
 import '../../domain/entities/saved_sentence.dart';
+import '../../domain/repositories/saved_sentence_repository.dart';
 import '../../domain/services/answer_matcher.dart';
 import 'saved_sentence_providers.dart';
 
@@ -21,12 +22,43 @@ class SavedSentenceStudyScreen extends ConsumerStatefulWidget {
 class _SavedSentenceStudyScreenState
     extends ConsumerState<SavedSentenceStudyScreen> {
   final TextEditingController _typed = TextEditingController();
+  final TextEditingController _edit = TextEditingController();
   String? _result;
+  String? _formError;
+  bool _saving = false;
+  String? _seededId;
 
   @override
   void dispose() {
     _typed.dispose();
+    _edit.dispose();
     super.dispose();
+  }
+
+  Future<void> _save(SavedSentence sentence) async {
+    setState(() {
+      _saving = true;
+      _formError = null;
+    });
+    try {
+      final updated = await ref.read(editHeardSentenceUseCaseProvider).call(
+            id: sentence.id,
+            raw: _edit.text,
+          );
+      _edit.text = updated.text;
+      ref.invalidate(savedSentencesProvider);
+      ref.invalidate(savedSentenceProvider(widget.id));
+    } on FormatException catch (error) {
+      _formError = error.message;
+    } on SavedSentenceNotFoundException catch (error) {
+      _formError = error.toString();
+    } on SavedSentenceAccessException catch (error) {
+      _formError = error.toString();
+    } catch (error) {
+      _formError = '$error';
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   Future<void> _speak(String text) async {
@@ -63,6 +95,10 @@ class _SavedSentenceStudyScreenState
               child: Text('That sentence is not on this account.'),
             );
           }
+          if (_seededId != item.id) {
+            _seededId = item.id;
+            _edit.text = item.text;
+          }
           return ListView(
             padding: const EdgeInsets.all(16),
             children: <Widget>[
@@ -77,6 +113,27 @@ class _SavedSentenceStudyScreenState
                 label: const Text('Listen'),
               ),
               const SizedBox(height: 16),
+              TextField(
+                controller: _edit,
+                minLines: 2,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'Sentence',
+                ),
+              ),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: _saving ? null : () => _save(item),
+                child: Text(_saving ? 'Saving…' : 'Save changes'),
+              ),
+              if (_formError != null) ...<Widget>[
+                const SizedBox(height: 8),
+                Text(
+                  _formError!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ],
+              const SizedBox(height: 24),
               TextField(
                 controller: _typed,
                 minLines: 2,

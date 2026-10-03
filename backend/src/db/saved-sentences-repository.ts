@@ -14,6 +14,8 @@ export type SavedSentencesRepository = {
   create(ownerId: string, text: string): Promise<SavedSentence>
   list(ownerId: string): Promise<SavedSentence[]>
   getById(ownerId: string, id: string): Promise<SavedSentence | null>
+  /** Null when this owner has no row with that id. Does not reveal another learner’s row. */
+  update(ownerId: string, id: string, text: string): Promise<SavedSentence | null>
 }
 
 const LIST_LIMIT = 100
@@ -64,6 +66,17 @@ export function createSavedSentencesRepository(
           and(eq(savedSentences.id, id), eq(savedSentences.ownerId, ownerId)),
         )
         .limit(1)
+      return row ? toSentence(row) : null
+    },
+
+    async update(ownerId, id, text) {
+      const [row] = await database
+        .update(savedSentences)
+        .set({ text })
+        .where(
+          and(eq(savedSentences.id, id), eq(savedSentences.ownerId, ownerId)),
+        )
+        .returning()
       return row ? toSentence(row) : null
     },
   }

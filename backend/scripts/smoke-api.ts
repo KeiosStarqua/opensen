@@ -227,6 +227,15 @@ function buildChecks(api: Fetch, authed: Fetch, write: boolean): Check[] {
         if (!saved?.id || saved.text !== text) throw new Error('saved sentence mismatch')
         const detail = await authed(`/api/saved-sentences/${saved.id}`)
         expectStatus(detail, 200)
+        const edited = `${text} (edited)`
+        const updated = await authed(`/api/saved-sentences/${saved.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: edited }),
+        })
+        expectStatus(updated, 200)
+        const after = (await readJson(updated)) as { text?: string } | null
+        if (after?.text !== edited) throw new Error('edited sentence mismatch')
       },
     })
   }

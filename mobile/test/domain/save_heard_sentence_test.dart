@@ -27,6 +27,21 @@ class _MemorySentences implements SavedSentenceRepository {
     }
     return null;
   }
+
+  @override
+  Future<SavedSentence?> update(String id, String text) async {
+    for (var index = 0; index < items.length; index++) {
+      if (items[index].id != id) continue;
+      final next = SavedSentence(
+        id: id,
+        text: text,
+        createdAt: items[index].createdAt,
+      );
+      items[index] = next;
+      return next;
+    }
+    return null;
+  }
 }
 
 void main() {

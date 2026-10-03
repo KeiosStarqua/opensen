@@ -75,8 +75,9 @@ Speech-to-text match rate is enough to start; detailed pronunciation scoring is 
 
 - The sentence list has an **Add a sentence** button. It opens a composer where the learner types or pastes one sentence from outside the app and saves it
 - Each save is a learning item owned by that account, with the exact text they entered. The sentence does not need to already exist in the catalog
-- Web and mobile read the same store. Closing the app or opening another surface still shows that sentence. Another learner does not
-- From a saved sentence the learner enters the existing study step for that text. Saving does not transcribe audio, generate a dialogue, or create an FSRS schedule
+- Opening a saved sentence lets the owner edit the wording and save. The account store keeps the new text, so web, mobile, and the study step for that sentence all use it. An empty sentence is rejected. Another learner cannot see or edit it
+- Web and mobile read the same store. Closing the app or opening another surface still shows that sentence, including after an edit. Another learner does not
+- From a saved sentence the learner enters the existing study step for the saved text. Saving or editing does not transcribe audio, generate a dialogue, or create an FSRS schedule
 
 ## Anki Export
 
