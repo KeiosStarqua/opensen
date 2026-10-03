@@ -1,0 +1,93 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:opensen/core/di/providers.dart';
+import 'package:opensen/core/platform/speech_synthesizer.dart';
+import 'package:opensen/domain/entities/learner_settings.dart';
+import 'package:opensen/domain/entities/saved_sentence.dart';
+import 'package:opensen/domain/repositories/saved_sentence_repository.dart';
+import 'package:opensen/features/saved_sentences/saved_sentence_study_screen.dart';
+import 'package:opensen/features/saved_sentences/saved_sentences_screen.dart';
+
+class _MemorySentences implements SavedSentenceRepository {
+  final List<SavedSentence> items = <SavedSentence>[];
+
+  @override
+  Future<SavedSentence> save(String text) async {
+    final sentence = SavedSentence(
+      id: 's${items.length + 1}',
+      text: text,
+      createdAt: DateTime.utc(2026, 10, 3),
+    );
+    items.add(sentence);
+    return sentence;
+  }
+
+  @override
+  Future<List<SavedSentence>> list() async => List<SavedSentence>.of(items);
+
+  @override
+  Future<SavedSentence?> getById(String id) async {
+    for (final item in items) {
+      if (item.id == id) return item;
+    }
+    return null;
+  }
+}
+
+void main() {
+  testWidgets('saves a sentence and studies that exact text', (tester) async {
+    final store = _MemorySentences();
+    final router = GoRouter(
+      routes: <RouteBase>[
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const SavedSentencesScreen(),
+        ),
+        GoRoute(
+          path: '/saved/:id',
+          builder: (context, state) => SavedSentenceStudyScreen(
+            id: state.pathParameters['id']!,
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          savedSentenceRepositoryProvider.overrideWith((ref) => store),
+          speechSynthesizerProvider.overrideWith(
+            (ref) => const SilentSpeechSynthesizer(),
+          ),
+          initialSettingsProvider.overrideWith(
+            (ref) => const LearnerSettings(onboardingComplete: true),
+          ),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nothing saved yet. Add a sentence you want to say later.'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'Could you say that again?');
+    await tester.tap(find.text('Save sentence'));
+    await tester.pumpAndSettle();
+
+    expect(store.items.single.text, 'Could you say that again?');
+    expect(find.byType(ListTile), findsOneWidget);
+
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Study this sentence'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Could you say that again?');
+    await tester.tap(find.text('Check'));
+    await tester.pump();
+
+    expect(find.text("That's the sentence."), findsOneWidget);
+    expect(store.items, hasLength(1));
+  });
+}

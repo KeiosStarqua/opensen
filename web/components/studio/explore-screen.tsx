@@ -11,6 +11,11 @@ import { useStudio } from "./studio-provider";
 import { Track } from "./ui";
 
 const moreTools = [
+  {
+    href: AppRoutes.saved,
+    title: "Sentences you heard",
+    detail: "Save a sentence from outside the app and study it.",
+  },
   { href: AppRoutes.today, title: "Due review", detail: "Sentences that are ready to recall." },
   { href: AppRoutes.plan, title: "Practice plan", detail: "What is due now and this week." },
   { href: AppRoutes.situations, title: "Situations", detail: "Build a dialogue from a real situation." },

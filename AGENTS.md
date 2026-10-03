@@ -13,6 +13,7 @@
 | Recall Practice | Produce the sentence instead of recognizing it |
 | Practice Plan | Spaced repetition schedules (FSRS, per chunk) |
 | Anki export | Take your chunks anywhere |
+| Saved sentences | Keep a sentence heard or read outside the app, then study it on the signed-in account |
 
 Durable product detail: [`docs/`](docs/). System boundaries: [`ARCHITECTURE.md`](ARCHITECTURE.md).
 

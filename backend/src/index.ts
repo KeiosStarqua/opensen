@@ -12,6 +12,7 @@ import { dialogues } from './routes/dialogues.js'
 import { exportRoutes } from './routes/export.js'
 import { health } from './routes/health.js'
 import { practice } from './routes/practice.js'
+import { savedSentences } from './routes/saved-sentences.js'
 import { situations } from './routes/situations.js'
 
 const env = loadEnv()
@@ -55,6 +56,7 @@ app.get('/', (c) => {
       chunks: '/api/chunks',
       dialogues: '/api/dialogues',
       practice: '/api/practice',
+      savedSentences: '/api/saved-sentences',
       export: '/api/export',
     },
   })
@@ -79,6 +81,7 @@ app.route('/api/situations', situations)
 app.route('/api/chunks', chunks)
 app.route('/api/dialogues', dialogues)
 app.route('/api/practice', practice)
+app.route('/api/saved-sentences', savedSentences)
 app.route('/api/export', exportRoutes)
 
 export default app

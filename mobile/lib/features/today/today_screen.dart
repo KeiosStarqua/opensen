@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../core/routing/app_routes.dart';
+import '../../core/theme/phosphor_icons.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/entities/chunk.dart';
 import '../../domain/entities/practice.dart';
@@ -59,6 +59,18 @@ class TodayScreen extends ConsumerWidget {
           builder: (data) => ListView(
             padding: const EdgeInsets.only(bottom: 32),
             children: <Widget>[
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: ListTile(
+                  leading: PhosphorIcon(PhosphorIconsRegular.quotes),
+                  title: const Text('Sentences you heard'),
+                  subtitle: const Text(
+                    'Save one and study it on your account',
+                  ),
+                  trailing: PhosphorIcon(PhosphorIconsRegular.caretRight),
+                  onTap: () => context.push(AppRoutes.savedSentences),
+                ),
+              ),
               _PlanCard(stats: data),
               if (data.total > 0) ...<Widget>[
                 _Upcoming(stats: data),

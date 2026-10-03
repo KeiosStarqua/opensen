@@ -3,12 +3,14 @@ export * from './users.js'
 export * from './content.js'
 export * from './generation.js'
 export * from './practice.js'
+export * from './saved-sentences.js'
 
 import * as enums from './enums.js'
 import * as users from './users.js'
 import * as content from './content.js'
 import * as generation from './generation.js'
 import * as practice from './practice.js'
+import * as savedSentences from './saved-sentences.js'
 
 export const schema = {
   ...enums,
@@ -16,4 +18,5 @@ export const schema = {
   ...content,
   ...generation,
   ...practice,
+  ...savedSentences,
 }

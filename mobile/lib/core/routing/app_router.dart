@@ -9,6 +9,8 @@ import '../../features/export/export_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/plan/plan_screen.dart';
 import '../../features/practice/practice_session_screen.dart';
+import '../../features/saved_sentences/saved_sentence_study_screen.dart';
+import '../../features/saved_sentences/saved_sentences_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/shell/app_shell.dart';
 import '../../features/situations/dialogue_builder_screen.dart';
@@ -116,6 +118,16 @@ GoRouter createAppRouter({
         path: '/drills/:patternId',
         builder: (context, state) =>
             DrillScreen(patternId: state.pathParameters['patternId']!),
+      ),
+      GoRoute(
+        path: AppRoutes.savedSentences,
+        builder: (context, state) => const SavedSentencesScreen(),
+      ),
+      GoRoute(
+        path: '/saved/:id',
+        builder: (context, state) => SavedSentenceStudyScreen(
+          id: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.practiceSession,

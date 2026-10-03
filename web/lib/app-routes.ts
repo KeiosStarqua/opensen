@@ -18,6 +18,8 @@ export const AppRoutes = {
 
   today: "/today",
   library: "/library",
+  saved: "/saved",
+  savedSentence: (id: string) => `/saved/${id}`,
   situations: "/situations",
   plan: "/plan",
 

@@ -43,5 +43,13 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  fonts:
+    - family: PhosphorRegular
+      fonts:
+        - asset: fonts/Phosphor.ttf
+    - family: PhosphorFill
+      fonts:
+        - asset: fonts/Phosphor-Fill.ttf
+
   assets:
     - assets/seed/content.json

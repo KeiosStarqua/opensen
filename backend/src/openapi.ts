@@ -66,6 +66,11 @@ export function buildOpenApiDocument(baseUrl?: string) {
       { name: 'Chunks', description: 'High-frequency phrases with swap patterns.' },
       { name: 'Dialogues', description: 'AI-generated memorization-ready dialogs.' },
       { name: 'Practice', description: 'FSRS spaced-repetition review on chunks.' },
+      {
+        name: 'Saved sentences',
+        description:
+          'Sentences a learner typed or pasted from outside the app. Each row belongs to one account.',
+      },
       { name: 'Export', description: 'Export chunks to external study tools.' },
     ],
     paths: {
@@ -200,6 +205,77 @@ export function buildOpenApiDocument(baseUrl?: string) {
                 },
               },
             },
+            '404': { $ref: '#/components/responses/NotFound' },
+          },
+        },
+      },
+      '/api/saved-sentences': {
+        get: {
+          tags: ['Saved sentences'],
+          summary: 'List sentences saved by the signed-in learner',
+          description:
+            'Newest first. Another learner’s sentences are never included.',
+          security: signedIn,
+          responses: {
+            '200': {
+              description: 'The learner’s saved sentences.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/SavedSentenceList' },
+                },
+              },
+            },
+            '401': { $ref: '#/components/responses/Unauthorized' },
+          },
+        },
+        post: {
+          tags: ['Saved sentences'],
+          summary: 'Save a sentence the learner heard or read',
+          description:
+            'Creates a learning item owned by the caller. The sentence does not need to exist in the catalog. Does not schedule an FSRS review.',
+          security: signedIn,
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/SaveSentence' },
+              },
+            },
+          },
+          responses: {
+            '201': {
+              description: 'Sentence saved.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/SavedSentence' },
+                },
+              },
+            },
+            '400': { $ref: '#/components/responses/BadRequest' },
+            '401': { $ref: '#/components/responses/Unauthorized' },
+          },
+        },
+      },
+      '/api/saved-sentences/{id}': {
+        get: {
+          tags: ['Saved sentences'],
+          summary: 'Get one saved sentence',
+          description:
+            'Returns the sentence when the caller owns it, so a study step can open that exact text. Missing and other learners’ rows are both 404.',
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          ],
+          security: signedIn,
+          responses: {
+            '200': {
+              description: 'The saved sentence.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/SavedSentence' },
+                },
+              },
+            },
+            '401': { $ref: '#/components/responses/Unauthorized' },
             '404': { $ref: '#/components/responses/NotFound' },
           },
         },
@@ -491,6 +567,32 @@ export function buildOpenApiDocument(baseUrl?: string) {
           properties: {
             items: { type: 'array', items: { type: 'object' } },
             nextCursor: { type: ['string', 'null'] },
+          },
+        },
+        SavedSentence: {
+          type: 'object',
+          required: ['id', 'text', 'createdAt'],
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            text: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        SavedSentenceList: {
+          type: 'object',
+          required: ['items'],
+          properties: {
+            items: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/SavedSentence' },
+            },
+          },
+        },
+        SaveSentence: {
+          type: 'object',
+          required: ['text'],
+          properties: {
+            text: { type: 'string', minLength: 1, maxLength: 500 },
           },
         },
         CreateChunk: {

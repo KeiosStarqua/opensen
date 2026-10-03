@@ -68,6 +68,12 @@ describe("queryKeys", () => {
     expect(queryKeys.chunks.list({ q: "hi" }).slice(0, 2)).toEqual(
       queryKeys.chunks.lists(),
     );
+    expect(queryKeys.savedSentences.list().slice(0, 1)).toEqual(
+      queryKeys.savedSentences.all,
+    );
+    expect(queryKeys.savedSentences.detail("id").slice(0, 1)).toEqual(
+      queryKeys.savedSentences.all,
+    );
   });
 
   it("keeps the session deck outside the practice prefix", () => {

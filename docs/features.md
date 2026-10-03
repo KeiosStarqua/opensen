@@ -69,6 +69,15 @@ Speech-to-text match rate is enough to start; detailed pronunciation scoring is 
 - Grading stays simple: Forgot / Hard / Good / Easy
 - Connects library content to daily practice habits
 
+## Saved sentences
+
+**Keep a sentence you heard or read, then study it.**
+
+- The learner types or pastes one sentence from outside the app and saves it
+- Each save is a learning item owned by that account, with the exact text they entered. The sentence does not need to already exist in the catalog
+- Web and mobile read the same store. Closing the app or opening another surface still shows that sentence. Another learner does not
+- From a saved sentence the learner enters the existing study step for that text. Saving does not transcribe audio, generate a dialogue, or create an FSRS schedule
+
 ## Anki Export
 
 **Take your chunks anywhere.**
@@ -91,6 +100,7 @@ flowchart LR
   Recall --> Plan[Practice Plan]
   Plan --> Recall
   Chunks --> Anki[Anki Export]
+  Heard[Saved sentences] --> Recall
 ```
 
 Situations inform what to generate; Dialog Builder produces material; Chunk Library holds durable units; Substitution Drills and Recall Practice convert those units into speech; Practice Plan schedules their return; Anki Export extends retention beyond the app.

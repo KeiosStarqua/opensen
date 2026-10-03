@@ -17,3 +17,4 @@ export * as chunksApi from "./routes/chunks";
 export * as dialoguesApi from "./routes/dialogues";
 export * as practiceApi from "./routes/practice";
 export * as exportApi from "./routes/export";
+export * as savedSentencesApi from "./routes/saved-sentences";

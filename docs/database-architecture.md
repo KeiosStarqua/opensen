@@ -51,6 +51,17 @@ Identity, goals, and preferences. Example: Nguyễn wants travel communication i
 | `daily_minutes` | Practice budget |
 | `learning_style` | Preference for practice style |
 
+### `saved_sentences`
+
+A sentence the learner typed or pasted after hearing or reading it outside the app. Each row is a learning item owned by that account. It is not a catalog `chunks` row and it has no FSRS state.
+
+| Column | Role |
+|--------|------|
+| `id` | Primary key |
+| `owner_id` | FK → `users`; required. Queries always filter by the signed-in learner |
+| `text` | The sentence exactly as entered (trimmed, 1–500 characters) |
+| `created_at` | When it was saved |
+
 ## 2. Content Knowledge Graph (core)
 
 OpenSen does **not** primarily learn “words”. Learners internalize:
@@ -406,6 +417,8 @@ The original "~12 core tables" target no longer holds: making slots and practice
 14. `ai_generations`
 
 **Phase 1 supporting:** `user_preferences`, `intents`, `pattern_intents`, `embeddings` (needed for dedup), `words`, `chunk_words`
+
+**Learner capture:** `saved_sentences` (one account’s heard-or-read sentences; no schedule)
 
 **Later:** `audio_assets` (Phase 2, with shadowing), `export_jobs` (Phase 2), `user_language_profile` (Phase 3), `packs` / `pack_items` / `entitlements` (Phase 4 / Pro launch)
 

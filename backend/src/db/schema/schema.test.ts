@@ -2,6 +2,7 @@ import { getTableName } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import {
   aiGenerations,
+  savedSentences,
   chunks,
   dialogueLines,
   dialogues,
@@ -83,6 +84,15 @@ describe('ownership columns', () => {
     expect(sentencePatterns.visibility).toBeDefined()
     expect(chunks.visibility).toBeDefined()
     expect(dialogues.visibility).toBeDefined()
+  })
+})
+
+describe('saved sentences', () => {
+  it('is a learner-owned table, separate from catalog chunks', () => {
+    expect(getTableName(savedSentences)).toBe('saved_sentences')
+    expect(savedSentences.ownerId.name).toBe('owner_id')
+    expect(savedSentences.text.name).toBe('text')
+    expect(savedSentences.createdAt.name).toBe('created_at')
   })
 })
 
