@@ -15,31 +15,6 @@ function html(text: string): string {
     .replace(/>/g, "&gt;");
 }
 
-function slugTag(tag: string): string {
-  return tag
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9:_-]+/g, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_|_$/g, "");
-}
-
-export function formatAnkiDeck(notes: AnkiNote[]): string {
-  const buffer: string[] = [
-    "#separator:tab",
-    "#html:true",
-    "#tags column:3",
-    "#columns:Front\tBack\tTags",
-  ];
-  for (const note of notes) {
-    const tags = note.tags.map(slugTag).filter(Boolean).join(" ");
-    buffer.push(
-      `${escapeField(note.front)}\t${escapeField(note.back)}\t${tags}`,
-    );
-  }
-  return buffer.join("\n") + "\n";
-}
-
 export function noteForChunk(input: {
   text: string;
   meaning: string;
