@@ -1,4 +1,5 @@
 import { AppLink } from "@/components/app-link";
+import { ProfileEmailSkeleton } from "@/components/shell/shell-loading";
 
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { useMemo, useState } from "react";
@@ -13,7 +14,7 @@ import { SearchField } from "./ui";
 
 export function ProfileScreen() {
   const studio = useStudio();
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending: sessionPending } = authClient.useSession();
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
   const rows = useMemo(
@@ -44,7 +45,9 @@ export function ProfileScreen() {
         </div>
       </div>
 
-      {session?.user ? (
+      {sessionPending ? (
+        <ProfileEmailSkeleton />
+      ) : session?.user ? (
         <p className="text-sm font-semibold text-sen-muted">
           Signed in as {session.user.email}
         </p>

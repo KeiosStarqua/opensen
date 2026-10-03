@@ -1,4 +1,5 @@
 import { AppLink } from "@/components/app-link";
+import { HeardSentenceRowsSkeleton } from "@/components/shell/shell-loading";
 import { useEffect, useRef, useState } from "react";
 import { PlusIcon, QuotesIcon, StarIcon } from "@phosphor-icons/react";
 
@@ -92,9 +93,7 @@ export function SavedSentencesScreen({ startComposing = false }: { startComposin
         </form>
       ) : null}
 
-      {list.isPending ? (
-        <p className="font-semibold text-sen-muted">Loading your sentences…</p>
-      ) : null}
+      {list.isPending && !listError ? <HeardSentenceRowsSkeleton /> : null}
       {listError ? (
         <p className="rounded-[22px] bg-white px-5 py-4 font-semibold text-sen-heart shadow-sm" role="alert">
           {listError}
