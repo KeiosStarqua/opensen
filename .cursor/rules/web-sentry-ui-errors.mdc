@@ -31,13 +31,9 @@ if (!result.ok) {
   return;
 }
 
-// ✅ GOOD — API screens keep the banner; the client reports operational errors
-const client = createDefaultApiClient();
-const result = await client.request("/api/practice/due");
-if (!result.ok) {
-  setError(formatApiErrorMessage(result.error));
-  return;
-}
+// ✅ GOOD — screens read through lib/query hooks; the shared client reports operational errors
+const due = usePracticeDue(10);
+const error = due.data ? null : queryErrorMessage(due.error);
 
 // ✅ GOOD — fetch that cannot use the JSON client
 if (!isOperationalApiError(error)) return;
