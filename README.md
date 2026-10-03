@@ -14,7 +14,7 @@ OpenSen turns conversations you actually need into reusable sentence patterns yo
 - **Practice Plan** — spaced repetition schedules (FSRS, per chunk)
 - **Anki export** — study chunks outside the app
 
-Full product docs: [`docs/`](docs/).
+Full product docs: [`docs/`](docs/). System architecture: [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ## Mobile app
 

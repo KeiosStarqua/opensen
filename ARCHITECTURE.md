@@ -2,7 +2,7 @@
 
 OpenSen is one repository and three runtimes. Learners turn a real situation into speakable sentence patterns, then practice those chunks until they come out without translation. This document records how the running system is split: which process owns which rules, and which store holds which rows.
 
-Column-level schema stays in [Database architecture](database-architecture.md). Product scope stays in [Product strategy](product-strategy.md). Feature names stay in [Features](features.md).
+Column-level schema stays in [Database architecture](docs/database-architecture.md). Product scope stays in [Product strategy](docs/product-strategy.md). Feature names stay in [Features](docs/features.md).
 
 ## Shape
 
@@ -32,9 +32,9 @@ The phone keeps content and progress on the device. The web app’s API-backed s
 
 | Path | Package | Runtime |
 |------|---------|---------|
-| [`mobile/`](../mobile/) | `opensen` | Flutter. v1 is fully offline. Web is a UI preview (SQLite WASM, speech unavailable). |
-| [`backend/`](../backend/) | `opensen-backend` | Hono app default-exported from `src/index.ts`, deployed as Vercel Functions. Host: `https://api.opensen.taquangkhoi.com/`. |
-| [`web/`](../web/) | `opensen-web` | One Next.js App Router project for the marketing page and the signed-in app. Host: `https://opensen.taquangkhoi.com/`. |
+| [`mobile/`](mobile/) | `opensen` | Flutter. v1 is fully offline. Web is a UI preview (SQLite WASM, speech unavailable). |
+| [`backend/`](backend/) | `opensen-backend` | Hono app default-exported from `src/index.ts`, deployed as Vercel Functions. Host: `https://api.opensen.taquangkhoi.com/`. |
+| [`web/`](web/) | `opensen-web` | One Next.js App Router project for the marketing page and the signed-in app. Host: `https://opensen.taquangkhoi.com/`. |
 
 Business rules that must survive a UI rewrite live in `mobile/lib/domain/` or in backend modules outside route handlers (`src/practice/`, `src/export/`, `src/dialogue-packs/`, `src/ai/`). Web UI calls the API through `web/lib/api/` and keeps only session-local scoring, drill assembly, and the studio lesson flow in the browser.
 
@@ -136,7 +136,7 @@ Practice Plan is also two implementations. The phone schedules in SQLite. The se
 
 ## Data
 
-The content graph is situation → intent → sentence pattern → slots and variants → chunk, plus dialogues whose lines point back at chunks. Ownership columns (`owner_id`, `visibility`, `source_template_id`) mark a curated template versus a learner instance. The full table list and the commitments that drive it are in [Database architecture](database-architecture.md).
+The content graph is situation → intent → sentence pattern → slots and variants → chunk, plus dialogues whose lines point back at chunks. Ownership columns (`owner_id`, `visibility`, `source_template_id`) mark a curated template versus a learner instance. The full table list and the commitments that drive it are in [Database architecture](docs/database-architecture.md).
 
 ### Postgres
 
@@ -156,7 +156,7 @@ Tables that exist in Drizzle and are not written by a route today: `user_prefere
 
 `AppDatabase` (schema version 1, file `opensen.db`) is the on-device adaptation of the same graph for one learner: no `users` table, `is_template` in place of `owner_id` / `visibility`, and an extra `pattern_situations` link. Learner rows are deleted by repositories; there are no FK cascades. Template rows re-import with `INSERT OR IGNORE`.
 
-`assets/seed/content.json` is the curated catalog. `SeedImporter` loads it when `version` is newer than the copy in `meta`. Authoring rules live in [`mobile/assets/seed/AGENTS.md`](../mobile/assets/seed/AGENTS.md).
+`assets/seed/content.json` is the curated catalog. `SeedImporter` loads it when `version` is newer than the copy in `meta`. Authoring rules live in [`mobile/assets/seed/AGENTS.md`](mobile/assets/seed/AGENTS.md).
 
 The same JSON file feeds both stores. After seeding, the phone and the server each have their own rows. There is no replication between them.
 

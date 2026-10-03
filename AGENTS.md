@@ -14,12 +14,13 @@
 | Practice Plan | Spaced repetition schedules (FSRS, per chunk) |
 | Anki export | Take your chunks anywhere |
 
-Durable product detail: [`docs/`](docs/).
+Durable product detail: [`docs/`](docs/). System boundaries: [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ## Repository layout
 
 | Path | Role |
 |------|------|
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | System boundaries: clients, API, stores, and where business rules live |
 | [`docs/`](docs/) | Product documentation |
 | [`mobile/`](mobile/) | Flutter mobile app (offline-first v1) |
 | [`backend/`](backend/) | Hono API on Vercel — `https://api.opensen.taquangkhoi.com/` |

@@ -11,13 +11,13 @@ OpenSen (Open Sentence) turns conversations a learner actually needs into senten
 | [Features](features.md) | Product capabilities and how they fit together |
 | [Lingua design system](DESIGN.md) | Philosophy, visual language, tokens, components, and learning-screen rules |
 | [Mobile UI/UX design](mobile-ui-design.md) | Mobile design contract: UX architecture, design system, screen specs, Flutter blueprint |
-| [Architecture](ARCHITECTURE.md) | System boundaries: clients, API, stores, and where business rules live |
 | [Database architecture](database-architecture.md) | Content graph + learning engine schema (MVP tables) |
 
 ## Repository layout
 
 | Path | Role |
 |------|------|
+| [`ARCHITECTURE.md`](../ARCHITECTURE.md) | System boundaries: clients, API, stores, and where business rules live |
 | [`mobile/`](../mobile/) | Flutter mobile app (primary client; offline-first v1) |
 | [`backend/`](../backend/) | Hono API on Vercel |
 | [`docs/`](.) | Product and project documentation |
