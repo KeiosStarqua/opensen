@@ -4,92 +4,21 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
-import {
-  formatApiErrorMessage,
-  isOperationalApiError,
-  resolveApiBaseUrl,
-} from "@/lib/api/client";
-import { getSessionToken } from "@/lib/api/session-token";
-import { ApiError } from "@/lib/api/types";
-import { captureOperationalError } from "@/lib/observability/operational-error";
+import { queryErrorMessage } from "@/lib/query/api-query";
+import { useAnkiExport, type AnkiExportScope } from "@/lib/query/hooks/export";
 
-type Scope = "enrolled" | "all";
+const OUTCOME_MESSAGES = {
+  downloaded: "Download started.",
+  empty: "Nothing to export for this scope yet.",
+} as const;
 
 export function AnkiExportPanel() {
-  const [scope, setScope] = useState<Scope>("enrolled");
-  const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  function reportExportError(error: ApiError) {
-    if (!isOperationalApiError(error)) return;
-    captureOperationalError(error, {
-      surface: "anki-export",
-      kind: error.kind,
-      status: error.status,
-      path: "/api/export/anki",
-    });
-  }
-
-  async function download() {
-    setLoading(true);
-    setMessage(null);
-    const baseUrl = resolveApiBaseUrl();
-    let response: Response;
-    try {
-      const token = await getSessionToken();
-      response = await fetch(`${baseUrl}/api/export/anki?scope=${scope}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-    } catch {
-      const error = new ApiError("network", "Network request failed");
-      reportExportError(error);
-      setLoading(false);
-      setMessage(formatApiErrorMessage(error));
-      return;
-    }
-    setLoading(false);
-    if (!response.ok) {
-      const error = new ApiError(
-        "http",
-        `Export failed (${response.status}).`,
-        response.status,
-      );
-      reportExportError(error);
-      setMessage(formatApiErrorMessage(error));
-      return;
-    }
-    const contentType = response.headers.get("content-type") ?? "";
-    if (contentType.includes("application/json")) {
-      let json: { empty?: boolean; noteCount?: number };
-      try {
-        json = (await response.json()) as {
-          empty?: boolean;
-          noteCount?: number;
-        };
-      } catch {
-        const error = new ApiError(
-          "parse",
-          "Response was not valid JSON",
-          response.status,
-        );
-        reportExportError(error);
-        setMessage(formatApiErrorMessage(error));
-        return;
-      }
-      if (json.empty) {
-        setMessage("Nothing to export for this scope yet.");
-        return;
-      }
-    }
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `opensen-anki-${scope}.txt`;
-    anchor.click();
-    URL.revokeObjectURL(url);
-    setMessage("Download started.");
-  }
+  const [scope, setScope] = useState<AnkiExportScope>("enrolled");
+  const exportDeck = useAnkiExport();
+  const loading = exportDeck.isPending;
+  const message = exportDeck.data
+    ? OUTCOME_MESSAGES[exportDeck.data]
+    : queryErrorMessage(exportDeck.error);
 
   return (
     <div className="space-y-6">
@@ -102,7 +31,7 @@ export function AnkiExportPanel() {
         <select
           className="mt-1 w-full rounded-lg border px-3 py-2"
           value={scope}
-          onChange={(e) => setScope(e.target.value as Scope)}
+          onChange={(e) => setScope(e.target.value as AnkiExportScope)}
         >
           <option value="enrolled">Enrolled chunks only</option>
           <option value="all">All chunks I own</option>
@@ -112,7 +41,7 @@ export function AnkiExportPanel() {
       <button
         type="button"
         disabled={loading}
-        onClick={() => void download()}
+        onClick={() => exportDeck.mutate(scope)}
         className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
       >
         {loading ? "Preparing…" : "Download Anki deck"}
