@@ -1,51 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
 
-import {
-  createDefaultApiClient,
-  formatApiErrorMessage,
-  situationsApi,
-} from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
-
-type Detail = {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  roleSelf: string;
-  roleOther: string;
-  goal: string;
-  tone: string;
-  intents: Array<{ id: string; name: string; description: string }>;
-  dialogues: Array<{ id: string; title: string; level: string }>;
-  chunks: Array<{ id: string; text: string; meaning: string }>;
-};
+import { queryErrorMessage } from "@/lib/query/api-query";
+import { useSituation } from "@/lib/query/hooks/situations";
 
 export function SituationDetail({ situationId }: { situationId: string }) {
-  const client = useMemo(() => createDefaultApiClient(), []);
-  const [detail, setDetail] = useState<Detail | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      const result = await situationsApi.getSituation(client, situationId);
-      if (!active) return;
-      setLoading(false);
-      if (!result.ok) {
-        setError(formatApiErrorMessage(result.error));
-        return;
-      }
-      setDetail(result.data as Detail);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [client, situationId]);
+  const { data: detail, error: queryError, isPending: loading } =
+    useSituation(situationId);
+  const error = queryErrorMessage(queryError);
 
   if (loading) {
     return <p className="text-slate-600">Loading…</p>;

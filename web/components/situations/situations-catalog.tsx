@@ -1,47 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect } from "react";
 
-import {
-  createDefaultApiClient,
-  formatApiErrorMessage,
-  situationsApi,
-} from "@/lib/api";
+import { ApiError } from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
 import { reportSituationsCatalogError } from "@/lib/observability/situations-catalog-error";
-
-type SituationItem = {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-};
+import { queryErrorMessage } from "@/lib/query/api-query";
+import { useSituationsList } from "@/lib/query/hooks/situations";
 
 export function SituationsCatalog() {
-  const client = useMemo(() => createDefaultApiClient(), []);
-  const [items, setItems] = useState<SituationItem[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: items = [], error: queryError, isPending: loading } =
+    useSituationsList({ limit: 50 });
+  const error = queryErrorMessage(queryError);
 
   useEffect(() => {
-    let active = true;
-    void (async () => {
-      const result = await situationsApi.listSituations(client, { limit: 50 });
-      if (!active) return;
-      setLoading(false);
-      if (!result.ok) {
-        reportSituationsCatalogError(result.error);
-        setError(formatApiErrorMessage(result.error));
-        return;
-      }
-      const data = result.data as { items: SituationItem[] };
-      setItems(data.items ?? []);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [client]);
+    if (queryError instanceof ApiError) {
+      reportSituationsCatalogError(queryError);
+    }
+  }, [queryError]);
 
   if (loading) {
     return <p className="text-slate-600">Loading situations…</p>;
