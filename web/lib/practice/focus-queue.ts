@@ -1,3 +1,5 @@
+import { captureOperationalError } from "@/lib/observability/operational-error";
+
 import type { DuePracticeItem } from "./types";
 
 export const PRACTICE_FOCUS_QUEUE_KEY = "opensen:practice-focus-queue";
@@ -17,7 +19,14 @@ export function consumePracticeFocusQueue(): DuePracticeItem[] | null {
   window.sessionStorage.removeItem(PRACTICE_FOCUS_QUEUE_KEY);
   try {
     return JSON.parse(raw) as DuePracticeItem[];
-  } catch {
+  } catch (error) {
+    // The handed-over sentences are lost and the session falls back to due.
+    captureOperationalError(
+      error,
+      { surface: "practice-focus-queue" },
+      { rawLength: raw.length },
+      "warning",
+    );
     return null;
   }
 }

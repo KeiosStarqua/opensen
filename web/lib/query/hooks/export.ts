@@ -2,10 +2,10 @@
 
 import { useMutation } from "@tanstack/react-query";
 
-import { isOperationalApiError, resolveApiBaseUrl } from "@/lib/api/client";
+import { reportApiError, resolveApiBaseUrl } from "@/lib/api/client";
+import { describeBearer } from "@/lib/api/error-report";
 import { getSessionToken } from "@/lib/api/session-token";
 import { ApiError } from "@/lib/api/types";
-import { captureOperationalError } from "@/lib/observability/operational-error";
 
 export type AnkiExportScope = "enrolled" | "all";
 
@@ -18,37 +18,39 @@ export function ankiExportFilename(scope: AnkiExportScope): string {
   return `opensen-anki-${scope}.apkg`;
 }
 
-function reportExportError(error: ApiError) {
-  if (!isOperationalApiError(error)) return;
-  captureOperationalError(error, {
-    surface: "anki-export",
-    kind: error.kind,
-    status: error.status,
-    path: "/api/export/anki",
-  });
-}
-
-function fail(error: ApiError): never {
-  reportExportError(error);
-  throw error;
-}
+const EXPORT_PATH = "/api/export/anki";
 
 /**
  * Anki package download. The response is an `.apkg` file, not JSON, so this
- * is the one raw `fetch` to the API; it still sends the session bearer.
+ * is the one raw `fetch` to the API; it still sends the session bearer and
+ * reports every failure through `reportApiError`, like `createDefaultApiClient`.
  */
 export async function downloadAnkiDeck(
   scope: AnkiExportScope,
 ): Promise<AnkiExportOutcome> {
   const baseUrl = resolveApiBaseUrl();
+  const path = `${EXPORT_PATH}?scope=${scope}`;
+  let token: string | null = null;
+
+  function fail(error: ApiError): never {
+    error.bearer = describeBearer(token);
+    reportApiError(error, path, baseUrl);
+    throw error;
+  }
+
   let response: Response;
   try {
-    const token = await getSessionToken();
-    response = await fetch(`${baseUrl}/api/export/anki?scope=${scope}`, {
+    token = await getSessionToken();
+    response = await fetch(`${baseUrl}${path}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
-  } catch {
-    fail(new ApiError("network", "Network request failed"));
+  } catch (caught) {
+    const error = new ApiError("network", "Network request failed");
+    if (caught instanceof Error) {
+      error.causeName = caught.name;
+      error.causeMessage = caught.message;
+    }
+    fail(error);
   }
   if (!response.ok) {
     fail(

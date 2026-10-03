@@ -1,11 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
 
-import { ApiError } from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
-import { reportSituationsCatalogError } from "@/lib/observability/situations-catalog-error";
 import { queryErrorMessage } from "@/lib/query/api-query";
 import { useSituationsList } from "@/lib/query/hooks/situations";
 
@@ -16,12 +13,6 @@ export function SituationsCatalog() {
   const items = data ?? [];
   // A failed background refetch keeps the cached catalog on screen.
   const error = data ? null : queryErrorMessage(queryError);
-
-  useEffect(() => {
-    if (queryError instanceof ApiError) {
-      reportSituationsCatalogError(queryError);
-    }
-  }, [queryError]);
 
   if (loading) {
     return <p className="text-slate-600">Loading situations…</p>;

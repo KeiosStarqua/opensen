@@ -1,3 +1,5 @@
+import { captureOperationalError } from "@/lib/observability/operational-error";
+
 export type ThemeMode = "system" | "light" | "dark";
 
 export type LearnerSettings = {
@@ -11,6 +13,8 @@ export type LearnerSettings = {
 };
 
 const STORAGE_KEY = "opensen:learner-settings";
+
+let settingsReadFailureReported = false;
 
 const DEFAULTS: LearnerSettings = {
   dailyNewLimit: 10,
@@ -29,14 +33,35 @@ export function getLearnerSettings(): LearnerSettings {
     if (!raw) return DEFAULTS;
     const parsed = JSON.parse(raw) as Partial<LearnerSettings>;
     return { ...DEFAULTS, ...parsed };
-  } catch {
+  } catch (error) {
+    // Storage blocked or the saved JSON is corrupt: the learner silently gets
+    // defaults, so record it once per page load.
+    if (!settingsReadFailureReported) {
+      settingsReadFailureReported = true;
+      captureOperationalError(
+        error,
+        { surface: "learner-settings", action: "read" },
+        {},
+        "warning",
+      );
+    }
     return DEFAULTS;
   }
 }
 
 export function saveLearnerSettings(patch: Partial<LearnerSettings>): LearnerSettings {
   const next = { ...getLearnerSettings(), ...patch };
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch (error) {
+    // Quota or blocked storage: keep the change for this page, report it.
+    captureOperationalError(
+      error,
+      { surface: "learner-settings", action: "write" },
+      {},
+      "warning",
+    );
+  }
   window.dispatchEvent(new Event("opensen:settings-changed"));
   return next;
 }

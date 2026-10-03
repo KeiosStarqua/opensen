@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { AppRoutes } from "@/lib/app-routes";
 import { auth } from "@/lib/auth/server";
-import { captureOperationalError } from "@/lib/observability/operational-error";
+import { reportAuthFormError } from "@/lib/observability/auth-form-error";
 
 export async function updateDisplayName(
   _prevState: { error: string } | null,
@@ -12,16 +12,15 @@ export async function updateDisplayName(
 ) {
   const name = (formData.get("name") as string | null)?.trim() ?? "";
   if (!name) {
-    return { error: "Name must be provided." };
+    const message = "Name must be provided.";
+    reportAuthFormError("update-name", message, { reason: "empty-field" });
+    return { error: message };
   }
 
   const { error } = await auth.updateUser({ name });
   if (error) {
     const message = error.message || "Could not update your name";
-    captureOperationalError(new Error(message), {
-      surface: "auth",
-      action: "update-name",
-    });
+    reportAuthFormError("update-name", message, { sdkError: error });
     return { error: message };
   }
 
