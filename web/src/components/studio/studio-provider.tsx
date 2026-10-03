@@ -9,7 +9,6 @@ import {
 
 import {
   defaultPractice,
-  initialSavedIds,
   initialTopicProgress,
 } from "@/lib/studio/content";
 import {
@@ -24,14 +23,11 @@ type StudioState = {
   points: number;
   sentencesLearned: number;
   topicProgress: typeof initialTopicProgress;
-  savedIds: string[];
   hearts: number;
   practice: PracticeDeck;
 };
 
 type StudioContextValue = StudioState & {
-  toggleSaved: (id: string) => void;
-  isSaved: (id: string) => boolean;
   loseHeart: () => number;
   refillHearts: () => void;
   startLessonPractice: (text: string, meaning: string) => void;
@@ -46,7 +42,6 @@ const initialState: StudioState = {
   points: 120,
   sentencesLearned: 18,
   topicProgress: initialTopicProgress,
-  savedIds: initialSavedIds,
   hearts: 3,
   practice: defaultPractice,
 };
@@ -57,15 +52,6 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<StudioState>(initialState);
   const claimed = useRef(new Set<string>());
   const heartsRef = useRef(initialState.hearts);
-
-  const toggleSaved = useCallback((id: string) => {
-    setState((current) => {
-      const saved = new Set(current.savedIds);
-      if (saved.has(id)) saved.delete(id);
-      else saved.add(id);
-      return { ...current, savedIds: [...saved] };
-    });
-  }, []);
 
   const loseHeart = useCallback(() => {
     const next = Math.max(0, heartsRef.current - 1);
@@ -116,8 +102,6 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<StudioContextValue>(
     () => ({
       ...state,
-      toggleSaved,
-      isSaved: (id: string) => state.savedIds.includes(id),
       loseHeart,
       refillHearts,
       startLessonPractice,
@@ -127,7 +111,6 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       state,
-      toggleSaved,
       loseHeart,
       refillHearts,
       startLessonPractice,

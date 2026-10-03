@@ -2,6 +2,14 @@ import { AppRoutes } from "@/lib/app-routes";
 
 export const ONBOARDING_COMPLETE_KEY = "opensen:onboarding-complete";
 
+/** Same-tab listeners. The `storage` event only fires in other tabs. */
+export const ONBOARDING_COMPLETE_EVENT = "opensen:onboarding-complete-change";
+
+function notifyOnboardingStorage(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(ONBOARDING_COMPLETE_EVENT));
+}
+
 /**
  * Legacy browser flag from before completion lived on the account.
  * Still read once so an already-finished browser can be copied onto
@@ -21,4 +29,11 @@ export function onboardingEntryHref(complete: boolean): string | null {
 export function markOnboardingComplete(): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+  notifyOnboardingStorage();
+}
+
+export function clearOnboardingComplete(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(ONBOARDING_COMPLETE_KEY);
+  notifyOnboardingStorage();
 }

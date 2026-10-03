@@ -1,22 +1,28 @@
 import { AppLink } from "@/components/app-link";
 import { useEffect, useRef, useState } from "react";
-import { PlusIcon, QuotesIcon } from "@phosphor-icons/react";
+import { PlusIcon, QuotesIcon, StarIcon } from "@phosphor-icons/react";
 
 import { AppRoutes } from "@/lib/app-routes";
 import { queryErrorMessage } from "@/lib/query/api-query";
-import { useSavedSentences, useSaveSentence } from "@/lib/query/hooks/saved-sentences";
+import {
+  useSavedSentences,
+  useSaveSentence,
+  useUnsaveSentences,
+} from "@/lib/query/hooks/saved-sentences";
 
 import { PrimaryButton } from "../studio/ui";
 
 export function SavedSentencesScreen({ startComposing = false }: { startComposing?: boolean }) {
   const list = useSavedSentences();
   const save = useSaveSentence();
+  const unsave = useUnsaveSentences();
   const [text, setText] = useState("");
   const [composing, setComposing] = useState(startComposing);
   const fieldRef = useRef<HTMLTextAreaElement>(null);
   const sentences = list.data;
   const listError = sentences ? null : queryErrorMessage(list.error);
   const saveError = queryErrorMessage(save.error);
+  const unsaveError = queryErrorMessage(unsave.error);
   const trimmed = text.trim();
 
   useEffect(() => {
@@ -99,17 +105,35 @@ export function SavedSentencesScreen({ startComposing = false }: { startComposin
           Nothing saved yet. Add a sentence you want to say later.
         </p>
       ) : null}
+      {unsaveError ? (
+        <p className="rounded-[22px] bg-white px-5 py-4 font-semibold text-sen-heart shadow-sm" role="alert">
+          {unsaveError}
+        </p>
+      ) : null}
       {sentences && sentences.length > 0 ? (
         <ul className="space-y-3">
           {sentences.map((sentence) => (
-            <li key={sentence.id}>
+            <li
+              key={sentence.id}
+              className="flex items-center gap-2 rounded-[22px] bg-white px-3 py-2 shadow-sm"
+            >
               <AppLink
                 href={AppRoutes.savedSentence(sentence.id)}
-                className="flex items-start gap-3 rounded-[22px] bg-white px-5 py-4 shadow-sm hover:bg-sen-soft"
+                className="flex min-w-0 flex-1 items-start gap-3 rounded-2xl px-2 py-2 hover:bg-sen-soft"
               >
                 <QuotesIcon size={22} weight="regular" className="mt-0.5 shrink-0 text-sen-primary" />
                 <span className="font-extrabold">{sentence.text}</span>
               </AppLink>
+              <button
+                type="button"
+                aria-pressed
+                aria-label={`Unsave ${sentence.text}`}
+                disabled={unsave.isPending}
+                onClick={() => unsave.mutate([sentence.id])}
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-sen-gold"
+              >
+                <StarIcon size={20} weight="fill" />
+              </button>
             </li>
           ))}
         </ul>

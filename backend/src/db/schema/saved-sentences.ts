@@ -2,8 +2,8 @@ import { index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { users } from './users.js'
 
 /**
- * A sentence the learner typed or pasted from outside the app.
- * Owned by one account. Not a catalog chunk and not an FSRS card.
+ * A sentence one learner kept: typed after hearing it, or starred from a lesson.
+ * Owned by one account. Not a catalog chunk, not a second star table, and not an FSRS card.
  */
 export const savedSentences = pgTable(
   'saved_sentences',

@@ -331,11 +331,26 @@ export function buildOpenApiDocument(baseUrl?: string) {
             '404': { $ref: '#/components/responses/NotFound' },
           },
         },
+        delete: {
+          tags: ['Saved sentences'],
+          summary: 'Remove one saved sentence',
+          description:
+            'Deletes the row when the caller owns it. Library and the saved-sentence list both lose that sentence. Missing and other learners’ rows are both 404.',
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          ],
+          security: signedIn,
+          responses: {
+            '204': { description: 'Sentence removed.' },
+            '401': { $ref: '#/components/responses/Unauthorized' },
+            '404': { $ref: '#/components/responses/NotFound' },
+          },
+        },
         patch: {
           tags: ['Saved sentences'],
           summary: 'Replace the text of one saved sentence',
           description:
-            'The caller must own the row. The study step reads this text, so the new wording is what they practice. Missing and other learners’ rows are both 404. Empty text is rejected.',
+            'The caller must own the row. The study step reads this text, so the new wording is what they practice. Library’s saved list shows the same text. Missing and other learners’ rows are both 404. Empty text is rejected.',
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
           ],

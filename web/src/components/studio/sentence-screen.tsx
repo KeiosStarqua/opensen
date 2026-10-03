@@ -3,6 +3,7 @@ import { useState } from "react";
 import { flushSync } from "react-dom";
 
 import { AppRoutes } from "@/lib/app-routes";
+import { useSavedSentenceListActions } from "@/lib/query/hooks/saved-sentences";
 import { getStep } from "@/lib/studio/content";
 
 import { SpeakerIcon, StarIcon, TurtleIcon } from "./icons";
@@ -23,13 +24,14 @@ export function SentenceScreen({
   const match = getStep(topicId, stepId);
   const navigate = useAppNavigate();
   const studio = useStudio();
+  const savedSentences = useSavedSentenceListActions();
   const [rate, setRate] = useState<"slow" | "natural">("natural");
 
   if (!match) return null;
   const { topic, step } = match;
   const safeIndex = Math.min(Math.max(index, 0), step.sentences.length - 1);
   const sentence = step.sentences[safeIndex];
-  const saved = studio.isSaved(sentence.id);
+  const saved = savedSentences.isSaved(sentence.text);
 
   function goNext() {
     if (safeIndex < step.sentences.length - 1) {
@@ -60,7 +62,8 @@ export function SentenceScreen({
             type="button"
             aria-pressed={saved}
             aria-label={saved ? "Remove from saved sentences" : "Save sentence"}
-            onClick={() => studio.toggleSaved(sentence.id)}
+            disabled={!savedSentences.rows || savedSentences.pending}
+            onClick={() => savedSentences.toggleText(sentence.text)}
             className={`grid h-10 w-10 place-items-center rounded-full bg-white shadow-sm ${
               saved ? "text-sen-gold" : "text-[#c5d0c8]"
             }`}
@@ -69,6 +72,11 @@ export function SentenceScreen({
           </button>
         </div>
       </div>
+      {savedSentences.listError ?? savedSentences.error ? (
+        <p className="rounded-[22px] bg-white px-5 py-4 font-semibold text-sen-heart shadow-sm" role="alert">
+          {savedSentences.listError ?? savedSentences.error}
+        </p>
+      ) : null}
 
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[1.05fr_1fr]">
         <div className="min-h-[280px] overflow-hidden rounded-[28px] shadow-sm">

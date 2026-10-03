@@ -60,6 +60,15 @@ export function createSavedSentencesRouter(
     return c.json(sentence, 201)
   })
 
+  router.delete('/:id', async (c) => {
+    const ownerId = requireUserId(c)
+    const removed = await repository().delete(ownerId, c.req.param('id'))
+    if (!removed) {
+      throw new HTTPException(404, { message: 'Saved sentence not found' })
+    }
+    return c.body(null, 204)
+  })
+
   router.patch('/:id', async (c) => {
     const ownerId = requireUserId(c)
     const text = await readSentenceText(() => c.req.json())

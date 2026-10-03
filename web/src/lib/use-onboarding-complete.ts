@@ -1,10 +1,17 @@
 import { useSyncExternalStore } from "react";
 
-import { isOnboardingComplete } from "@/lib/onboarding-storage";
+import {
+  ONBOARDING_COMPLETE_EVENT,
+  isOnboardingComplete,
+} from "@/lib/onboarding-storage";
 
 function subscribe(onChange: () => void): () => void {
   window.addEventListener("storage", onChange);
-  return () => window.removeEventListener("storage", onChange);
+  window.addEventListener(ONBOARDING_COMPLETE_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(ONBOARDING_COMPLETE_EVENT, onChange);
+  };
 }
 
 function getServerSnapshot(): boolean {

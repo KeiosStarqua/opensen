@@ -72,7 +72,7 @@ Auth is Managed Better Auth through `@neondatabase/auth`. The server side is a T
 
 The signed-in shell (`components/studio/`, `components/app-shell.tsx`) has two study surfaces.
 
-**Studio** uses static lesson copy in `lib/studio/content.ts` and in-memory session state in `StudioProvider` (hearts, streak, saved sentences, word-order deck). It does not read Postgres. Routes: `/home`, `/learn`, `/learn/$topic`, `/learn/$topic/$step`, `/practice`, `/practice/speak`, `/practice/done`, `/explore`, `/library`, `/profile`.
+**Studio** uses static lesson copy in `lib/studio/content.ts` and in-memory session state in `StudioProvider` (hearts, streak, word-order deck). Topic tabs stay that catalog. The saved list on `/library` and the star on a lesson sentence read and write `saved_sentences` through the same hooks as `/saved`. Routes: `/home`, `/learn`, `/learn/$topic`, `/learn/$topic/$step`, `/practice`, `/practice/speak`, `/practice/done`, `/explore`, `/library`, `/profile`.
 
 **API-backed study** is linked from Explore and from direct routes: `/today`, `/plan`, `/situations`, `/patterns`, `/chunks`, `/dialogues`, `/drills/$patternId`, `/practice/session`, `/export`, `/settings`, `/onboarding`. These screens call `lib/api/routes/*` through TanStack Query hooks in `lib/query/hooks/`. `QueryProvider`, mounted by `routes/_app.tsx`, holds the cache for the signed-in session, so Today, Plan, and Library share fetched data, and a review, chunk edit, or persisted dialogue invalidates the screens it affects.
 
@@ -103,7 +103,7 @@ Page analytics is `onedollarstats` in the root route. Error monitoring is `@sent
 | `POST /api/dialogues/generate` | AI dialogue pack | Anonymous. A signed-in caller enrolls persisted chunks. |
 | `GET /api/dialogues`, `GET /api/dialogues/:id` | Stored dialogues | Anonymous. Empty list or `501` while persistence is off. |
 | `GET /api/practice/due`, `GET /api/practice/plan`, `POST /api/practice/reviews` | Due queue, plan, FSRS grade | Signed in. |
-| `GET /api/saved-sentences`, `GET /api/saved-sentences/:id`, `POST /api/saved-sentences`, `PATCH /api/saved-sentences/:id` | Sentences the learner saved from outside the app. Patch replaces the owner’s text. | Signed in. |
+| `GET /api/saved-sentences`, `GET /api/saved-sentences/:id`, `POST /api/saved-sentences`, `PATCH /api/saved-sentences/:id`, `DELETE /api/saved-sentences/:id` | The account’s saved sentences. `/saved` and Library’s saved list read and write this table. Patch replaces the owner’s text. | Signed in. |
 | `GET /api/onboarding`, `PUT /api/onboarding` | Whether this account finished onboarding | Signed in. |
 | `GET /api/export/anki` | Anki deck text for enrolled or all chunks | Signed in. |
 
