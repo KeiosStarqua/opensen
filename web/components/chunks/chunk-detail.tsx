@@ -2,73 +2,26 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
-import {
-  chunksApi,
-  createDefaultApiClient,
-  formatApiErrorMessage,
-} from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
 import { savePracticeFocusQueue } from "@/lib/practice/focus-queue";
 import type { DuePracticeItem } from "@/lib/practice/types";
-
-type ChunkDetail = {
-  id: string;
-  text: string;
-  meaning: string;
-  level: string;
-  register: string;
-  editable: boolean;
-  patternId: string | null;
-  situation: { id: string; name: string } | null;
-};
+import { queryErrorMessage } from "@/lib/query/api-query";
+import {
+  useChunk,
+  useUpdateChunk,
+  type ChunkDetail,
+} from "@/lib/query/hooks/chunks";
 
 export function ChunkDetailView({ chunkId }: { chunkId: string }) {
-  const client = useMemo(() => createDefaultApiClient(), []);
   const router = useRouter();
-  const [data, setData] = useState<ChunkDetail | null>(null);
-  const [patternId, setPatternId] = useState<string | null>(null);
-  const [editText, setEditText] = useState("");
-  const [editMeaning, setEditMeaning] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      const result = await chunksApi.getChunk(client, chunkId);
-      if (!active) return;
-      if (!result.ok) {
-        setError(formatApiErrorMessage(result.error));
-        return;
-      }
-      const detail = result.data as ChunkDetail;
-      setData(detail);
-      setEditText(detail.text);
-      setEditMeaning(detail.meaning);
-      setPatternId(detail.patternId);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [client, chunkId]);
-
-  async function saveEdits() {
-    if (!data?.editable) return;
-    setSaving(true);
-    const result = await chunksApi.updateChunk(client, chunkId, {
-      text: editText.trim(),
-      meaning: editMeaning.trim(),
-    });
-    setSaving(false);
-    if (!result.ok) {
-      setError(formatApiErrorMessage(result.error));
-      return;
-    }
-    setData(result.data as ChunkDetail);
-    setError(null);
-  }
+  const chunk = useChunk(chunkId);
+  const update = useUpdateChunk(chunkId);
+  const data = chunk.data;
+  const patternId = data?.patternId ?? null;
+  const loadError = queryErrorMessage(chunk.error);
+  const saveError = queryErrorMessage(update.error);
 
   function practiceChunk() {
     if (!data) return;
@@ -87,10 +40,10 @@ export function ChunkDetailView({ chunkId }: { chunkId: string }) {
     router.push(AppRoutes.practiceSession);
   }
 
-  if (error && !data) {
+  if (loadError && !data) {
     return (
       <p className="text-red-700">
-        {error}{" "}
+        {loadError}{" "}
         <Link href={AppRoutes.patterns} className="underline">
           Sentence patterns
         </Link>
@@ -105,34 +58,14 @@ export function ChunkDetailView({ chunkId }: { chunkId: string }) {
       <Link href={AppRoutes.patterns} className="text-sm text-slate-600">
         ← Sentence patterns
       </Link>
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {saveError ? <p className="text-sm text-red-700">{saveError}</p> : null}
       {data.editable ? (
-        <div className="space-y-3">
-          <label className="block text-sm">
-            Text
-            <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-            />
-          </label>
-          <label className="block text-sm">
-            Meaning
-            <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
-              value={editMeaning}
-              onChange={(e) => setEditMeaning(e.target.value)}
-            />
-          </label>
-          <button
-            type="button"
-            disabled={saving}
-            onClick={() => void saveEdits()}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium"
-          >
-            {saving ? "Saving…" : "Save changes"}
-          </button>
-        </div>
+        <ChunkEditor
+          key={data.id}
+          chunk={data}
+          saving={update.isPending}
+          onSave={(edits) => update.mutate(edits)}
+        />
       ) : (
         <>
           <h1 className="text-3xl font-semibold">{data.text}</h1>
@@ -160,6 +93,50 @@ export function ChunkDetailView({ chunkId }: { chunkId: string }) {
           </Link>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function ChunkEditor({
+  chunk,
+  saving,
+  onSave,
+}: {
+  chunk: ChunkDetail;
+  saving: boolean;
+  onSave: (edits: { text: string; meaning: string }) => void;
+}) {
+  const [editText, setEditText] = useState(chunk.text);
+  const [editMeaning, setEditMeaning] = useState(chunk.meaning);
+
+  return (
+    <div className="space-y-3">
+      <label className="block text-sm">
+        Text
+        <input
+          className="mt-1 w-full rounded-lg border px-3 py-2"
+          value={editText}
+          onChange={(e) => setEditText(e.target.value)}
+        />
+      </label>
+      <label className="block text-sm">
+        Meaning
+        <input
+          className="mt-1 w-full rounded-lg border px-3 py-2"
+          value={editMeaning}
+          onChange={(e) => setEditMeaning(e.target.value)}
+        />
+      </label>
+      <button
+        type="button"
+        disabled={saving}
+        onClick={() =>
+          onSave({ text: editText.trim(), meaning: editMeaning.trim() })
+        }
+        className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium"
+      >
+        {saving ? "Saving…" : "Save changes"}
+      </button>
     </div>
   );
 }

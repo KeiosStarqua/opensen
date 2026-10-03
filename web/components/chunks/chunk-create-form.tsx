@@ -2,17 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import {
-  chunksApi,
-  createDefaultApiClient,
-  formatApiErrorMessage,
-} from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
+import { queryErrorMessage } from "@/lib/query/api-query";
+import { useCreateChunk } from "@/lib/query/hooks/chunks";
 
 export function ChunkCreateForm() {
-  const client = useMemo(() => createDefaultApiClient(), []);
   const router = useRouter();
   const [text, setText] = useState("");
   const [meaning, setMeaning] = useState("");
@@ -20,14 +16,14 @@ export function ChunkCreateForm() {
   const [slotName, setSlotName] = useState("food");
   const [variantText, setVariantText] = useState("peanuts");
   const [variantMeaning, setVariantMeaning] = useState("đậu phộng");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const createChunk = useCreateChunk();
+  const error = queryErrorMessage(createChunk.error);
+  const loading = createChunk.isPending;
 
-  async function onSubmit(event: React.FormEvent) {
+  function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setLoading(true);
-    setError(null);
-    const result = await chunksApi.createChunk(client, {
+    if (loading) return;
+    const body = {
       text: text.trim(),
       meaning: meaning.trim(),
       register: "neutral",
@@ -42,18 +38,14 @@ export function ChunkCreateForm() {
           variants: [{ text: variantText.trim(), meaning: variantMeaning.trim() }],
         },
       ],
+    };
+    createChunk.mutate(body, {
+      onSuccess: (created) => router.push(AppRoutes.chunk(created.id)),
     });
-    setLoading(false);
-    if (!result.ok) {
-      setError(formatApiErrorMessage(result.error));
-      return;
-    }
-    const created = result.data as { id: string };
-    router.push(AppRoutes.chunk(created.id));
   }
 
   return (
-    <form onSubmit={(event) => void onSubmit(event)} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4">
       <Link href={AppRoutes.patterns} className="text-sm text-slate-600">
         ← Sentence patterns
       </Link>

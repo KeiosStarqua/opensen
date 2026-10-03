@@ -1,54 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
-import {
-  chunksApi,
-  createDefaultApiClient,
-  formatApiErrorMessage,
-} from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
-
-type ChunkItem = {
-  id: string;
-  text: string;
-  meaning: string;
-  register: string;
-  level: string;
-};
+import { queryErrorMessage } from "@/lib/query/api-query";
+import { useChunks } from "@/lib/query/hooks/chunks";
 
 export function ChunkLibrary() {
-  const client = useMemo(() => createDefaultApiClient(), []);
-  const [items, setItems] = useState<ChunkItem[]>([]);
   const [q, setQ] = useState("");
   const [register, setRegister] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      setLoading(true);
-      const result = await chunksApi.listChunks(client, {
-        limit: 100,
-        q: q.trim() || undefined,
-        register: register || undefined,
-      });
-      if (!active) return;
-      setLoading(false);
-      if (!result.ok) {
-        setError(formatApiErrorMessage(result.error));
-        return;
-      }
-      setError(null);
-      const data = result.data as { items: ChunkItem[] };
-      setItems(data.items ?? []);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [client, q, register]);
+  const chunks = useChunks({
+    limit: 100,
+    q: q.trim() || undefined,
+    register: register || undefined,
+  });
+  const items = chunks.data ?? [];
+  const error = queryErrorMessage(chunks.error);
+  const loading = chunks.isPending;
 
   return (
     <div className="space-y-6">
@@ -89,7 +58,12 @@ export function ChunkLibrary() {
           No chunks yet. Generate a dialogue or create a custom chunk.
         </p>
       ) : (
-        <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+        <ul
+          aria-busy={chunks.isPlaceholderData}
+          className={`divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white transition-opacity ${
+            chunks.isPlaceholderData ? "opacity-60" : ""
+          }`}
+        >
           {items.map((chunk) => (
             <li key={chunk.id}>
               <Link
