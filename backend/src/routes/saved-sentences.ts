@@ -55,26 +55,40 @@ export function createSavedSentencesRouter(
 
   router.post('/', async (c) => {
     const ownerId = requireUserId(c)
-    let body: unknown
-    try {
-      body = await c.req.json()
-    } catch {
-      throw new HTTPException(400, { message: 'Invalid JSON body' })
-    }
-    const parsed = createBodySchema.safeParse(body)
-    if (!parsed.success) {
-      throw new HTTPException(400, {
-        message: parsed.error.issues
-          .map((issue) => `${issue.path.join('.') || 'body'}: ${issue.message}`)
-          .join('; '),
-      })
-    }
-
-    const sentence = await repository().create(ownerId, parsed.data.text)
+    const text = await readSentenceText(() => c.req.json())
+    const sentence = await repository().create(ownerId, text)
     return c.json(sentence, 201)
   })
 
+  router.patch('/:id', async (c) => {
+    const ownerId = requireUserId(c)
+    const text = await readSentenceText(() => c.req.json())
+    const sentence = await repository().update(ownerId, c.req.param('id'), text)
+    if (!sentence) {
+      throw new HTTPException(404, { message: 'Saved sentence not found' })
+    }
+    return c.json(sentence)
+  })
+
   return router
+}
+
+async function readSentenceText(readJson: () => Promise<unknown>): Promise<string> {
+  let body: unknown
+  try {
+    body = await readJson()
+  } catch {
+    throw new HTTPException(400, { message: 'Invalid JSON body' })
+  }
+  const parsed = createBodySchema.safeParse(body)
+  if (!parsed.success) {
+    throw new HTTPException(400, {
+      message: parsed.error.issues
+        .map((issue) => `${issue.path.join('.') || 'body'}: ${issue.message}`)
+        .join('; '),
+    })
+  }
+  return parsed.data.text
 }
 
 export const savedSentences = createSavedSentencesRouter()
