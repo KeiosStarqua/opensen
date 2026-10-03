@@ -75,7 +75,8 @@ Speech-to-text match rate is enough to start; detailed pronunciation scoring is 
 
 - The sentence list has an **Add a sentence** button. It opens a composer where the learner types or pastes one sentence from outside the app and saves it
 - Each save is a learning item owned by that account, with the exact text they entered. The sentence does not need to already exist in the catalog
-- Web and mobile read the same store. Closing the app or opening another surface still shows that sentence. Another learner does not
+- Web Library’s Saved list is this same account list. Starring a lesson sentence saves that sentence’s text here. Removing it in Library or on the saved-sentence list removes the row for both. Topic tabs stay the static lesson catalog
+- Web and mobile read the same store. Closing the app or opening another surface still shows that sentence. Another learner does not. A signed-out caller cannot write one
 - From a saved sentence the learner enters the existing study step for that text. Saving does not transcribe audio, generate a dialogue, or create an FSRS schedule
 
 ## Anki Export

@@ -29,3 +29,12 @@ export function createSavedSentence(
     body: JSON.stringify({ text }),
   });
 }
+
+export function deleteSavedSentence(
+  client: ApiClient,
+  id: string,
+): Promise<ApiResult<void>> {
+  return client.request(`/api/saved-sentences/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+}

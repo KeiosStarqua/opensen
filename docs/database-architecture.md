@@ -54,7 +54,7 @@ Identity, goals, and preferences. Example: Nguyễn wants travel communication i
 
 ### `saved_sentences`
 
-A sentence the learner typed or pasted after hearing or reading it outside the app. Each row is a learning item owned by that account. It is not a catalog `chunks` row and it has no FSRS state.
+A sentence one learner kept: typed after hearing or reading it, or starred from a lesson. Library’s saved list and `/saved` read this table. There is no second star table. Each row is owned by that account. It is not a catalog `chunks` row and it has no FSRS state.
 
 | Column | Role |
 |--------|------|
