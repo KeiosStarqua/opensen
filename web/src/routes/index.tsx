@@ -4,6 +4,10 @@ import { LandingPage } from "@/components/landing-page";
 import { QueryProvider } from "@/lib/query/query-provider";
 
 export const Route = createFileRoute("/")({
+  // Public, not personalized on the server: CDN may cache it per deployment.
+  headers: () => ({
+    "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
+  }),
   component: MarketingHome,
 });
 
