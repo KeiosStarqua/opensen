@@ -139,6 +139,17 @@ Any generated raster asset (mascot art, onboarding scenes, landing/studio illust
 - Use gpt-image-2 thinking mode for text-heavy or layout-sensitive compositions (infographics, diagrams).
 - Match the existing Sen mascot style when regenerating character art: soft cream-yellow bean body, green leaf beret, black dot eyes, pink blush cheeks, warm pastel watercolor illustration.
 
+## Cursor Cloud specific instructions
+
+Cloud agents get Node.js 22, Flutter stable (`/opt/flutter`, on `PATH`), `libsqlite3-dev`, and Docker. Use `sudo docker`. The daemon is configured with `fuse-overlayfs` and iptables disabled so Postgres can run in this VM.
+
+- Backend: `npm ci --prefix backend`. Web: `npm ci --prefix web --legacy-peer-deps`. Plain `npm ci` in `web/` fails because the lockfile omits some peer dependencies.
+- Mobile, from `mobile/`: `flutter pub get`, `flutter analyze --no-fatal-infos`, `flutter test`.
+- Local Postgres is `backend/docker-compose.test.yml` (pgvector, host port 5433). Use `postgresql://opensen:opensen@localhost:5433/opensen_test` for `DATABASE_URL`, `MIGRATION_DATABASE_URL`, and `TEST_DATABASE_URL`. From `backend/`: `npm run db:migrate`, then `npm run seed:mobile-catalog`.
+- `npm run dev` in `backend/` is `vercel dev` and needs `vercel login` or `VERCEL_TOKEN`. The Cloud Agent `start` script serves `backend/src/index.ts` with `tsx` on port 3000 and Next.js on port 3001. `CORS_ORIGINS` includes `http://localhost:3001`.
+- `web/.env.local` needs `NEON_AUTH_COOKIE_SECRET` (at least 32 characters) or the app fails to boot. A real `NEON_AUTH_BASE_URL` is required for sign-in. `OPENROUTER_API_KEY` is required for dialogue generation. Landing, `/health`, `/health/db`, and the seeded `GET /api/situations` route do not need those secrets.
+- Checks without those secrets: backend `npm run typecheck`, `npm test`, `npm run test:db`; web `npm test`, `npm run lint`, `npm run build`; mobile analyze and test as above.
+
 ## Child DOX Index
 
 | Path | Scope |
