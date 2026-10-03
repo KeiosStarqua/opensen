@@ -19,57 +19,65 @@ export function LearnScreen({ topicId }: { topicId: string }) {
     <div className="flex flex-col gap-5">
       <div className="flex items-start gap-3">
         <BackButton href={AppRoutes.home} label="Back to home" />
-        <div className="relative min-w-0 flex-1 overflow-hidden rounded-[28px] shadow-sm">
-          <div className="h-[220px] sm:h-[300px] xl:h-[360px]">
-            <TopicBanner topicId={topic.id} />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-black/10" />
-          <div className="absolute left-6 top-6 right-6 flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-4xl font-extrabold tracking-tight text-[#16324a] drop-shadow-sm">
-                {topic.lesson.title}
-              </h1>
-              <p className="mt-1 font-bold text-[#1d3b52]/80">{topic.lesson.subtitle}</p>
+        {/* Width queries are on the hero, not the viewport: the sidebar makes a
+            "desktop" window still render a narrow banner. */}
+        <div className="@container min-w-0 flex-1">
+          <div className="relative overflow-hidden rounded-[28px] shadow-sm @min-[600px]:h-[300px] @min-[900px]:h-[360px]">
+            <div className="absolute inset-0">
+              <TopicBanner topicId={topic.id} />
             </div>
-            <div className="flex items-center gap-3 rounded-2xl bg-white/95 px-4 py-3 shadow-sm">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-wide text-sen-muted">Your progress</p>
-                <p className="font-extrabold">
-                  {progress.done} / {progress.total} sentences
-                </p>
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,transparent_38%,rgba(255,255,255,0.94)_72%)] @min-[600px]:bg-gradient-to-t @min-[600px]:from-black/25 @min-[600px]:via-transparent @min-[600px]:to-black/10" />
+            <div className="relative z-10 flex flex-col gap-5 p-4 @min-[600px]:h-full @min-[600px]:justify-between @min-[600px]:gap-4 @min-[600px]:p-6">
+              <div className="flex flex-col gap-3 @min-[600px]:flex-row @min-[600px]:items-start @min-[600px]:justify-between @min-[600px]:gap-4">
+                <div className="min-w-0">
+                  <h1 className="text-3xl font-extrabold tracking-tight text-[#16324a] drop-shadow-sm @min-[600px]:text-4xl">
+                    {topic.lesson.title}
+                  </h1>
+                  <p className="mt-1 font-bold text-[#1d3b52]/80">{topic.lesson.subtitle}</p>
+                </div>
+                <div className="flex w-full shrink-0 items-center gap-3 rounded-2xl bg-white/95 px-4 py-3 shadow-sm @min-[600px]:w-auto">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-sen-muted">
+                      Your progress
+                    </p>
+                    <p className="font-extrabold">
+                      {progress.done} / {progress.total} sentences
+                    </p>
+                  </div>
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-sen-soft text-sen-primary">
+                    <PlaneIcon className="h-5 w-5" />
+                  </span>
+                </div>
               </div>
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-sen-soft text-sen-primary">
-                <PlaneIcon className="h-5 w-5" />
-              </span>
+              <div className="relative">
+                <span className="pointer-events-none absolute top-[18px] right-[8%] left-[8%] h-1 rounded-full bg-[#16324a]/20 @min-[600px]:top-[22px] @min-[600px]:bg-white/80" />
+                <ol
+                  className="relative grid gap-1"
+                  style={{
+                    gridTemplateColumns: `repeat(${topic.lesson.steps.length}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {topic.lesson.steps.map((lessonStep, index) => {
+                    const current = lessonStep.id === topic.lesson.highlightStepId;
+                    return (
+                      <li key={lessonStep.id} className="relative z-10 flex min-w-0 flex-col items-center">
+                        <span
+                          className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-extrabold text-white shadow @min-[600px]:h-11 @min-[600px]:w-11 ${
+                            index === 0 ? "bg-sen-gold" : "bg-sen-primary"
+                          } ${current ? "ring-4 ring-white" : ""}`}
+                        >
+                          {index + 1}
+                        </span>
+                        <span className="mt-1.5 w-full px-0.5 text-center text-[10px] leading-tight font-extrabold text-[#16324a] [overflow-wrap:anywhere] @min-[600px]:text-xs @min-[600px]:text-white @min-[600px]:drop-shadow">
+                          {lessonStep.title}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
             </div>
           </div>
-          <div className="absolute inset-x-4 bottom-4">
-          <span className="pointer-events-none absolute left-[6%] right-[6%] top-5 h-1 rounded-full bg-white/80" />
-          <ol
-            className="relative grid gap-1"
-            style={{
-              gridTemplateColumns: `repeat(${topic.lesson.steps.length}, minmax(0, 1fr))`,
-            }}
-          >
-            {topic.lesson.steps.map((lessonStep, index) => {
-              const current = lessonStep.id === topic.lesson.highlightStepId;
-              return (
-                <li key={lessonStep.id} className="relative z-10 flex flex-col items-center">
-                  <span
-                    className={`grid h-11 w-11 place-items-center rounded-full text-sm font-extrabold text-white shadow ${
-                      index === 0 ? "bg-sen-gold" : "bg-sen-primary"
-                    } ${current ? "ring-4 ring-white" : ""}`}
-                  >
-                    {index + 1}
-                  </span>
-                  <span className="mt-1.5 text-center text-xs font-extrabold text-white drop-shadow">
-                    {lessonStep.title}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
         </div>
       </div>
 
