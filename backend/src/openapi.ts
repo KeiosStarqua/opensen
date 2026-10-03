@@ -426,7 +426,9 @@ export function buildOpenApiDocument(baseUrl?: string) {
           tags: ['Export'],
           summary: 'Export chunks as an Anki deck',
           description:
-            'Returns a tab-separated Anki import file. When the learner has no ' +
+            'Returns an Anki package (`.apkg`) built with ankipack. Each note uses ' +
+            'the meaning as Front and the sentence, plus its frame when present, as ' +
+            'Back, tagged `opensen`, register, and level. When the learner has no ' +
             'matching notes, returns `{ empty: true, noteCount: 0 }` as JSON.',
           security: signedIn,
           parameters: [
@@ -439,9 +441,11 @@ export function buildOpenApiDocument(baseUrl?: string) {
           ],
           responses: {
             '200': {
-              description: 'Anki deck file, or an empty-set JSON marker.',
+              description: 'Anki package, or an empty-set JSON marker.',
               content: {
-                'text/plain': { schema: { type: 'string' } },
+                'application/apkg': {
+                  schema: { type: 'string', format: 'binary' },
+                },
                 'application/json': {
                   schema: {
                     type: 'object',

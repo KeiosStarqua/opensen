@@ -128,6 +128,6 @@ curl -s http://localhost:3000/api/dialogues/generate \
 | `/api/chunks` | Chunk Library (stub) |
 | `/api/dialogues` | Dialog Builder — `POST /generate` live |
 | `/api/practice` | Practice Plan (SRS, stub) |
-| `/api/export` | Anki export (stub) |
+| `/api/export` | Anki `.apkg` export (`GET /anki`, signed in) |
 
 Schema contract: [`docs/database-architecture.md`](../docs/database-architecture.md).
