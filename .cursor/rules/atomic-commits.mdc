@@ -1,0 +1,25 @@
+---
+description: Atomic git commits after each small edit slice
+alwaysApply: true
+---
+
+# Atomic commits
+
+Khi agent sửa file trong repo, **commit ngay sau mỗi lần edit nhỏ hoàn thành một slice logic** — không gom nhiều việc không liên quan vào một commit và không để working tree đầy thay đổi chưa commit tới cuối session.
+
+## Một slice, một commit
+
+- Một bug fix, một tính năng nhỏ, một refactor cục bộ, hoặc một cập nhật DOX/rule gắn với slice đó → **tạo commit trước khi** chuyển sang việc khác.
+- Stage chỉ file thuộc slice (implementation, test, `AGENTS.md` / rule nếu DOX đổi theo slice).
+- Message ngắn, imperative, nêu **why** khi cần body. Theo style commit gần nhất trên branch.
+
+## Khi không commit
+
+- User **cấm commit** trong session đó.
+- User chỉ hỏi / review, không yêu cầu sửa code.
+
+## Đóng session
+
+- Nếu đã sửa code và user không cấm commit: **không** kết thúc với thay đổi chưa commit. Slice cuối còn lại vẫn phải có commit riêng.
+
+Chi tiết repo-wide: phần **Commits** trong root `AGENTS.md`.
