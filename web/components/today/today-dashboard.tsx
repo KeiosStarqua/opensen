@@ -2,73 +2,26 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
 
-import {
-  createDefaultApiClient,
-  formatApiErrorMessage,
-  practiceApi,
-} from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
 import { savePracticeFocusQueue } from "@/lib/practice/focus-queue";
-import type { DuePracticeItem } from "@/lib/practice/types";
-
-type PlanStats = {
-  total: number;
-  dueNow: number;
-  dueNext7Days: number;
-  reviewedToday: number;
-};
+import { queryErrorMessage } from "@/lib/query/api-query";
+import { usePracticeDue, usePracticePlan } from "@/lib/query/hooks/practice";
 
 export function TodayDashboard() {
-  const client = useMemo(() => createDefaultApiClient(), []);
   const router = useRouter();
-  const [stats, setStats] = useState<PlanStats | null>(null);
-  const [dueItems, setDueItems] = useState<DuePracticeItem[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const plan = usePracticePlan();
+  const due = usePracticeDue(10);
+  const stats = plan.data ?? null;
+  // A failed due list keeps the dashboard usable; only the plan gates it.
+  const dueItems = due.data ?? [];
+  const error = queryErrorMessage(plan.error);
+  const loading = plan.isPending;
 
-  const load = useCallback(async (showLoading = false) => {
-    if (showLoading) setLoading(true);
-    setError(null);
-    const [planResult, dueResult] = await Promise.all([
-      practiceApi.getPracticePlan(client),
-      practiceApi.getPracticeDue(client, { limit: 10 }),
-    ]);
-    setLoading(false);
-    if (!planResult.ok) {
-      setError(formatApiErrorMessage(planResult.error));
-      return;
-    }
-    setStats(planResult.data as PlanStats);
-    if (dueResult.ok) {
-      setDueItems((dueResult.data as { items: DuePracticeItem[] }).items ?? []);
-    }
-  }, [client]);
-
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      setError(null);
-      const [planResult, dueResult] = await Promise.all([
-        practiceApi.getPracticePlan(client),
-        practiceApi.getPracticeDue(client, { limit: 10 }),
-      ]);
-      if (!active) return;
-      setLoading(false);
-      if (!planResult.ok) {
-        setError(formatApiErrorMessage(planResult.error));
-        return;
-      }
-      setStats(planResult.data as PlanStats);
-      if (dueResult.ok) {
-        setDueItems((dueResult.data as { items: DuePracticeItem[] }).items ?? []);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [client]);
+  function retry() {
+    void plan.refetch();
+    void due.refetch();
+  }
 
   function startPractice() {
     if (dueItems.length === 0) return;
@@ -91,7 +44,7 @@ export function TodayDashboard() {
       {error ? (
         <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
           {error}{" "}
-          <button type="button" onClick={() => void load(true)} className="underline">
+          <button type="button" onClick={retry} className="underline">
             Retry
           </button>
         </div>
