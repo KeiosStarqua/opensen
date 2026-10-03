@@ -28,7 +28,8 @@ export const queryKeys = {
   },
   onboarding: {
     all: ["onboarding"] as const,
-    status: () => ["onboarding", "status"] as const,
+    /** Scoped by learner so a signed-out page cannot reuse another account's flag. */
+    status: (userId: string | null) => ["onboarding", "status", userId] as const,
   },
   practice: {
     all: ["practice"] as const,
