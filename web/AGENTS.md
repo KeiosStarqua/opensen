@@ -16,6 +16,7 @@ TanStack Start **web client** for OpenSen: marketing/landing and the authenticat
 ## Local Contracts
 
 - Framework: [TanStack Start](https://tanstack.com/start) on Vite 8 + Nitro (TypeScript, Tailwind CSS v4 via `@tailwindcss/vite`, ESLint flat config). Nitro picks the Vercel preset on Vercel builds and the Node server elsewhere.
+- UI kit: [shadcn/ui](https://ui.shadcn.com) in `components.json` (style `radix-nova`, CSS `src/styles.css`, alias `@/components/ui`). Add a component with `npx shadcn@latest add <name>` from this directory. Source lives in `src/components/ui/`; `cn` is re-exported from `src/lib/utils.ts`. Keep the existing page `--background` and `--foreground` pair; the preset palette must not replace it.
 - Package name: `opensen-web` (see `package.json`). ESM (`"type": "module"`).
 - Production host: `https://opensen.taquangkhoi.com/`
 - Run from this directory: `npm install`, `npm run dev` (port 3001), `npm run build`, `npm run start`, `npm run typecheck`, `npm run lint`, `npm test`. `.npmrc` sets `legacy-peer-deps` because `@neondatabase/auth` still declares a `next` peer.
@@ -55,13 +56,13 @@ TanStack Start **web client** for OpenSen: marketing/landing and the authenticat
 - Study illustrations live in `public/studio/` and are mapped by `components/studio/scenes.tsx`. Sen is the cream round character with the green leaf beret, glossy black eyes, and rosy cheeks. New scenes stay in that pastel storybook style and contain no UI chrome or readable text. `docs/DESIGN.md` still governs the calmer recall and plan surfaces.
 - The marketing page is `components/landing-page.tsx`, with storybook art in `public/landing/`. Readable product copy on that page stays in HTML. Landing headlines live in `lib/site.ts` and match the Landing copy section of `docs/product-strategy.md`.
 - The brand mark is `public/brand/logo.png` (transparent square crop of the lotus). Render it through `components/brand-mark.tsx` (`BrandMark`, and `LogoMark` in the study shell). Favicon and Apple touch icon are `public/favicon.ico`, `public/icon.png` (192px), and `public/apple-icon.png` (180px), linked from `routes/__root.tsx`.
-- UI icons: [`@phosphor-icons/react`](https://github.com/phosphor-icons/react). Import the named component (`HorseIcon`). Vite tree-shakes the named imports, so only the icons in use ship. Default `weight="regular"`; `weight="fill"` for the selected or active state of the same icon. Size and color go through the icon props (`size`, `color`, or `currentColor`). Do not add Material, Lucide, Heroicons, or hand-rolled `<svg>` icons for UI chrome.
+- UI components come from shadcn (`src/components/ui/`). UI icons stay [`@phosphor-icons/react`](https://github.com/phosphor-icons/react). `components.json` `iconLibrary` is `phosphor`. Import the named component (`HorseIcon`). Vite tree-shakes the named imports, so only the icons in use ship. Default `weight="regular"`; `weight="fill"` for the selected or active state of the same icon. Size and color go through the icon props (`size`, `color`, or `currentColor`). If the CLI emits `strokeWidth` on a Phosphor icon, replace it with `weight="regular"`. Do not add Material, Lucide, Heroicons, or hand-rolled `<svg>` icons for UI chrome, and do not add `lucide-react`.
 
 ## Verification
 
 - `npm run typecheck` from `web/`
 - `npm run lint` from `web/`
-- `npm run test` from `web/` (API client, `lib/query`, auth route rules, sidebar account label, search serialization, observability, and speech unit tests)
+- `npm run test` from `web/` (API client, `lib/query`, auth route rules, sidebar account label, search serialization, observability, speech, and the shadcn Button import)
 - `npm run build` from `web/`, then `node --env-file=.env.local .output/server/index.mjs` to smoke-check status codes, redirects, titles, and `Cache-Control` on the production server
 
 ## Child DOX Index
