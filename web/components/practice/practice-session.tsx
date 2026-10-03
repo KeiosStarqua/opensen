@@ -1,21 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import {
-  createDefaultApiClient,
-  formatApiErrorMessage,
-  practiceApi,
-} from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
 import { isCorrect, similarity } from "@/lib/practice/answer-matcher";
 import { consumePracticeFocusQueue } from "@/lib/practice/focus-queue";
 import { buildPracticeItem } from "@/lib/practice/practice-item";
+import { queryErrorMessage, queryErrorStatus } from "@/lib/query/api-query";
+import {
+  usePracticeSessionDeck,
+  useSubmitReview,
+} from "@/lib/query/hooks/practice";
 import { getLearnerSettings } from "@/lib/settings/learner-settings";
 import type { DuePracticeItem, ReviewRating } from "@/lib/practice/types";
 
-type Phase = "loading" | "prompt" | "reveal" | "finished" | "empty" | "error";
+type Step = "prompt" | "reveal" | "finished";
+type Phase = Step | "loading" | "empty" | "error";
 
 const GRADES: { rating: ReviewRating; label: string }[] = [
   { rating: "forgot", label: "Forgot" },
@@ -25,80 +26,63 @@ const GRADES: { rating: ReviewRating; label: string }[] = [
 ];
 
 export function PracticeSession() {
-  const client = useMemo(() => createDefaultApiClient(), []);
   const canSpeak =
     typeof window !== "undefined" &&
     typeof window.speechSynthesis !== "undefined";
 
-  const [initialFocusQueue] = useState(() => consumePracticeFocusQueue());
-  const hasInitialFocus =
-    initialFocusQueue !== null && initialFocusQueue.length > 0;
+  // Items handed over by Today/Plan/Library/Dialog Builder; null means
+  // "practice whatever is due".
+  const [focusQueue, setFocusQueue] = useState<DuePracticeItem[] | null>(() => {
+    const handedOver = consumePracticeFocusQueue();
+    return handedOver && handedOver.length > 0 ? handedOver : null;
+  });
+  const [deckLimit] = useState(() => getLearnerSettings().sessionSize);
+  const deck = usePracticeSessionDeck(deckLimit, {
+    enabled: focusQueue === null,
+  });
+  const review = useSubmitReview();
 
-  const [phase, setPhase] = useState<Phase>(() =>
-    hasInitialFocus ? "prompt" : "loading",
-  );
-  const [queue, setQueue] = useState<DuePracticeItem[]>(
-    () => initialFocusQueue ?? [],
-  );
+  const [step, setStep] = useState<Step>("prompt");
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [matchScore, setMatchScore] = useState<number | null>(null);
   const [completed, setCompleted] = useState(0);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [grading, setGrading] = useState(false);
+
+  const queue = useMemo(
+    () => focusQueue ?? deck.data ?? [],
+    [focusQueue, deck.data],
+  );
+  const reviewMissing = queryErrorStatus(review.error) === 404;
+  const phase: Phase =
+    focusQueue === null && deck.isPending
+      ? "loading"
+      : (focusQueue === null && deck.isError) || reviewMissing
+        ? "error"
+        : queue.length === 0
+          ? "empty"
+          : step;
+  const errorMessage = queryErrorMessage(
+    focusQueue === null && deck.isError ? deck.error : review.error,
+  );
 
   const currentDue = queue[index];
-  const currentItem = currentDue
-    ? buildPracticeItem(currentDue, canSpeak)
-    : null;
+  const currentItem = useMemo(
+    () => (currentDue ? buildPracticeItem(currentDue, canSpeak) : null),
+    [currentDue, canSpeak],
+  );
 
-  const loadDue = useCallback(async (showLoading = false) => {
-    if (showLoading) {
-      setPhase("loading");
-    }
-    setErrorMessage(null);
-    const limit = getLearnerSettings().sessionSize;
-    const result = await practiceApi.getPracticeDue(client, { limit });
-    if (!result.ok) {
-      setErrorMessage(formatApiErrorMessage(result.error));
-      setPhase("error");
-      return;
-    }
-    if (result.data.items.length === 0) {
-      setPhase("empty");
-      return;
-    }
-    setQueue(result.data.items);
+  function restartFromDue() {
+    review.reset();
+    setStep("prompt");
     setIndex(0);
-    setPhase("prompt");
-  }, [client]);
-
-  useEffect(() => {
-    if (hasInitialFocus) {
-      return;
+    setAnswer("");
+    setMatchScore(null);
+    if (focusQueue !== null) {
+      setFocusQueue(null);
+    } else {
+      void deck.refetch();
     }
-    let active = true;
-    void (async () => {
-      const limit = getLearnerSettings().sessionSize;
-    const result = await practiceApi.getPracticeDue(client, { limit });
-      if (!active) return;
-      if (!result.ok) {
-        setErrorMessage(formatApiErrorMessage(result.error));
-        setPhase("error");
-        return;
-      }
-      if (result.data.items.length === 0) {
-        setPhase("empty");
-        return;
-      }
-      setQueue(result.data.items);
-      setIndex(0);
-      setPhase("prompt");
-    })();
-    return () => {
-      active = false;
-    };
-  }, [client, hasInitialFocus]);
+  }
 
   useEffect(() => {
     const settings = getLearnerSettings();
@@ -124,7 +108,7 @@ export function PracticeSession() {
     } else {
       setMatchScore(null);
     }
-    setPhase("reveal");
+    setStep("reveal");
     const settings = getLearnerSettings();
     if (currentItem.mode !== "listenRepeat" && canSpeak && settings.ttsEnabled) {
       const utterance = new SpeechSynthesisUtterance(currentItem.expected);
@@ -133,32 +117,24 @@ export function PracticeSession() {
     }
   }
 
-  async function submitGrade(rating: ReviewRating) {
-    if (!currentDue || grading) return;
-    setGrading(true);
-    setErrorMessage(null);
-    const result = await practiceApi.postPracticeReview(client, {
-      chunkId: currentDue.chunkId,
-      rating,
-    });
-    setGrading(false);
-    if (!result.ok) {
-      setErrorMessage(formatApiErrorMessage(result.error));
-      if (result.error.status === 404) {
-        setPhase("error");
-      }
-      return;
-    }
-    const nextCompleted = completed + 1;
-    setCompleted(nextCompleted);
-    setAnswer("");
-    setMatchScore(null);
-    if (index + 1 >= queue.length) {
-      setPhase("finished");
-      return;
-    }
-    setIndex(index + 1);
-    setPhase("prompt");
+  function submitGrade(rating: ReviewRating) {
+    if (!currentDue || review.isPending) return;
+    review.mutate(
+      { chunkId: currentDue.chunkId, rating },
+      {
+        onSuccess: () => {
+          setCompleted((count) => count + 1);
+          setAnswer("");
+          setMatchScore(null);
+          if (index + 1 >= queue.length) {
+            setStep("finished");
+            return;
+          }
+          setIndex(index + 1);
+          setStep("prompt");
+        },
+      },
+    );
   }
 
   if (phase === "loading") {
@@ -201,7 +177,7 @@ export function PracticeSession() {
         <div className="mt-6 flex flex-wrap gap-3">
           <button
             type="button"
-            onClick={() => void loadDue(true)}
+            onClick={restartFromDue}
             className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white"
           >
             Retry
@@ -299,8 +275,8 @@ export function PracticeSession() {
               <button
                 key={option.rating}
                 type="button"
-                disabled={grading}
-                onClick={() => void submitGrade(option.rating)}
+                disabled={review.isPending}
+                onClick={() => submitGrade(option.rating)}
                 className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50 disabled:opacity-50"
               >
                 {option.label}
