@@ -1,58 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
-import {
-  chunksApi,
-  createDefaultApiClient,
-  formatApiErrorMessage,
-} from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
-import {
-  buildDrillItems,
-  type DrillItem,
-  type PatternSlot,
-  type SentencePattern,
-} from "@/lib/drills/drill-generator";
+import { buildDrillItems } from "@/lib/drills/drill-generator";
 import { normalizeAnswer } from "@/lib/practice/answer-matcher";
-
+import { queryErrorMessage } from "@/lib/query/api-query";
+import { useSentencePattern } from "@/lib/query/hooks/chunks";
 
 export function SubstitutionDrillSession({ patternId }: { patternId: string }) {
-  const client = useMemo(() => createDefaultApiClient(), []);
-  const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<DrillItem[]>([]);
-  const [slotsById, setSlotsById] = useState<Map<string, PatternSlot>>(new Map());
+  const patternQuery = useSentencePattern(patternId);
+  const pattern = patternQuery.data;
+  const items = useMemo(() => (pattern ? buildDrillItems(pattern) : []), [pattern]);
+  const slotsById = useMemo(
+    () => new Map((pattern?.slots ?? []).map((slot) => [slot.id, slot])),
+    [pattern],
+  );
+  // A failed background refetch keeps the drill running on cached data.
+  const error = pattern
+    ? items.length === 0
+      ? "This pattern needs at least two fill variants per slot to run a drill."
+      : null
+    : queryErrorMessage(patternQuery.error);
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState<"idle" | "correct" | "wrong">("idle");
   const [correctCount, setCorrectCount] = useState(0);
   const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      const result = await chunksApi.getPatternById(client, patternId);
-      if (!active) return;
-      if (!result.ok) {
-        setError(formatApiErrorMessage(result.error));
-        return;
-      }
-      const pattern = (result.data as { pattern: SentencePattern }).pattern;
-      setSlotsById(new Map(pattern.slots.map((slot) => [slot.id, slot])));
-      const built = buildDrillItems(pattern);
-      if (built.length === 0) {
-        setError(
-          "This pattern needs at least two fill variants per slot to run a drill.",
-        );
-        return;
-      }
-      setItems(built);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [client, patternId]);
 
   const current = items[index];
 
