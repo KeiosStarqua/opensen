@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/* Self-hosted fonts (Fontsource) replace next/font. Variable fonts cover the
+   weights the app uses: Geist (UI), Nunito 500-800 (study shell, onboarding,
+   landing), Caveat 600-700 (landing script accents). */
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "@fontsource-variable/nunito";
+@import "@fontsource-variable/caveat";
+
+:root {
+  --font-geist-sans: "Geist Variable";
+  --font-geist-mono: "Geist Mono Variable";
+  --font-nunito: "Nunito Variable";
+  --font-caveat: "Caveat Variable";
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-studio: var(--font-nunito), ui-rounded, system-ui, sans-serif;
+  --font-script: var(--font-caveat), cursive;
+  --color-sen-canvas: #e6efe3;
+  --color-sen-ink: #1b2a22;
+  --color-sen-muted: #6b7c73;
+  --color-sen-primary: #1f9d52;
+  --color-sen-primary-dark: #157a3e;
+  --color-sen-soft: #e7f6eb;
+  --color-sen-line: #e4eee6;
+  --color-sen-gold: #e4b322;
+  --color-sen-flame: #f08c2a;
+  --color-sen-heart: #ef5b6c;
+  --color-sen-cream: #f6f4ee;
+  --color-sen-cream-deep: #efe9dc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
