@@ -43,7 +43,7 @@ npm run dev
 
 ## Web
 
-Next.js landing + web app lives in [`web/`](web/).
+TanStack Start landing + web app lives in [`web/`](web/).
 
 ```bash
 cd web

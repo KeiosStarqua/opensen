@@ -25,7 +25,7 @@ Durable product detail: [`docs/`](docs/). System boundaries: [`ARCHITECTURE.md`]
 | [`docs/`](docs/) | Product documentation |
 | [`mobile/`](mobile/) | Flutter mobile app (offline-first v1) |
 | [`backend/`](backend/) | Hono API on Vercel — `https://api.opensen.taquangkhoi.com/` |
-| [`web/`](web/) | Next.js landing + web app — `https://opensen.taquangkhoi.com/` |
+| [`web/`](web/) | TanStack Start landing + web app — `https://opensen.taquangkhoi.com/` |
 | [`.github/workflows/`](.github/workflows/) | GitHub Actions CI (`mobile-ci.yml`: analyze, test, Android APK) |
 
 ---
@@ -152,12 +152,12 @@ Any generated raster asset (mascot art, onboarding scenes, landing/studio illust
 
 Cloud agents get Node.js 22, Flutter stable (`/opt/flutter`, on `PATH`), `libsqlite3-dev`, and Docker. Use `sudo docker`. The daemon is configured with `fuse-overlayfs` and iptables disabled so Postgres can run in this VM.
 
-- Backend: `npm ci --prefix backend`. Web: `npm ci --prefix web --legacy-peer-deps`. Plain `npm ci` in `web/` fails because the lockfile omits some peer dependencies.
+- Backend: `npm ci --prefix backend`. Web: `npm ci --prefix web` (`web/.npmrc` sets `legacy-peer-deps`, because `@neondatabase/auth` still declares a `next` peer).
 - Mobile, from `mobile/`: `flutter pub get`, `flutter analyze --no-fatal-infos`, `flutter test`.
 - Local Postgres is `backend/docker-compose.test.yml` (pgvector, host port 5433). Use `postgresql://opensen:opensen@localhost:5433/opensen_test` for `DATABASE_URL`, `MIGRATION_DATABASE_URL`, and `TEST_DATABASE_URL`. From `backend/`: `npm run db:migrate`, then `npm run seed:mobile-catalog`.
-- `npm run dev` in `backend/` is `vercel dev` and needs `vercel login` or `VERCEL_TOKEN`. The Cloud Agent `start` script serves `backend/src/index.ts` with `tsx` on port 3000 and Next.js on port 3001. `CORS_ORIGINS` includes `http://localhost:3001`.
+- `npm run dev` in `backend/` is `vercel dev` and needs `vercel login` or `VERCEL_TOKEN`. The Cloud Agent `start` script serves `backend/src/index.ts` with `tsx` on port 3000 and the web app (`vite dev`) on port 3001. `CORS_ORIGINS` includes `http://localhost:3001`.
 - `web/.env.local` needs `NEON_AUTH_COOKIE_SECRET` (at least 32 characters) or the app fails to boot. A real `NEON_AUTH_BASE_URL` is required for sign-in. `OPENROUTER_API_KEY` is required for dialogue generation. Landing, `/health`, `/health/db`, and the seeded `GET /api/situations` route do not need those secrets.
-- Checks without those secrets: backend `npm run typecheck`, `npm test`, `npm run test:db`; web `npm test`, `npm run lint`, `npm run build`; mobile analyze and test as above.
+- Checks without those secrets: backend `npm run typecheck`, `npm test`, `npm run test:db`; web `npm run typecheck`, `npm test`, `npm run lint`, `npm run build`; mobile analyze and test as above.
 
 ## Child DOX Index
 
@@ -166,4 +166,4 @@ Cloud agents get Node.js 22, Flutter stable (`/opt/flutter`, on `PATH`), `libsql
 | [`docs/AGENTS.md`](docs/AGENTS.md) | Product and project documentation |
 | [`mobile/AGENTS.md`](mobile/AGENTS.md) | Flutter mobile client |
 | [`backend/AGENTS.md`](backend/AGENTS.md) | Hono API (Vercel); Drizzle + Neon (`backend/drizzle.config.ts`, `backend/drizzle/`, `backend/src/db/schema/`, `backend/neon.ts`) |
-| [`web/AGENTS.md`](web/AGENTS.md) | Next.js landing + web app |
+| [`web/AGENTS.md`](web/AGENTS.md) | TanStack Start landing + web app |
