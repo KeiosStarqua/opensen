@@ -27,6 +27,7 @@ export const config = {
     "/practice/:path*",
     "/explore/:path*",
     "/library/:path*",
+    "/saved/:path*",
     "/profile/:path*",
     "/patterns/:path*",
     "/today/:path*",
