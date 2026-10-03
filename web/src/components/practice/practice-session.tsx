@@ -1,4 +1,5 @@
 import { AppLink } from "@/components/app-link";
+import { RecallPromptSkeleton } from "@/components/practice/practice-loading";
 import { useEffect, useMemo, useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
@@ -139,7 +140,7 @@ export function PracticeSession() {
   if (phase === "loading") {
     return (
       <ScreenShell title="Practice session">
-        <p className="text-slate-600">Loading due items…</p>
+        <RecallPromptSkeleton />
       </ScreenShell>
     );
   }
