@@ -12,14 +12,15 @@ Use `captureOperationalError` from `web/lib/observability/operational-error.ts`.
 
 ## Report
 
-- Network failure, invalid JSON, and HTTP status >= 500 from `createDefaultApiClient` (already wired — do not capture again in the component)
+- Network failure, invalid JSON, and HTTP status >= 500 from `createDefaultApiClient` (already wired — do not capture again in the component). The report includes the thrown `fetch` message plus bearer shape and length, never the token.
+- The `/situations` catalog banner, including HTTP 4xx, via `reportSituationsCatalogError`. That screen is the exception to the 4xx rule: the banner hides status and message.
 - Auth SDK failures in sign-in, sign-up, and account name update
 - Any new `fetch` outside `lib/api/` (network, parse, HTTP >= 500)
 - Render crashes in `app/error.tsx` and `app/global-error.tsx` (already wired)
 
 ## Do not report
 
-- HTTP 4xx
+- HTTP 4xx, except the `/situations` catalog banner
 - Empty-field validation (`Email address must be provided.`, `Name must be provided.`)
 - Expected empty states (nothing to export, pattern has too few variants, persistence is off)
 
@@ -48,4 +49,4 @@ captureOperationalError(error, {
 });
 ```
 
-Tags to include when you call the helper yourself: `surface`, and when you have them `kind`, `status`, `path`, `action`. Do not attach learner ids, passwords, or response bodies.
+Tags to include when you call the helper yourself: `surface`, and when you have them `kind`, `status`, `path`, `action`. API reports may also include `apiHost`, `bearerAttached`, `bearerShape`, and `bearerLength`. Put the thrown `fetch` name/message and the banner sentence in `extra` (`causeName`, `causeMessage`, `uiMessage`). Do not attach learner ids, passwords, tokens, or response bodies.

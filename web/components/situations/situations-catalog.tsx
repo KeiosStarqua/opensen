@@ -9,6 +9,7 @@ import {
   situationsApi,
 } from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
+import { reportSituationsCatalogError } from "@/lib/observability/situations-catalog-error";
 
 type SituationItem = {
   id: string;
@@ -30,6 +31,7 @@ export function SituationsCatalog() {
       if (!active) return;
       setLoading(false);
       if (!result.ok) {
+        reportSituationsCatalogError(result.error);
         setError(formatApiErrorMessage(result.error));
         return;
       }
