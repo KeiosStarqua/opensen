@@ -3,7 +3,7 @@ import { useAppNavigate } from "@/lib/use-app-navigate";
 import { useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
-import { ONBOARDING_COMPLETE_KEY } from "@/lib/onboarding-storage";
+import { clearOnboardingComplete } from "@/lib/onboarding-storage";
 import { queryErrorMessage } from "@/lib/query/api-query";
 import { useSetOnboardingComplete } from "@/lib/query/hooks/onboarding";
 import {
@@ -35,7 +35,7 @@ export function SettingsForm() {
 
   function redoOnboarding() {
     update({ onboardingComplete: false });
-    window.localStorage.removeItem(ONBOARDING_COMPLETE_KEY);
+    clearOnboardingComplete();
     setOnboardingComplete.mutate(false, {
       onSuccess: () => navigate(AppRoutes.onboarding),
     });
