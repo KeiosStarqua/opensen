@@ -174,17 +174,25 @@ describe("operational error reporting", () => {
     expect(reportError.mock.calls[0][0].status).toBe(503);
   });
 
-  it("does not report HTTP 4xx", async () => {
+  it("reports HTTP 4xx too", async () => {
     await clientWith(
       async () =>
         new Response(JSON.stringify({ error: "missing", status: 404 }), {
           status: 404,
         }),
     ).request("/api/chunks/x");
-    expect(reportError).not.toHaveBeenCalled();
+    expect(reportError).toHaveBeenCalledTimes(1);
+    expect(reportError.mock.calls[0][0].status).toBe(404);
     expect(isOperationalApiError(new ApiError("http", "missing", 404))).toBe(
       false,
     );
+  });
+
+  it("does not report a successful request", async () => {
+    await clientWith(
+      async () => new Response(JSON.stringify({ ok: true }), { status: 200 }),
+    ).request("/api/chunks/x");
+    expect(reportError).not.toHaveBeenCalled();
   });
 
   it("createDefaultApiClient sends operational failures to Sentry", async () => {
@@ -214,20 +222,36 @@ describe("operational error reporting", () => {
         uiMessage:
           "Could not reach the server. Check your connection and try again.",
       }),
+      "error",
     );
   });
 
-  it("createDefaultApiClient does not send HTTP 4xx to Sentry", async () => {
+  it("createDefaultApiClient sends HTTP 4xx to Sentry as a warning", async () => {
     const client = createDefaultApiClient({
       fetch: async () =>
-        new Response(JSON.stringify({ error: "nope", status: 400 }), {
-          status: 400,
-        }),
+        new Response(
+          JSON.stringify({ error: "Invalid or expired token", status: 401 }),
+          { status: 401 },
+        ),
       baseUrl: "http://api.test",
-      getAccessToken: async () => TOKEN,
+      getAccessToken: async () => "a".repeat(32),
     });
-    await client.request("/api/chunks/x");
-    expect(captureOperationalError).not.toHaveBeenCalled();
+    await client.request("/api/situations?limit=50");
+    expect(captureOperationalError).toHaveBeenCalledTimes(1);
+    expect(captureOperationalError).toHaveBeenCalledWith(
+      expect.any(ApiError),
+      expect.objectContaining({
+        surface: "api",
+        kind: "http",
+        status: 401,
+        path: "/api/situations?limit=50",
+        bearerAttached: "true",
+        bearerShape: "opaque",
+        bearerLength: 32,
+      }),
+      expect.objectContaining({ uiMessage: "Invalid or expired token" }),
+      "warning",
+    );
   });
 });
 

@@ -23,11 +23,27 @@ describe("captureOperationalError", () => {
     });
 
     expect(captureException).toHaveBeenCalledWith(error, {
+      level: "error",
       tags: {
         surface: "api",
         status: "503",
         path: "/api/practice/due",
       },
+    });
+  });
+
+  it("passes the warning level and extra fields", () => {
+    const error = new Error("missing");
+    captureOperationalError(
+      error,
+      { surface: "api" },
+      { uiMessage: "missing" },
+      "warning",
+    );
+    expect(captureException).toHaveBeenCalledWith(error, {
+      level: "warning",
+      tags: { surface: "api" },
+      extra: { uiMessage: "missing" },
     });
   });
 
