@@ -10,7 +10,7 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 - Vercel deploy config and local `vercel` CLI workflows for this package
 - Product behavior and schema contracts live in [`docs/`](../docs/); this tree owns API implementation
 - Database choice (Postgres + pgvector) is defined in [`docs/database-architecture.md`](../docs/database-architecture.md)
-- Drizzle schema, migrations (`drizzle/`), and database tooling under `src/db/`
+- Drizzle schema (`src/db/schema/`), migrations (`drizzle/`), Kit config (`drizzle.config.ts`), and Neon project policy (`neon.ts`)
 
 ## Local Contracts
 
@@ -30,7 +30,8 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 - AI calls go through `src/ai/` only — never hardcode a vendor HTTP client in a route
 - Runtime database access: lazy `getDatabase()` in `src/db/client.ts` — Neon hosts use `drizzle-orm/neon-http`; local `postgresql://` URLs use postgres.js. Routes that do not persist data must not require `DATABASE_URL` at startup.
 - Migrations: checked-in SQL under `drizzle/`; apply with `npm run db:migrate` using `MIGRATION_DATABASE_URL` or `DATABASE_URL`
-- Neon project policy lives in `neon.ts` (`@neon/config`). Preview with `neon config plan`, apply with `neon config apply`. `neon link` writes connection strings to `.env.local` (gitignored); never commit them.
+- Drizzle lives in this package, not the repo root. Kit config: `drizzle.config.ts` (`schema` → `src/db/schema/index.ts`, `out` → `drizzle/`). Run `drizzle-kit` and `npm run db:migrate` from `backend/`.
+- Neon CLI link is the gitignored repo-root `.neon` (already linked; do not re-link). Project `little-tree-71151135` (`opensen`), org `org-rough-water-40798621`, region `aws-us-east-2`, Postgres 18. Default branch `production` (`br-small-mouse-aynnq03c`). `neon status` works from the repo root because it walks up to that link. Project policy is `backend/neon.ts` (`@neon/config`); preview with `neon config plan`, apply with `neon config apply` from `backend/`. `neon link` writes connection strings to `.env.local` (gitignored); never commit them.
 
 ## Work Guidance
 

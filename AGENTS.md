@@ -156,5 +156,5 @@ Cloud agents get Node.js 22, Flutter stable (`/opt/flutter`, on `PATH`), `libsql
 |------|-------|
 | [`docs/AGENTS.md`](docs/AGENTS.md) | Product and project documentation |
 | [`mobile/AGENTS.md`](mobile/AGENTS.md) | Flutter mobile client |
-| [`backend/AGENTS.md`](backend/AGENTS.md) | Hono API (Vercel) |
+| [`backend/AGENTS.md`](backend/AGENTS.md) | Hono API (Vercel); Drizzle + Neon (`backend/drizzle.config.ts`, `backend/drizzle/`, `backend/src/db/schema/`, `backend/neon.ts`) |
 | [`web/AGENTS.md`](web/AGENTS.md) | Next.js landing + web app |
