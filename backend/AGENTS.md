@@ -49,6 +49,7 @@ Hono **HTTP API** for OpenSen, deployed on **Vercel** Functions. Serves the Flut
 
 - `npm run typecheck` from `backend/`
 - `npm run test` — unit tests (no database)
+- `npm run smoke:api` — live smoke test of a deployed API (`scripts/smoke-api.ts`, default production). Signs in via Neon Auth (`POST sign-in/email` with an `Origin` header, which Neon Auth requires; session cookie → `GET get-session` → JWT in `set-auth-jwt`), then checks public routes, 401 handling, and signed-in reads. Needs `OPENSEN_TEST_EMAIL` and `OPENSEN_TEST_PASSWORD` (env only) plus `NEON_AUTH_BASE_URL` (also read from `web/.env.local`). Flags: `--base-url`, `--write` (saves one sentence), `--sign-up` (creates the account on production auth; use deliberately). Prints no tokens.
 - `npm run test:db` — requires `TEST_DATABASE_URL` and a pgvector-enabled disposable database (see `docker-compose.test.yml`)
 
 ## Child DOX Index

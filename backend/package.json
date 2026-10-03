@@ -14,7 +14,8 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:preflight": "tsx src/db/preflight.ts",
     "db:studio": "drizzle-kit studio",
-    "seed:mobile-catalog": "tsx scripts/seed-mobile-catalog.ts"
+    "seed:mobile-catalog": "tsx scripts/seed-mobile-catalog.ts",
+    "smoke:api": "tsx scripts/smoke-api.ts"
   },
   "dependencies": {
     "@neon/config": "^1.8.2",
