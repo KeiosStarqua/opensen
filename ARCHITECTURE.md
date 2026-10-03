@@ -88,7 +88,7 @@ Browser-local pieces on the API-backed path:
 
 The next due time for a server chunk is computed only when `POST /api/practice/reviews` runs. The browser sends the grade; it does not write `user_chunks`.
 
-Page analytics is `onedollarstats` in the root layout. Error monitoring is `@sentry/nextjs`, with browser ingest tunneled through `/monitoring`. Operational UI failures go through `captureOperationalError`. HTTP 4xx and expected empty states stay out of Sentry.
+Page analytics is `onedollarstats` in the root layout. Error monitoring is `@sentry/nextjs`, with browser ingest tunneled through `/monitoring`. Every failure message a learner sees is reported once through `captureOperationalError`: `error` level for our failures (network, 5xx, parse, unexpected throws), `warning` for request or setup failures (HTTP 4xx, empty fields, persistence off, too few drill variants, speech or storage refusal). Correct outcomes such as a wrong drill answer or an empty export stay out.
 
 ## API
 
