@@ -23,6 +23,7 @@ import '../../domain/services/fsrs/fsrs_parameters.dart';
 import '../../domain/services/fsrs/fsrs_scheduler.dart';
 import '../../domain/services/id_generator.dart';
 import '../../domain/usecases/build_dialogue.dart';
+import '../../domain/usecases/edit_heard_sentence.dart';
 import '../../domain/usecases/create_custom_chunk.dart';
 import '../../domain/usecases/export_anki.dart';
 import '../../domain/usecases/record_review.dart';
@@ -174,6 +175,10 @@ final exportAnkiUseCaseProvider = Provider<ExportAnkiUseCase>(
 
 final saveHeardSentenceUseCaseProvider = Provider<SaveHeardSentence>(
   (ref) => SaveHeardSentence(ref.watch(savedSentenceRepositoryProvider)),
+);
+
+final editHeardSentenceUseCaseProvider = Provider<EditHeardSentence>(
+  (ref) => EditHeardSentence(ref.watch(savedSentenceRepositoryProvider)),
 );
 
 final createCustomChunkUseCaseProvider = Provider<CreateCustomChunkUseCase>(

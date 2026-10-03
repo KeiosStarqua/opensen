@@ -34,6 +34,28 @@ class _MemorySentences implements SavedSentenceRepository {
     }
     return null;
   }
+
+  @override
+  Future<SavedSentence?> update(String id, String text) async {
+    for (var index = 0; index < items.length; index++) {
+      if (items[index].id != id) continue;
+      final next = SavedSentence(
+        id: id,
+        text: text,
+        createdAt: items[index].createdAt,
+      );
+      items[index] = next;
+      return next;
+    }
+    return null;
+  }
+}
+
+Finder _fieldLabeled(String label) {
+  return find.ancestor(
+    of: find.text(label),
+    matching: find.byType(TextField),
+  );
 }
 
 void main() {
@@ -86,11 +108,79 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Study this sentence'), findsOneWidget);
-    await tester.enterText(find.byType(TextField), 'Could you say that again?');
+    await tester.enterText(
+      _fieldLabeled('Say or type the sentence'),
+      'Could you say that again?',
+    );
     await tester.tap(find.text('Check'));
     await tester.pump();
 
     expect(find.text("That's the sentence."), findsOneWidget);
     expect(store.items, hasLength(1));
+  });
+
+  testWidgets('an edited sentence is what the list and the study step use', (
+    tester,
+  ) async {
+    final store = _MemorySentences();
+    store.items.add(
+      SavedSentence(
+        id: 's1',
+        text: 'Could you say that again?',
+        createdAt: DateTime.utc(2026, 10, 3),
+      ),
+    );
+    final router = GoRouter(
+      routes: <RouteBase>[
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const SavedSentencesScreen(),
+        ),
+        GoRoute(
+          path: '/saved/:id',
+          builder: (context, state) => SavedSentenceStudyScreen(
+            id: state.pathParameters['id']!,
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          savedSentenceRepositoryProvider.overrideWith((ref) => store),
+          speechSynthesizerProvider.overrideWith(
+            (ref) => const SilentSpeechSynthesizer(),
+          ),
+          initialSettingsProvider.overrideWith(
+            (ref) => const LearnerSettings(onboardingComplete: true),
+          ),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(_fieldLabeled('Sentence'), 'Could you repeat that?');
+    await tester.tap(find.text('Save changes'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Could you repeat that?'), findsWidgets);
+    await tester.enterText(
+      _fieldLabeled('Say or type the sentence'),
+      'Could you repeat that?',
+    );
+    await tester.tap(find.text('Check'));
+    await tester.pump();
+    expect(find.text("That's the sentence."), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Could you repeat that?'), findsOneWidget);
+    expect(find.text('Could you say that again?'), findsNothing);
+    expect(store.items.single.text, 'Could you repeat that?');
   });
 }

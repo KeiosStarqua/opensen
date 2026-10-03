@@ -61,6 +61,11 @@ class OpenSenApiClient {
     return _send('POST', path, jsonBody: body);
   }
 
+  /// `PATCH` JSON [body] to [path] and decode the response.
+  Future<Object?> patchJson(String path, Object? body) {
+    return _send('PATCH', path, jsonBody: body);
+  }
+
   Future<Object?> _send(
     String method,
     String path, {
@@ -81,13 +86,12 @@ class OpenSenApiClient {
 
     final http.Response response;
     try {
-      final request = method == 'POST'
-          ? _http.post(
-              uri,
-              headers: headers,
-              body: jsonBody == null ? null : jsonEncode(jsonBody),
-            )
-          : _http.get(uri, headers: headers);
+      final encoded = jsonBody == null ? null : jsonEncode(jsonBody);
+      final Future<http.Response> request = switch (method) {
+        'POST' => _http.post(uri, headers: headers, body: encoded),
+        'PATCH' => _http.patch(uri, headers: headers, body: encoded),
+        _ => _http.get(uri, headers: headers),
+      };
       response = await request.timeout(timeout);
     } on TimeoutException {
       throw const ApiException(ApiErrorKind.network, 'Request timed out');

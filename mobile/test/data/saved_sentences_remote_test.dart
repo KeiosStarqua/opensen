@@ -70,6 +70,54 @@ void main() {
     expect(await missing.getById('other'), isNull);
   });
 
+  test('patches the owned sentence and hides a missing row', () async {
+    late http.Request captured;
+    final client = OpenSenApiClient(
+      baseUri: Uri.parse('https://api.example.com/'),
+      accessToken: () async => 'learner-a',
+      httpClient: MockClient((request) async {
+        captured = request;
+        return http.Response(
+          jsonEncode(<String, String>{
+            'id': 's1',
+            'text': 'Could you repeat that?',
+            'createdAt': '2026-10-03T12:00:00.000Z',
+          }),
+          200,
+        );
+      }),
+    );
+
+    final updated = await HttpSavedSentenceRepository(client).update(
+      's1',
+      'Could you repeat that?',
+    );
+
+    expect(captured.method, 'PATCH');
+    expect(captured.headers['authorization'], 'Bearer learner-a');
+    expect(captured.url.path, '/api/saved-sentences/s1');
+    expect(jsonDecode(captured.body), <String, String>{
+      'text': 'Could you repeat that?',
+    });
+    expect(updated?.text, 'Could you repeat that?');
+
+    final missing = HttpSavedSentenceRepository(
+      OpenSenApiClient(
+        baseUri: Uri.parse('https://api.example.com/'),
+        httpClient: MockClient(
+          (_) async => http.Response(
+            jsonEncode(<String, Object>{
+              'error': 'Saved sentence not found',
+              'status': 404,
+            }),
+            404,
+          ),
+        ),
+      ),
+    );
+    expect(await missing.update('other', 'Stolen'), isNull);
+  });
+
   test('reads the Neon Auth session token', () async {
     final gateway = NeonAuthGateway(
       baseUri: Uri.parse('https://auth.example/'),
