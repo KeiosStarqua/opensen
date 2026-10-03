@@ -1,12 +1,14 @@
 import { AppLink } from "@/components/app-link";
+import { DialogueDetailSkeleton } from "@/components/content/content-loading";
 
 import { AppRoutes } from "@/lib/app-routes";
 import { queryErrorMessage } from "@/lib/query/api-query";
 import { useDialogue } from "@/lib/query/hooks/dialogues";
 
 export function DialogueView({ dialogueId }: { dialogueId: string }) {
-  const { data, error: queryError } = useDialogue(dialogueId);
-  const error = data ? null : queryErrorMessage(queryError);
+  const dialogue = useDialogue(dialogueId);
+  const data = dialogue.data;
+  const error = data ? null : queryErrorMessage(dialogue.error);
 
   if (error) {
     return (
@@ -19,7 +21,18 @@ export function DialogueView({ dialogueId }: { dialogueId: string }) {
     );
   }
 
-  if (!data) return <p className="text-slate-600">Loading dialogue…</p>;
+  if (!data && !dialogue.isPending) {
+    return (
+      <p className="text-red-700">
+        Dialogue not found{" "}
+        <AppLink href={AppRoutes.situations} className="underline">
+          Situations
+        </AppLink>
+      </p>
+    );
+  }
+
+  if (!data) return <DialogueDetailSkeleton />;
 
   return (
     <div className="space-y-6">
