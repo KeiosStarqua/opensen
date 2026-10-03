@@ -34,6 +34,14 @@ function memoryStore(): SavedSentencesRepository & {
         ? { id: row.id, text: row.text, createdAt: row.createdAt }
         : null
     },
+    async delete(ownerId, id) {
+      const index = rows.findIndex(
+        (item) => item.id === id && item.ownerId === ownerId,
+      )
+      if (index === -1) return false
+      rows.splice(index, 1)
+      return true
+    },
   }
 }
 
@@ -116,6 +124,63 @@ describe('saved sentences', () => {
       id: mine.id,
       text: 'Could you say that again?',
     })
+  })
+
+  it('still returns the sentence on a later read, and hides it from another learner', async () => {
+    const store = memoryStore()
+    const created = await appFor(LEARNER_A, store).request('/', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text: 'Could you say that again?' }),
+    })
+    const sentence = (await created.json()) as { id: string; text: string }
+
+    const again = await appFor(LEARNER_A, store).request('/')
+    const againBody = (await again.json()) as { items: Array<{ text: string }> }
+    expect(againBody.items.map((item) => item.text)).toContain(sentence.text)
+
+    const otherList = await appFor(LEARNER_B, store).request('/')
+    const otherBody = (await otherList.json()) as { items: Array<{ id: string }> }
+    expect(otherBody.items.map((item) => item.id)).not.toContain(sentence.id)
+
+    const otherDetail = await appFor(LEARNER_B, store).request(`/${sentence.id}`)
+    expect(otherDetail.status).toBe(404)
+  })
+
+  it('removes the owner’s sentence so a later read no longer returns it', async () => {
+    const store = memoryStore()
+    const mine = await store.create(LEARNER_A, 'Could you say that again?')
+    const response = await appFor(LEARNER_A, store).request(`/${mine.id}`, {
+      method: 'DELETE',
+    })
+    expect(response.status).toBe(204)
+    expect(await response.text()).toBe('')
+
+    const list = await appFor(LEARNER_A, store).request('/')
+    const body = (await list.json()) as { items: Array<{ id: string }> }
+    expect(body.items).toEqual([])
+  })
+
+  it('does not delete another learner’s sentence', async () => {
+    const store = memoryStore()
+    const theirs = await store.create(LEARNER_B, 'Theirs')
+    const response = await appFor(LEARNER_A, store).request(`/${theirs.id}`, {
+      method: 'DELETE',
+    })
+    expect(response.status).toBe(404)
+    expect(store.rows).toHaveLength(1)
+    const stillTheirs = await appFor(LEARNER_B, store).request(`/${theirs.id}`)
+    expect(stillTheirs.status).toBe(200)
+  })
+
+  it('rejects anonymous deletes', async () => {
+    const loadDatabaseEnv = vi.fn()
+    const app = createSavedSentencesRouter({ loadDatabaseEnv })
+    const response = await app.request('/11111111-1111-4111-8111-111111111111', {
+      method: 'DELETE',
+    })
+    expect(response.status).toBe(401)
+    expect(loadDatabaseEnv).not.toHaveBeenCalled()
   })
 
   it('does not call the database env loader before auth fails', async () => {

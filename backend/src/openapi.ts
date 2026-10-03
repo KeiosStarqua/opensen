@@ -331,6 +331,21 @@ export function buildOpenApiDocument(baseUrl?: string) {
             '404': { $ref: '#/components/responses/NotFound' },
           },
         },
+        delete: {
+          tags: ['Saved sentences'],
+          summary: 'Remove one saved sentence',
+          description:
+            'Deletes the row when the caller owns it. Library and the saved-sentence list both lose that sentence. Missing and other learners’ rows are both 404.',
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          ],
+          security: signedIn,
+          responses: {
+            '204': { description: 'Sentence removed.' },
+            '401': { $ref: '#/components/responses/Unauthorized' },
+            '404': { $ref: '#/components/responses/NotFound' },
+          },
+        },
       },
       '/api/chunks': {
         get: {
