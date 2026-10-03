@@ -17,15 +17,10 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { BrandMark } from "@/components/brand-mark";
 import { LeafMascot } from "@/components/onboarding/leaf-mascot";
-import {
-  createDefaultApiClient,
-  dialoguesApi,
-  formatApiErrorMessage,
-} from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
 import {
   goalByLabel,
@@ -37,6 +32,8 @@ import {
 import { markOnboardingComplete } from "@/lib/onboarding-storage";
 import { savePracticeFocusQueue } from "@/lib/practice/focus-queue";
 import type { DuePracticeItem } from "@/lib/practice/types";
+import { queryErrorMessage } from "@/lib/query/api-query";
+import { useGenerateDialogue } from "@/lib/query/hooks/dialogues";
 import { siteConfig } from "@/lib/site";
 
 type GenerateResponse = {
@@ -69,14 +66,16 @@ function speak(text: string) {
 
 export function OnboardingExperience() {
   const router = useRouter();
-  const client = useMemo(() => createDefaultApiClient(), []);
   const resultRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<WizardStep>("goal");
   const [selectedLabel, setSelectedLabel] = useState<string>(onboardingGoals[0].label);
   const [situation, setSituation] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<GenerateResponse | null>(null);
+  const generate = useGenerateDialogue();
+  // The onboarding prompt always asks for frame, example, and meanings.
+  const result = (generate.data ?? null) as GenerateResponse | null;
+  const loading = generate.isPending;
+  const [practiceError, setPracticeError] = useState<string | null>(null);
+  const error = practiceError ?? queryErrorMessage(generate.error);
   const goal = goalByLabel(selectedLabel);
 
   useEffect(() => {
@@ -86,8 +85,12 @@ export function OnboardingExperience() {
 
   function selectGoal(label: string) {
     setSelectedLabel(label);
-    setResult(null);
-    setError(null);
+    dismissError();
+  }
+
+  function dismissError() {
+    generate.reset();
+    setPracticeError(null);
   }
 
   function goToSituation() {
@@ -98,31 +101,30 @@ export function OnboardingExperience() {
     setStep("goal");
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (situation.trim().length === 0 || loading) return;
-    setLoading(true);
-    setError(null);
-    const apiResult = await dialoguesApi.generateDialogue(client, {
-      situation: situation.trim(),
-      goal: selectedLabel,
-      nativeLanguage: "vi",
-      targetLanguage: "en",
-      level: "beginner",
-    });
-    setLoading(false);
-    if (!apiResult.ok) {
-      setError(formatApiErrorMessage(apiResult.error));
-      return;
-    }
-    setResult(apiResult.data as GenerateResponse);
-    setStep("result");
-    markOnboardingComplete();
+    setPracticeError(null);
+    generate.mutate(
+      {
+        situation: situation.trim(),
+        goal: selectedLabel,
+        nativeLanguage: "vi",
+        targetLanguage: "en",
+        level: "beginner",
+      },
+      {
+        onSuccess: () => {
+          setStep("result");
+          markOnboardingComplete();
+        },
+      },
+    );
   }
 
   function startPractice() {
     if (!result?.persistence?.chunkIds?.length) {
-      setError(
+      setPracticeError(
         "Practice needs persisted chunks (backend DATABASE_URL and DIALOGUE_PERSISTENCE_MODE). Try again when the API is fully configured.",
       );
       return;
@@ -190,7 +192,7 @@ export function OnboardingExperience() {
             onSituationChange={setSituation}
             loading={loading}
             error={error}
-            onDismissError={() => setError(null)}
+            onDismissError={dismissError}
             onBack={goBackToGoal}
             onSubmit={handleSubmit}
             canGenerate={canGenerate}

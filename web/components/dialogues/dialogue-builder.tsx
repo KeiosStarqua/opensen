@@ -2,16 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import {
-  createDefaultApiClient,
-  dialoguesApi,
-  formatApiErrorMessage,
-} from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
 import { savePracticeFocusQueue } from "@/lib/practice/focus-queue";
 import type { DuePracticeItem } from "@/lib/practice/types";
+import { queryErrorMessage } from "@/lib/query/api-query";
+import { useGenerateDialogue } from "@/lib/query/hooks/dialogues";
 
 type Props = {
   situationId: string;
@@ -20,7 +17,6 @@ type Props = {
 
 export function DialogueBuilder({ situationId, situationName }: Props) {
   const router = useRouter();
-  const client = useMemo(() => createDefaultApiClient(), []);
   const [role, setRole] = useState("");
   const [otherSpeaker, setOtherSpeaker] = useState("");
   const [goal, setGoal] = useState("");
@@ -29,20 +25,17 @@ export function DialogueBuilder({ situationId, situationName }: Props) {
   const [situationText, setSituationText] = useState(
     situationName ?? "Describe the conversation you need",
   );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{
-    dialogue: { title: string; lines: Array<{ speaker: string; text: string; meaningNative?: string }> };
-    chunks: Array<{ frame?: string; example?: string; meaningNative: string }>;
-    persistence?: { dialogueId: string; chunkIds: string[] };
-  } | null>(null);
+  const generate = useGenerateDialogue();
+  const result = generate.data ?? null;
+  const loading = generate.isPending;
+  const [practiceError, setPracticeError] = useState<string | null>(null);
+  const error = practiceError ?? queryErrorMessage(generate.error);
 
-  async function onSubmit(event: React.FormEvent) {
+  function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (situationText.trim().length < 3) return;
-    setLoading(true);
-    setError(null);
-    const apiResult = await dialoguesApi.generateDialogue(client, {
+    if (situationText.trim().length < 3 || loading) return;
+    setPracticeError(null);
+    generate.mutate({
       situation: situationText.trim(),
       role: role.trim() || undefined,
       otherSpeaker: otherSpeaker.trim() || undefined,
@@ -50,17 +43,11 @@ export function DialogueBuilder({ situationId, situationName }: Props) {
       tone: tone.trim() || undefined,
       level,
     });
-    setLoading(false);
-    if (!apiResult.ok) {
-      setError(formatApiErrorMessage(apiResult.error));
-      return;
-    }
-    setResult(apiResult.data as typeof result);
   }
 
   function practiceNow() {
     if (!result?.persistence?.chunkIds.length) {
-      setError("Persistence is off or generate did not return chunk ids.");
+      setPracticeError("Persistence is off or generate did not return chunk ids.");
       return;
     }
     const items: DuePracticeItem[] = result.persistence.chunkIds.map((chunkId, i) => ({
@@ -113,7 +100,7 @@ export function DialogueBuilder({ situationId, situationName }: Props) {
   }
 
   return (
-    <form onSubmit={(event) => void onSubmit(event)} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4">
       <Link href={AppRoutes.situation(situationId)} className="text-sm text-slate-600">
         ← Back to situation
       </Link>

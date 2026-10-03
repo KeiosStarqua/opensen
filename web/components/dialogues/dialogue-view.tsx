@@ -1,40 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
 
-import {
-  createDefaultApiClient,
-  dialoguesApi,
-  formatApiErrorMessage,
-} from "@/lib/api";
 import { AppRoutes } from "@/lib/app-routes";
+import { queryErrorMessage } from "@/lib/query/api-query";
+import { useDialogue } from "@/lib/query/hooks/dialogues";
 
 export function DialogueView({ dialogueId }: { dialogueId: string }) {
-  const client = useMemo(() => createDefaultApiClient(), []);
-  const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<{
-    title: string;
-    level: string;
-    lines: Array<{ speaker: string; text: string }>;
-    chunks: Array<{ id: string; text: string; meaning: string }>;
-  } | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      const result = await dialoguesApi.getDialogue(client, dialogueId);
-      if (!active) return;
-      if (!result.ok) {
-        setError(formatApiErrorMessage(result.error));
-        return;
-      }
-      setData(result.data as typeof data);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [client, dialogueId]);
+  const { data, error: queryError } = useDialogue(dialogueId);
+  const error = data ? null : queryErrorMessage(queryError);
 
   if (error) {
     return (
