@@ -7,7 +7,7 @@ fileMatchPattern: ['web/**/*.{ts,tsx}']
 
 Every failure message a learner can see is reported to Sentry exactly once. A red banner alone is not enough.
 
-Use `captureOperationalError(error, tags, extra, level)` from `web/lib/observability/operational-error.ts`. It calls `@sentry/core` `captureException`, which is the client `Sentry.init` already registered for browser and server.
+Use `captureOperationalError(error, tags, extra, level)` from `web/src/lib/observability/operational-error.ts`. It calls `@sentry/core` `captureException`, which is the client `Sentry.init` already registered for browser and server.
 
 ## Levels
 
@@ -20,7 +20,7 @@ Use `captureOperationalError(error, tags, extra, level)` from `web/lib/observabi
 - Non-`ApiError` throws in query or mutation functions (`QueryCache` / `MutationCache` in `lib/query/query-client.ts`)
 - Auth forms via `reportAuthFormError`
 - Browser speech via `speak` in `lib/speech/speak.ts`
-- Render crashes in `app/error.tsx` and `app/global-error.tsx`
+- Render crashes in the router error component `src/components/route-error.tsx`
 
 ## Do not report
 

@@ -13,7 +13,7 @@ Neon Auth (Managed Better Auth)
         |
         +---------------------------+
         |                           |
-   web/  Next.js               mobile/  Flutter
+   web/  TanStack Start        mobile/  Flutter
    landing + study UI          offline-first client
         |                           |
         | HTTPS JSON                | SQLite: catalog, drills,
@@ -34,9 +34,9 @@ The phone keeps content and progress on the device. The web app’s API-backed s
 |------|---------|---------|
 | [`mobile/`](mobile/) | `opensen` | Flutter. v1 is fully offline. Web is a UI preview (SQLite WASM, speech unavailable). |
 | [`backend/`](backend/) | `opensen-backend` | Hono app default-exported from `src/index.ts`, deployed as Vercel Functions. Host: `https://api.opensen.taquangkhoi.com/`. |
-| [`web/`](web/) | `opensen-web` | One Next.js App Router project for the marketing page and the signed-in app. Host: `https://opensen.taquangkhoi.com/`. |
+| [`web/`](web/) | `opensen-web` | One TanStack Start app (Vite + Nitro, Vercel) for the marketing page and the signed-in app. Host: `https://opensen.taquangkhoi.com/`. |
 
-Business rules that must survive a UI rewrite live in `mobile/lib/domain/` or in backend modules outside route handlers (`src/practice/`, `src/export/`, `src/dialogue-packs/`, `src/ai/`). Web UI calls the API through `web/lib/api/` and keeps only session-local scoring, drill assembly, and the studio lesson flow in the browser.
+Business rules that must survive a UI rewrite live in `mobile/lib/domain/` or in backend modules outside route handlers (`src/practice/`, `src/export/`, `src/dialogue-packs/`, `src/ai/`). Web UI calls the API through `web/src/lib/api/` and keeps only session-local scoring, drill assembly, and the studio lesson flow in the browser.
 
 ## Mobile
 
@@ -66,15 +66,15 @@ A chunk is on the Practice Plan only when a `user_chunks` row exists. Due means 
 
 ## Web
 
-One App Router app, split by route groups. `(marketing)` is the public landing page (`components/landing-page.tsx`). `(app)` is the signed-in product. `proxy.ts` runs Neon Auth middleware on study, onboarding, settings, and account routes and leaves `/` and `/auth/*` public.
+One TanStack Start app; paths below are under `web/src/`. `routes/index.tsx` is the public landing page (`components/landing-page.tsx`). The pathless `routes/_app` layout is the signed-in product, and `routes/_app/_shell` adds the study shell. A global request middleware (`lib/auth/auth-middleware.ts`, registered in `start.ts`) checks the Neon Auth session on every document request under the prefixes in `lib/auth/protected-routes.ts`, answers 307 to `/auth/sign-in?redirectTo=…` when signed out, and marks signed-in pages `Cache-Control: private, no-store`. `/` and `/auth/*` stay public.
 
-Auth is Managed Better Auth through `@neondatabase/auth`. The server instance is `lib/auth/server.ts` (`NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`). The browser client is `lib/auth/client.ts`. Email sign-in and sign-up are server actions. `app/api/auth/[...path]` proxies the auth SDK. `createDefaultApiClient` sends `Authorization: Bearer <jwt>` from `authClient.getSession()`. Signed-out calls omit the header.
+Auth is Managed Better Auth through `@neondatabase/auth`. The server side is a TanStack Start adapter over `@neondatabase/auth/server` in `lib/auth/auth.server.ts` (`NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, server-only). The browser client is `lib/auth/client.ts`. Sign-in, sign-up, name change, and sign-out are server functions in `lib/auth/auth.functions.ts`; each checks the session itself. `routes/api.auth.$.ts` proxies the auth SDK. `createDefaultApiClient` sends `Authorization: Bearer <jwt>` from `authClient.getSession()`. Signed-out calls omit the header.
 
 The signed-in shell (`components/studio/`, `components/app-shell.tsx`) has two study surfaces.
 
-**Studio** uses static lesson copy in `lib/studio/content.ts` and in-memory session state in `StudioProvider` (hearts, streak, saved sentences, word-order deck). It does not read Postgres. Routes: `/home`, `/learn`, `/learn/[topic]`, `/learn/[topic]/[step]`, `/practice`, `/practice/speak`, `/practice/done`, `/explore`, `/library`, `/profile`.
+**Studio** uses static lesson copy in `lib/studio/content.ts` and in-memory session state in `StudioProvider` (hearts, streak, saved sentences, word-order deck). It does not read Postgres. Routes: `/home`, `/learn`, `/learn/$topic`, `/learn/$topic/$step`, `/practice`, `/practice/speak`, `/practice/done`, `/explore`, `/library`, `/profile`.
 
-**API-backed study** is linked from Explore and from direct routes: `/today`, `/plan`, `/situations`, `/patterns`, `/chunks`, `/dialogues`, `/drills/[patternId]`, `/practice/session`, `/export`, `/settings`, `/onboarding`. These screens call `lib/api/routes/*` through TanStack Query hooks in `lib/query/hooks/`. `QueryProvider`, mounted by `app/(app)/layout.tsx`, holds the cache for the signed-in session, so Today, Plan, and Library share fetched data, and a review, chunk edit, or persisted dialogue invalidates the screens it affects.
+**API-backed study** is linked from Explore and from direct routes: `/today`, `/plan`, `/situations`, `/patterns`, `/chunks`, `/dialogues`, `/drills/$patternId`, `/practice/session`, `/export`, `/settings`, `/onboarding`. These screens call `lib/api/routes/*` through TanStack Query hooks in `lib/query/hooks/`. `QueryProvider`, mounted by `routes/_app.tsx`, holds the cache for the signed-in session, so Today, Plan, and Library share fetched data, and a review, chunk edit, or persisted dialogue invalidates the screens it affects.
 
 Browser-local pieces on the API-backed path:
 
@@ -88,7 +88,7 @@ Browser-local pieces on the API-backed path:
 
 The next due time for a server chunk is computed only when `POST /api/practice/reviews` runs. The browser sends the grade; it does not write `user_chunks`.
 
-Page analytics is `onedollarstats` in the root layout. Error monitoring is `@sentry/nextjs`, with browser ingest tunneled through `/monitoring`. Every failure message a learner sees is reported once through `captureOperationalError`: `error` level for our failures (network, 5xx, parse, unexpected throws), `warning` for request or setup failures (HTTP 4xx, empty fields, persistence off, too few drill variants, speech or storage refusal). Correct outcomes such as a wrong drill answer or an empty export stay out.
+Page analytics is `onedollarstats` in the root route. Error monitoring is `@sentry/tanstackstart-react`, with browser ingest tunneled through `/monitoring` (`routes/monitoring.ts`). Every failure message a learner sees is reported once through `captureOperationalError`: `error` level for our failures (network, 5xx, parse, unexpected throws), `warning` for request or setup failures (HTTP 4xx, empty fields, persistence off, too few drill variants, speech or storage refusal). Correct outcomes such as a wrong drill answer or an empty export stay out.
 
 ## API
 
@@ -129,8 +129,8 @@ The Postgres `users` row is a shadow of that `sub`. `ensureLearner` inserts it o
 | Pack shape and persistence projection | `backend/src/dialogue-packs/generated-pack.ts` and `src/db/dialogue-pack-writer.ts` |
 | Server FSRS and the next due time | `backend/src/practice/fsrs-scheduler.ts` (`ts-fsrs`), applied by `src/db/practice-review-repository.ts` on `POST /api/practice/reviews` |
 | Server Anki text | `backend/src/export/anki-deck-formatter.ts` |
-| Web recall score and web drill assembly | `web/lib/practice/answer-matcher.ts`, `web/lib/drills/drill-generator.ts` |
-| Studio hearts, rewards, and word order | `web/lib/studio/model.ts` over static copy in `lib/studio/content.ts` |
+| Web recall score and web drill assembly | `web/src/lib/practice/answer-matcher.ts`, `web/src/lib/drills/drill-generator.ts` |
+| Studio hearts, rewards, and word order | `web/src/lib/studio/model.ts` over static copy in `lib/studio/content.ts` |
 
 Dialog Builder is two implementations of the same product feature. On the phone, `BuildDialogueUseCase` fills the bundled template. On the server, `generateDialoguePack` asks the model, then optionally writes the graph. The web onboarding wizard and the situation builder call the server path.
 
