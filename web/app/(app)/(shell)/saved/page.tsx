@@ -2,6 +2,11 @@ import { SavedSentencesScreen } from "@/components/saved-sentences/saved-sentenc
 
 export const metadata = { title: "Sentences you heard" };
 
-export default function SavedSentencesPage() {
-  return <SavedSentencesScreen />;
+export default async function SavedSentencesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ add?: string }>;
+}) {
+  const { add } = await searchParams;
+  return <SavedSentencesScreen startComposing={add === "1"} />;
 }

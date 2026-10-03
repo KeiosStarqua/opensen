@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { QuotesIcon } from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from "react";
+import { PlusIcon, QuotesIcon } from "@phosphor-icons/react";
 
 import { AppRoutes } from "@/lib/app-routes";
 import { queryErrorMessage } from "@/lib/query/api-query";
@@ -10,14 +10,25 @@ import { useSavedSentences, useSaveSentence } from "@/lib/query/hooks/saved-sent
 
 import { PrimaryButton } from "../studio/ui";
 
-export function SavedSentencesScreen() {
+export function SavedSentencesScreen({ startComposing = false }: { startComposing?: boolean }) {
   const list = useSavedSentences();
   const save = useSaveSentence();
   const [text, setText] = useState("");
+  const [composing, setComposing] = useState(startComposing);
+  const fieldRef = useRef<HTMLTextAreaElement>(null);
   const sentences = list.data;
   const listError = sentences ? null : queryErrorMessage(list.error);
   const saveError = queryErrorMessage(save.error);
   const trimmed = text.trim();
+
+  useEffect(() => {
+    if (composing) fieldRef.current?.focus();
+  }, [composing]);
+
+  function openComposer() {
+    setComposing(true);
+    fieldRef.current?.focus();
+  }
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -29,40 +40,53 @@ export function SavedSentencesScreen() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight">Sentences you heard</h1>
-        <p className="mt-1 max-w-xl font-semibold text-sen-muted">
-          Paste a sentence you heard or read. It stays on your account, and you can study it here.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">Sentences you heard</h1>
+          <p className="mt-1 max-w-xl font-semibold text-sen-muted">
+            Paste a sentence you heard or read. It stays on your account, and you can study it here.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={openComposer}
+          className="inline-flex h-12 items-center gap-2 rounded-full bg-sen-primary px-5 text-sm font-extrabold text-white shadow-[0_8px_16px_rgba(31,157,82,0.28)] hover:bg-sen-primary-dark"
+        >
+          <PlusIcon size={18} weight="regular" />
+          Add a sentence
+        </button>
       </div>
 
-      <form onSubmit={onSubmit} className="rounded-[22px] bg-white p-5 shadow-sm">
-        <label className="block text-sm font-extrabold" htmlFor="heard-sentence">
-          Sentence
-        </label>
-        <textarea
-          id="heard-sentence"
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          maxLength={500}
-          rows={3}
-          required
-          placeholder="Could you say that again?"
-          className="mt-2 w-full resize-y rounded-2xl bg-[#f4f8f5] px-4 py-3 font-semibold text-sen-ink outline-none ring-sen-primary placeholder:text-sen-muted focus:ring-2"
-        />
-        {saveError ? (
-          <p className="mt-2 text-sm font-bold text-sen-heart" role="alert">
-            {saveError}
-          </p>
-        ) : null}
-        <PrimaryButton
-          type="submit"
-          className="mt-4"
-          disabled={!trimmed || save.isPending}
-        >
-          {save.isPending ? "Saving…" : "Save sentence"}
-        </PrimaryButton>
-      </form>
+      {composing ? (
+        <form onSubmit={onSubmit} className="rounded-[22px] bg-white p-5 shadow-sm">
+          <label className="block text-sm font-extrabold" htmlFor="heard-sentence">
+            Sentence
+          </label>
+          <textarea
+            ref={fieldRef}
+            id="heard-sentence"
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            maxLength={500}
+            rows={3}
+            required
+            placeholder="Could you say that again?"
+            className="mt-2 w-full resize-y rounded-2xl bg-[#f4f8f5] px-4 py-3 font-semibold text-sen-ink outline-none ring-sen-primary placeholder:text-sen-muted focus:ring-2"
+          />
+          {saveError ? (
+            <p className="mt-2 text-sm font-bold text-sen-heart" role="alert">
+              {saveError}
+            </p>
+          ) : null}
+          <PrimaryButton
+            type="submit"
+            className="mt-4"
+            disabled={!trimmed || save.isPending}
+          >
+            {save.isPending ? "Saving…" : "Save sentence"}
+          </PrimaryButton>
+        </form>
+      ) : null}
 
       {list.isPending ? (
         <p className="font-semibold text-sen-muted">Loading your sentences…</p>

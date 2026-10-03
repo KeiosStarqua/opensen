@@ -15,6 +15,7 @@ class PhosphorIconsRegular {
     0xe44a,
     fontFamily: 'PhosphorRegular',
   );
+  static const IconData plus = IconData(0xe3d4, fontFamily: 'PhosphorRegular');
 }
 
 class PhosphorIconsFill {

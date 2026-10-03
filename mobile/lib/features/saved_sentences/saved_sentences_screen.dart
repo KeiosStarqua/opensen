@@ -22,16 +22,24 @@ class _SavedSentencesScreenState extends ConsumerState<SavedSentencesScreen> {
   final TextEditingController _sentence = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  final FocusNode _sentenceFocus = FocusNode();
   String? _formError;
   bool _saving = false;
   bool _signingIn = false;
+  bool _composing = false;
 
   @override
   void dispose() {
     _sentence.dispose();
     _email.dispose();
     _password.dispose();
+    _sentenceFocus.dispose();
     super.dispose();
+  }
+
+  void _openComposer() {
+    setState(() => _composing = true);
+    _sentenceFocus.requestFocus();
   }
 
   Future<void> _save() async {
@@ -84,6 +92,13 @@ class _SavedSentencesScreenState extends ConsumerState<SavedSentencesScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Sentences you heard')),
+      floatingActionButton: needsSignIn
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _openComposer,
+              icon: PhosphorIcon(PhosphorIconsRegular.plus),
+              label: const Text('Add a sentence'),
+            ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
@@ -114,9 +129,10 @@ class _SavedSentencesScreenState extends ConsumerState<SavedSentencesScreen> {
               onPressed: _signingIn ? null : _signIn,
               child: Text(_signingIn ? 'Signing in…' : 'Sign in'),
             ),
-          ] else ...<Widget>[
+          ] else if (_composing) ...<Widget>[
             TextField(
               controller: _sentence,
+              focusNode: _sentenceFocus,
               minLines: 2,
               maxLines: 4,
               decoration: const InputDecoration(

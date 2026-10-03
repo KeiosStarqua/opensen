@@ -71,7 +71,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nothing saved yet. Add a sentence you want to say later.'), findsOneWidget);
+    expect(find.byType(TextField), findsNothing);
 
+    await tester.tap(find.text('Add a sentence'));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Could you say that again?');
     await tester.tap(find.text('Save sentence'));
     await tester.pumpAndSettle();

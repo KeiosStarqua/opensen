@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
+import { PlusIcon } from "@phosphor-icons/react";
 
+import { AppRoutes } from "@/lib/app-routes";
 import {
   initialSavedIds,
   libraryFilters,
@@ -40,7 +43,16 @@ export function LibraryScreen() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-extrabold tracking-tight">My Sentences</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-3xl font-extrabold tracking-tight">My Sentences</h1>
+          <Link
+            href={`${AppRoutes.saved}?add=1`}
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-sen-primary px-4 text-sm font-extrabold text-white shadow-[0_8px_16px_rgba(31,157,82,0.28)] hover:bg-sen-primary-dark"
+          >
+            <PlusIcon size={18} weight="regular" />
+            Add a sentence
+          </Link>
+        </div>
         <SearchField
           value={query}
           onChange={setQuery}
