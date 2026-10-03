@@ -20,6 +20,8 @@ class AppRoutes {
   static String chunk(String id) => '/chunks/$id';
   static String drill(String patternId) => '/drills/$patternId';
   static const String practiceSession = '/practice/session';
+  static const String savedSentences = '/saved';
+  static String savedSentence(String id) => '/saved/$id';
   static const String settings = '/settings';
   static const String export = '/export';
 }

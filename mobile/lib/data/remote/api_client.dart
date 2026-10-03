@@ -35,34 +35,70 @@ class OpenSenApiClient {
     required this.baseUri,
     http.Client? httpClient,
     this.timeout = const Duration(seconds: 10),
+    this.accessToken,
   }) : _http = httpClient ?? http.Client();
 
   final Uri baseUri;
   final Duration timeout;
+
+  /// Bearer token for the signed-in learner. Null sends the call anonymously.
+  final Future<String?> Function()? accessToken;
+
   final http.Client _http;
 
   /// `GET` [path] (e.g. `/api/situations`) and decode the JSON body.
   /// Throws [ApiException] on any failure.
-  Future<Object?> getJson(String path, {Map<String, String>? query}) async {
-    final uri = baseUri
-        .resolve(path)
-        .replace(
+  Future<Object?> getJson(String path, {Map<String, String>? query}) {
+    return _send(
+      'GET',
+      path,
+      query: query,
+    );
+  }
+
+  /// `POST` JSON [body] to [path] and decode the response.
+  Future<Object?> postJson(String path, Object? body) {
+    return _send('POST', path, jsonBody: body);
+  }
+
+  Future<Object?> _send(
+    String method,
+    String path, {
+    Map<String, String>? query,
+    Object? jsonBody,
+  }) async {
+    final uri = baseUri.resolve(path).replace(
           queryParameters: query == null || query.isEmpty ? null : query,
         );
+    final headers = <String, String>{'Accept': 'application/json'};
+    if (jsonBody != null) {
+      headers['Content-Type'] = 'application/json';
+    }
+    final token = await accessToken?.call();
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
     final http.Response response;
     try {
-      response = await _http
-          .get(
-            uri,
-            headers: const <String, String>{'Accept': 'application/json'},
-          )
-          .timeout(timeout);
+      final request = method == 'POST'
+          ? _http.post(
+              uri,
+              headers: headers,
+              body: jsonBody == null ? null : jsonEncode(jsonBody),
+            )
+          : _http.get(uri, headers: headers);
+      response = await request.timeout(timeout);
     } on TimeoutException {
       throw const ApiException(ApiErrorKind.network, 'Request timed out');
     } catch (error) {
       throw ApiException(ApiErrorKind.network, error.toString());
     }
 
+    return _decode(response);
+  }
+
+  Object? _decode(http.Response response) {
     final ok = response.statusCode >= 200 && response.statusCode < 300;
     Object? body;
     try {
