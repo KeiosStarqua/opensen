@@ -1,16 +1,29 @@
 import { AppLink } from "@/components/app-link";
+import { SituationDetailSkeleton } from "@/components/content/content-loading";
 
 import { AppRoutes } from "@/lib/app-routes";
 import { queryErrorMessage } from "@/lib/query/api-query";
 import { useSituation } from "@/lib/query/hooks/situations";
 
 export function SituationDetail({ situationId }: { situationId: string }) {
-  const { data: detail, error: queryError, isPending: loading } =
-    useSituation(situationId);
-  const error = detail ? null : queryErrorMessage(queryError);
+  const situation = useSituation(situationId);
+  const detail = situation.data;
+  const error = detail ? null : queryErrorMessage(situation.error);
 
-  if (loading) {
-    return <p className="text-slate-600">Loading…</p>;
+  if (!detail && situation.isPending && !error) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <AppLink
+            href={AppRoutes.situations}
+            className="text-sm font-medium text-slate-600 hover:text-slate-900"
+          >
+            ← Situations
+          </AppLink>
+          <SituationDetailSkeleton />
+        </div>
+      </div>
+    );
   }
 
   if (error || !detail) {

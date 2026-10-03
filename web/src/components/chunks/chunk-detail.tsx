@@ -1,4 +1,5 @@
 import { AppLink } from "@/components/app-link";
+import { ChunkDetailSkeleton } from "@/components/content/content-loading";
 import { useAppNavigate } from "@/lib/use-app-navigate";
 import { useState } from "react";
 
@@ -49,7 +50,27 @@ export function ChunkDetailView({ chunkId }: { chunkId: string }) {
     );
   }
 
-  if (!data) return <p className="text-slate-600">Loading chunk…</p>;
+  if (!data && !chunk.isPending) {
+    return (
+      <p className="text-red-700">
+        Chunk not found{" "}
+        <AppLink href={AppRoutes.patterns} className="underline">
+          Sentence patterns
+        </AppLink>
+      </p>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="space-y-6">
+        <AppLink href={AppRoutes.patterns} className="text-sm text-slate-600">
+          ← Sentence patterns
+        </AppLink>
+        <ChunkDetailSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
