@@ -102,7 +102,8 @@ Default section order:
 3. Refresh every affected Child DOX Index
 4. Remove stale or contradictory text
 5. Run existing verification when relevant
-6. Report any docs intentionally left unchanged and why
+6. **Commits** — Land remaining edits as atomic commits per **Commits** (unless the user forbade commits this session)
+7. Report any docs intentionally left unchanged and why
 
 ## User Preferences
 
@@ -121,8 +122,14 @@ Child `AGENTS.md` files may add stack-specific seams (e.g. AI only via `backend/
 
 ### Commits
 
-- Commit as you edit: each logical change (one feature slice, fix, refactor, or doc update) lands as its own atomic commit that builds and passes its checks on its own.
-- Do not batch unrelated edits into one commit, and do not leave a session's work as one large uncommitted diff.
+When an agent edits files in this repo, commit atomically. Finish a meaningful task with those edits committed.
+
+- **One slice, one commit** — After each logical unit of work (one feature slice, bug fix, refactor, or DOX/doc update tied to the same contract), create a commit before starting unrelated edits. Each commit should build and pass the checks that apply to its scope.
+- **Stage only what belongs** — Include every file that slice requires (implementation, tests, and the nearest owning `AGENTS.md` when DOX changed). Keep unrelated paths out of the commit.
+- **Message** — Short, imperative, focused on why (repo style: a clear subject; a body only when the why needs it).
+- **No session dump** — Leave the working tree clean at closeout when the task produced committable changes.
+
+If the user explicitly asks for no commits in that session, honor that. Otherwise follow this section.
 
 ### Icons
 
