@@ -1,14 +1,11 @@
 "use client";
 
 import { BrandMark } from "@/components/brand-mark";
+import { speak } from "@/lib/speech/speak";
 
 export function LessonPreview() {
   function speakLine() {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    const utterance = new SpeechSynthesisUtterance("May I see your passport?");
-    utterance.lang = "en-US";
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+    speak("May I see your passport?", { surface: "landing" });
   }
 
   return (
