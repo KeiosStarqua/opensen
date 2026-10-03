@@ -8,16 +8,29 @@ export type OperationalTags = Record<string, string | number | undefined>;
  * actions: `Sentry.init` in the Next SDK registers that client.
  * Expected user input and HTTP 4xx stay out — callers decide that first.
  */
-export function captureOperationalError(
-  error: unknown,
-  tags: OperationalTags = {},
-): void {
-  const exception =
-    error instanceof Error ? error : new Error("Operational error");
+function normalizeTags(
+  tags: OperationalTags,
+): Record<string, string> {
   const normalized: Record<string, string> = {};
   for (const [key, value] of Object.entries(tags)) {
     if (value === undefined || value === "") continue;
     normalized[key] = String(value);
   }
-  captureException(exception, { tags: normalized });
+  return normalized;
+}
+
+export function captureOperationalError(
+  error: unknown,
+  tags: OperationalTags = {},
+  extra: OperationalTags = {},
+): void {
+  const exception =
+    error instanceof Error ? error : new Error("Operational error");
+  const normalizedExtra = normalizeTags(extra);
+  captureException(exception, {
+    tags: normalizeTags(tags),
+    ...(Object.keys(normalizedExtra).length > 0
+      ? { extra: normalizedExtra }
+      : {}),
+  });
 }

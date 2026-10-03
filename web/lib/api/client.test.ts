@@ -119,6 +119,14 @@ describe("createApiClient", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.kind).toBe("network");
+      expect(result.error.message).toBe("Failed to fetch");
+      expect(result.error.causeName).toBe("TypeError");
+      expect(result.error.causeMessage).toBe("Failed to fetch");
+      expect(result.error.bearer).toEqual({
+        attached: true,
+        length: TOKEN.length,
+        shape: "jwt",
+      });
     }
   });
 });
@@ -195,6 +203,16 @@ describe("operational error reporting", () => {
         surface: "api",
         kind: "network",
         path: "/api/practice/due",
+        apiHost: "api.test",
+        bearerAttached: "true",
+        bearerShape: "jwt",
+        bearerLength: TOKEN.length,
+      }),
+      expect.objectContaining({
+        causeName: "TypeError",
+        causeMessage: "Failed to fetch",
+        uiMessage:
+          "Could not reach the server. Check your connection and try again.",
       }),
     );
   });

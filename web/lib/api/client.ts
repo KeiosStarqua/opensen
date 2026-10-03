@@ -1,5 +1,6 @@
 import { captureOperationalError } from "@/lib/observability/operational-error";
 
+import { apiErrorSentryFields, describeBearer } from "./error-report";
 import { getSessionToken } from "./session-token";
 import type { ApiResult, BackendErrorBody } from "./types";
 import { ApiError } from "./types";
@@ -60,12 +61,20 @@ export function createDefaultApiClient(
     baseUrl,
     getAccessToken,
     reportError: (error, context) => {
-      captureOperationalError(error, {
-        surface: "api",
-        kind: error.kind,
-        status: error.status,
-        path: context.path,
-      });
+      const fields = apiErrorSentryFields(error);
+      captureOperationalError(
+        error,
+        {
+          surface: "api",
+          path: context.path,
+          apiHost: apiHost(baseUrl),
+          ...fields.tags,
+        },
+        {
+          ...fields.extra,
+          uiMessage: formatApiErrorMessage(error),
+        },
+      );
     },
     ...overrides,
   });
@@ -89,6 +98,7 @@ export function createApiClient(deps: ApiClientDeps) {
     }
 
     function fail(error: ApiError): ApiResult<T> {
+      error.bearer = describeBearer(token);
       if (isOperationalApiError(error)) {
         deps.reportError?.(error, { path });
       }
@@ -98,8 +108,20 @@ export function createApiClient(deps: ApiClientDeps) {
     let response: Response;
     try {
       response = await deps.fetch(url, { ...init, headers });
-    } catch {
-      return fail(new ApiError("network", "Network request failed"));
+    } catch (caught) {
+      const error = new ApiError(
+        "network",
+        caught instanceof Error && caught.message
+          ? caught.message
+          : "Network request failed",
+      );
+      if (caught instanceof Error) {
+        error.causeName = caught.name;
+        error.causeMessage = caught.message;
+      } else if (typeof caught === "string" && caught) {
+        error.causeMessage = caught;
+      }
+      return fail(error);
     }
 
     const text = await response.text();
@@ -182,6 +204,14 @@ export async function withRetry<T>(
     ok: false,
     error: new ApiError("network", "Retry exhausted"),
   };
+}
+
+function apiHost(baseUrl: string): string | undefined {
+  try {
+    return new URL(baseUrl).host;
+  } catch {
+    return undefined;
+  }
 }
 
 export function formatApiErrorMessage(error: ApiError): string {
