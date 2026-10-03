@@ -30,11 +30,13 @@ import {
   type OnboardingPreviewLine,
 } from "@/lib/onboarding-goals";
 import { markOnboardingComplete } from "@/lib/onboarding-storage";
+import { captureOperationalError } from "@/lib/observability/operational-error";
 import { savePracticeFocusQueue } from "@/lib/practice/focus-queue";
 import type { DuePracticeItem } from "@/lib/practice/types";
 import { queryErrorMessage } from "@/lib/query/api-query";
 import { useGenerateDialogue } from "@/lib/query/hooks/dialogues";
 import { siteConfig } from "@/lib/site";
+import { speak as speakAloud } from "@/lib/speech/speak";
 
 type GenerateResponse = {
   dialogue: {
@@ -57,11 +59,7 @@ const goalIcons: Record<OnboardingGoal["id"], Icon> = {
 };
 
 function speak(text: string) {
-  if (typeof window === "undefined" || !window.speechSynthesis) return;
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utterance);
+  speakAloud(text, { surface: "onboarding" });
 }
 
 export function OnboardingExperience() {
@@ -124,9 +122,15 @@ export function OnboardingExperience() {
 
   function startPractice() {
     if (!result?.persistence?.chunkIds?.length) {
-      setPracticeError(
-        "Practice needs persisted chunks (backend DATABASE_URL and DIALOGUE_PERSISTENCE_MODE). Try again when the API is fully configured.",
+      const message =
+        "Practice needs persisted chunks (backend DATABASE_URL and DIALOGUE_PERSISTENCE_MODE). Try again when the API is fully configured.";
+      captureOperationalError(
+        new Error(message),
+        { surface: "onboarding", reason: "persistence-off" },
+        {},
+        "warning",
       );
+      setPracticeError(message);
       return;
     }
     const items: DuePracticeItem[] = result.persistence.chunkIds.map((chunkId, index) => ({

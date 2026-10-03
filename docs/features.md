@@ -82,9 +82,12 @@ Speech-to-text match rate is enough to start; detailed pronunciation scoring is 
 
 **Take your chunks anywhere.**
 
-- Export memorization decks compatible with Anki
-- Lets learners study on mobile or desktop outside the OpenSen app
-- Preserves chunk structure and context where the format allows
+- Signed-in learners download an Anki package (`.apkg`) and open it directly in Anki
+- Each note shows the meaning on the front and the sentence on the back, with the frame when the chunk has one
+- Tags mark the note as OpenSen and record register and level. The situation name stays on the back when the chunk has one
+- Scope is the learner's enrolled chunks, or the chunks they own
+- The package is study content only. Practice progress stays in OpenSen
+- The mobile app still shares a text import. Writing a package on device is separate from this export
 
 ## Feature map
 

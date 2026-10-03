@@ -3,11 +3,13 @@ import { captureException } from "@sentry/core";
 export type OperationalTags = Record<string, string | number | undefined>;
 
 /**
- * Report a failure the UI already handled (network, 5xx, parse, auth SDK).
- * Uses `@sentry/core` so the same call works in the browser and in server
- * actions: `Sentry.init` in the Next SDK registers that client.
- * Expected user input and HTTP 4xx stay out — callers decide that first.
+ * Sentry severity for a handled failure. `error` is something broken on our
+ * side (network, 5xx, parse, auth SDK, unexpected throw). `warning` is a
+ * learner-visible message caused by the request or the setup (HTTP 4xx,
+ * empty form field, missing persistence, speech or storage refusal).
  */
+export type OperationalLevel = "error" | "warning";
+
 function normalizeTags(
   tags: OperationalTags,
 ): Record<string, string> {
@@ -19,15 +21,23 @@ function normalizeTags(
   return normalized;
 }
 
+/**
+ * Report a failure the UI already handled. Uses `@sentry/core` so the same
+ * call works in the browser and in server actions: `Sentry.init` in the Next
+ * SDK registers that client. Every red message a learner sees goes through
+ * here exactly once; pick `warning` for failures caused by input or setup.
+ */
 export function captureOperationalError(
   error: unknown,
   tags: OperationalTags = {},
   extra: OperationalTags = {},
+  level: OperationalLevel = "error",
 ): void {
   const exception =
     error instanceof Error ? error : new Error("Operational error");
   const normalizedExtra = normalizeTags(extra);
   captureException(exception, {
+    level,
     tags: normalizeTags(tags),
     ...(Object.keys(normalizedExtra).length > 0
       ? { extra: normalizedExtra }

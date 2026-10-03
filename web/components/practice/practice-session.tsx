@@ -13,6 +13,7 @@ import {
   useSubmitReview,
 } from "@/lib/query/hooks/practice";
 import { getLearnerSettings } from "@/lib/settings/learner-settings";
+import { canSpeak as speechAvailable, speak as speakNow } from "@/lib/speech/speak";
 import type { DuePracticeItem, ReviewRating } from "@/lib/practice/types";
 
 type Step = "prompt" | "reveal" | "finished";
@@ -26,9 +27,7 @@ const GRADES: { rating: ReviewRating; label: string }[] = [
 ];
 
 export function PracticeSession() {
-  const canSpeak =
-    typeof window !== "undefined" &&
-    typeof window.speechSynthesis !== "undefined";
+  const canSpeak = speechAvailable();
 
   // Items handed over by Today/Plan/Library/Dialog Builder; null means
   // "practice whatever is due".
@@ -94,10 +93,10 @@ export function PracticeSession() {
     ) {
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(currentItem.spokenText);
-    utterance.rate = settings.speechRate;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+    speakNow(currentItem.spokenText, {
+      rate: settings.speechRate,
+      surface: "practice-session",
+    });
   }, [phase, currentItem, canSpeak]);
 
   function reveal() {
@@ -111,9 +110,11 @@ export function PracticeSession() {
     setStep("reveal");
     const settings = getLearnerSettings();
     if (currentItem.mode !== "listenRepeat" && canSpeak && settings.ttsEnabled) {
-      const utterance = new SpeechSynthesisUtterance(currentItem.expected);
-      utterance.rate = settings.speechRate;
-      window.speechSynthesis.speak(utterance);
+      speakNow(currentItem.expected, {
+        rate: settings.speechRate,
+        interrupt: false,
+        surface: "practice-session",
+      });
     }
   }
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
+import { captureOperationalError } from "@/lib/observability/operational-error";
 import { savePracticeFocusQueue } from "@/lib/practice/focus-queue";
 import type { DuePracticeItem } from "@/lib/practice/types";
 import { queryErrorMessage } from "@/lib/query/api-query";
@@ -47,7 +48,14 @@ export function DialogueBuilder({ situationId, situationName }: Props) {
 
   function practiceNow() {
     if (!result?.persistence?.chunkIds.length) {
-      setPracticeError("Persistence is off or generate did not return chunk ids.");
+      const message = "Persistence is off or generate did not return chunk ids.";
+      captureOperationalError(
+        new Error(message),
+        { surface: "dialog-builder", reason: "persistence-off" },
+        {},
+        "warning",
+      );
+      setPracticeError(message);
       return;
     }
     const items: DuePracticeItem[] = result.persistence.chunkIds.map((chunkId, i) => ({

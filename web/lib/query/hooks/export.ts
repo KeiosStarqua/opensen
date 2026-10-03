@@ -2,45 +2,55 @@
 
 import { useMutation } from "@tanstack/react-query";
 
-import { isOperationalApiError, resolveApiBaseUrl } from "@/lib/api/client";
+import { reportApiError, resolveApiBaseUrl } from "@/lib/api/client";
+import { describeBearer } from "@/lib/api/error-report";
 import { getSessionToken } from "@/lib/api/session-token";
 import { ApiError } from "@/lib/api/types";
-import { captureOperationalError } from "@/lib/observability/operational-error";
 
 export type AnkiExportScope = "enrolled" | "all";
 
 /** `downloaded` started a file download; `empty` means the scope has no notes. */
 export type AnkiExportOutcome = "downloaded" | "empty";
 
-function reportExportError(error: ApiError) {
-  if (!isOperationalApiError(error)) return;
-  captureOperationalError(error, {
-    surface: "anki-export",
-    kind: error.kind,
-    status: error.status,
-    path: "/api/export/anki",
-  });
+export const ANKI_PACKAGE_MEDIA_TYPE = "application/apkg";
+
+export function ankiExportFilename(scope: AnkiExportScope): string {
+  return `opensen-anki-${scope}.apkg`;
 }
 
-function fail(error: ApiError): never {
-  reportExportError(error);
-  throw error;
-}
+const EXPORT_PATH = "/api/export/anki";
 
 /**
- * Anki deck download. The response is a file, not JSON, so this is the one
- * raw `fetch` to the API; it still sends the session bearer.
+ * Anki package download. The response is an `.apkg` file, not JSON, so this
+ * is the one raw `fetch` to the API; it still sends the session bearer and
+ * reports every failure through `reportApiError`, like `createDefaultApiClient`.
  */
-async function downloadAnkiDeck(scope: AnkiExportScope): Promise<AnkiExportOutcome> {
+export async function downloadAnkiDeck(
+  scope: AnkiExportScope,
+): Promise<AnkiExportOutcome> {
   const baseUrl = resolveApiBaseUrl();
+  const path = `${EXPORT_PATH}?scope=${scope}`;
+  let token: string | null = null;
+
+  function fail(error: ApiError): never {
+    error.bearer = describeBearer(token);
+    reportApiError(error, path, baseUrl);
+    throw error;
+  }
+
   let response: Response;
   try {
-    const token = await getSessionToken();
-    response = await fetch(`${baseUrl}/api/export/anki?scope=${scope}`, {
+    token = await getSessionToken();
+    response = await fetch(`${baseUrl}${path}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
-  } catch {
-    fail(new ApiError("network", "Network request failed"));
+  } catch (caught) {
+    const error = new ApiError("network", "Network request failed");
+    if (caught instanceof Error) {
+      error.causeName = caught.name;
+      error.causeMessage = caught.message;
+    }
+    fail(error);
   }
   if (!response.ok) {
     fail(
@@ -59,11 +69,13 @@ async function downloadAnkiDeck(scope: AnkiExportScope): Promise<AnkiExportOutco
       return "empty";
     }
   }
-  const blob = await response.blob();
+  const blob = new Blob([await response.arrayBuffer()], {
+    type: ANKI_PACKAGE_MEDIA_TYPE,
+  });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `opensen-anki-${scope}.txt`;
+  anchor.download = ankiExportFilename(scope);
   anchor.click();
   URL.revokeObjectURL(url);
   return "downloaded";

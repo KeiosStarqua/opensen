@@ -15,12 +15,13 @@ export type ApiClientDeps = {
   /** Bearer token for the signed-in learner; null sends the request anonymously. */
   getAccessToken: () => Promise<string | null>;
   /**
-   * Called for operational failures only (network, parse, HTTP >= 500).
-   * `createDefaultApiClient` reports these to Sentry. HTTP 4xx is not reported.
+   * Called once for every failed request. `createDefaultApiClient` sends it to
+   * Sentry: network, parse, and HTTP >= 500 as `error`, HTTP 4xx as `warning`.
    */
   reportError?: (error: ApiError, context: ApiErrorReportContext) => void;
 };
 
+/** Network, parse, and HTTP >= 500: the request was fine, the system was not. */
 export function isOperationalApiError(error: ApiError): boolean {
   if (error.kind === "network" || error.kind === "parse") {
     return true;
@@ -60,24 +61,35 @@ export function createDefaultApiClient(
     fetch: fetchFn,
     baseUrl,
     getAccessToken,
-    reportError: (error, context) => {
-      const fields = apiErrorSentryFields(error);
-      captureOperationalError(
-        error,
-        {
-          surface: "api",
-          path: context.path,
-          apiHost: apiHost(baseUrl),
-          ...fields.tags,
-        },
-        {
-          ...fields.extra,
-          uiMessage: formatApiErrorMessage(error),
-        },
-      );
-    },
+    reportError: (error, context) => reportApiError(error, context.path, baseUrl),
     ...overrides,
   });
+}
+
+/**
+ * Sentry report for a failed API call, shared by the JSON client and the Anki
+ * file download. Never attaches the bearer value, only its shape and length.
+ */
+export function reportApiError(
+  error: ApiError,
+  path: string,
+  baseUrl: string = resolveApiBaseUrl(),
+): void {
+  const fields = apiErrorSentryFields(error);
+  captureOperationalError(
+    error,
+    {
+      surface: "api",
+      path,
+      apiHost: apiHost(baseUrl),
+      ...fields.tags,
+    },
+    {
+      ...fields.extra,
+      uiMessage: formatApiErrorMessage(error),
+    },
+    isOperationalApiError(error) ? "error" : "warning",
+  );
 }
 
 export type ApiClient = ReturnType<typeof createApiClient>;
@@ -99,9 +111,7 @@ export function createApiClient(deps: ApiClientDeps) {
 
     function fail(error: ApiError): ApiResult<T> {
       error.bearer = describeBearer(token);
-      if (isOperationalApiError(error)) {
-        deps.reportError?.(error, { path });
-      }
+      deps.reportError?.(error, { path });
       return { ok: false, error };
     }
 

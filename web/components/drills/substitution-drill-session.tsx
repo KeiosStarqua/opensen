@@ -1,26 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AppRoutes } from "@/lib/app-routes";
 import { buildDrillItems } from "@/lib/drills/drill-generator";
+import { captureOperationalError } from "@/lib/observability/operational-error";
 import { normalizeAnswer } from "@/lib/practice/answer-matcher";
 import { queryErrorMessage } from "@/lib/query/api-query";
 import { useSentencePattern } from "@/lib/query/hooks/chunks";
+
+const TOO_FEW_VARIANTS =
+  "This pattern needs at least two fill variants per slot to run a drill.";
 
 export function SubstitutionDrillSession({ patternId }: { patternId: string }) {
   const patternQuery = useSentencePattern(patternId);
   const pattern = patternQuery.data;
   const items = useMemo(() => (pattern ? buildDrillItems(pattern) : []), [pattern]);
+  const tooFewVariants = pattern !== undefined && items.length === 0;
+
+  // Content gap in the catalog, not a network failure: the API client never
+  // sees it, so report it here once per pattern.
+  useEffect(() => {
+    if (!tooFewVariants) return;
+    captureOperationalError(
+      new Error(TOO_FEW_VARIANTS),
+      { surface: "drill", reason: "too-few-variants", patternId },
+      {},
+      "warning",
+    );
+  }, [tooFewVariants, patternId]);
   const slotsById = useMemo(
     () => new Map((pattern?.slots ?? []).map((slot) => [slot.id, slot])),
     [pattern],
   );
   // A failed background refetch keeps the drill running on cached data.
   const error = pattern
-    ? items.length === 0
-      ? "This pattern needs at least two fill variants per slot to run a drill."
+    ? tooFewVariants
+      ? TOO_FEW_VARIANTS
       : null
     : queryErrorMessage(patternQuery.error);
   const [index, setIndex] = useState(0);
