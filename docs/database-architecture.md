@@ -60,7 +60,7 @@ A sentence one learner kept: typed after hearing or reading it, or starred from 
 |--------|------|
 | `id` | Primary key |
 | `owner_id` | FK → `users`; required. Queries always filter by the signed-in learner |
-| `text` | The sentence exactly as entered (trimmed, 1–500 characters) |
+| `text` | The sentence exactly as entered (trimmed, 1–500 characters). The owner can replace it; a blank replacement is rejected |
 | `created_at` | When it was saved |
 
 ## 2. Content Knowledge Graph (core)

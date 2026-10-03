@@ -42,6 +42,12 @@ function memoryStore(): SavedSentencesRepository & {
       rows.splice(index, 1)
       return true
     },
+    async update(ownerId, id, text) {
+      const row = rows.find((item) => item.id === id && item.ownerId === ownerId)
+      if (!row) return null
+      row.text = text
+      return { id: row.id, text: row.text, createdAt: row.createdAt }
+    },
   }
 }
 
@@ -187,6 +193,65 @@ describe('saved sentences', () => {
     const loadDatabaseEnv = vi.fn()
     const app = createSavedSentencesRouter({ loadDatabaseEnv })
     const response = await app.request('/')
+    expect(response.status).toBe(401)
+    expect(loadDatabaseEnv).not.toHaveBeenCalled()
+  })
+
+  it('replaces the owner’s sentence so list and study use the new text', async () => {
+    const store = memoryStore()
+    const mine = await store.create(LEARNER_A, 'Could you say that again?')
+    const response = await appFor(LEARNER_A, store).request(`/${mine.id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text: '  Could you repeat that?  ' }),
+    })
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({
+      id: mine.id,
+      text: 'Could you repeat that?',
+    })
+
+    const listed = await appFor(LEARNER_A, store).request('/')
+    const body = await listed.json()
+    expect(body.items.map((item: { text: string }) => item.text)).toEqual([
+      'Could you repeat that?',
+    ])
+    const detail = await appFor(LEARNER_A, store).request(`/${mine.id}`)
+    expect(await detail.json()).toMatchObject({ text: 'Could you repeat that?' })
+  })
+
+  it('rejects an empty edit and leaves the saved text', async () => {
+    const store = memoryStore()
+    const mine = await store.create(LEARNER_A, 'Could you say that again?')
+    const response = await appFor(LEARNER_A, store).request(`/${mine.id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text: '   ' }),
+    })
+    expect(response.status).toBe(400)
+    expect(store.rows[0]?.text).toBe('Could you say that again?')
+  })
+
+  it('rejects an edit from another learner', async () => {
+    const store = memoryStore()
+    const theirs = await store.create(LEARNER_B, 'Theirs')
+    const response = await appFor(LEARNER_A, store).request(`/${theirs.id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text: 'Stolen' }),
+    })
+    expect(response.status).toBe(404)
+    expect(store.rows[0]?.text).toBe('Theirs')
+  })
+
+  it('rejects an anonymous edit before touching the database', async () => {
+    const loadDatabaseEnv = vi.fn()
+    const app = createSavedSentencesRouter({ loadDatabaseEnv })
+    const response = await app.request('/id-1', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text: 'Could you repeat that?' }),
+    })
     expect(response.status).toBe(401)
     expect(loadDatabaseEnv).not.toHaveBeenCalled()
   })

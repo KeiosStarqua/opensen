@@ -38,3 +38,14 @@ export function deleteSavedSentence(
     method: "DELETE",
   });
 }
+
+export function updateSavedSentence(
+  client: ApiClient,
+  id: string,
+  text: string,
+): Promise<ApiResult<SavedSentence>> {
+  return client.request(`/api/saved-sentences/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ text }),
+  });
+}

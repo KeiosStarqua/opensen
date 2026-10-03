@@ -39,10 +39,7 @@ export function useSaveSentence() {
     mutationFn: async (text: string) =>
       unwrapApiResult(savedSentencesApi.createSavedSentence(client, text)),
     onSuccess: (sentence) => {
-      queryClient.setQueryData(queryKeys.savedSentences.detail(sentence.id), sentence);
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.savedSentences.list(),
-      });
+      rememberSavedSentence(queryClient, sentence);
     },
   });
 }
@@ -65,6 +62,19 @@ export function useUnsaveSentences() {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.savedSentences.list(),
       });
+    },
+  });
+}
+
+/** Replace the wording of a sentence this account already saved. */
+export function useUpdateSavedSentence(id: string) {
+  const client = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (text: string) =>
+      unwrapApiResult(savedSentencesApi.updateSavedSentence(client, id, text)),
+    onSuccess: (sentence) => {
+      rememberSavedSentence(queryClient, sentence);
     },
   });
 }
@@ -98,4 +108,25 @@ export function useSavedSentenceListActions() {
     error: queryErrorMessage(save.error) ?? queryErrorMessage(unsave.error),
     listError: rows ? null : queryErrorMessage(list.error),
   };
+}
+
+function rememberSavedSentence(
+  queryClient: ReturnType<typeof useQueryClient>,
+  sentence: SavedSentence,
+) {
+  queryClient.setQueryData(queryKeys.savedSentences.detail(sentence.id), sentence);
+  queryClient.setQueryData<{ items: SavedSentence[] }>(
+    queryKeys.savedSentences.list(),
+    (current) =>
+      current
+        ? {
+            items: current.items.map((item) =>
+              item.id === sentence.id ? sentence : item,
+            ),
+          }
+        : current,
+  );
+  void queryClient.invalidateQueries({
+    queryKey: queryKeys.savedSentences.list(),
+  });
 }

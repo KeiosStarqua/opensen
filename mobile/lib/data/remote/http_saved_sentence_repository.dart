@@ -42,6 +42,21 @@ class HttpSavedSentenceRepository implements SavedSentenceRepository {
     }
   }
 
+  @override
+  Future<SavedSentence?> update(String id, String text) async {
+    try {
+      final body = await _guard(
+        () => _client.patchJson('/api/saved-sentences/$id', <String, String>{
+          'text': text,
+        }),
+      );
+      return _sentence(body);
+    } on ApiException catch (error) {
+      if (error.status == 404) return null;
+      rethrow;
+    }
+  }
+
   Future<Object?> _guard(Future<Object?> Function() call) async {
     try {
       return await call();

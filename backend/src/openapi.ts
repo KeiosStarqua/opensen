@@ -346,6 +346,37 @@ export function buildOpenApiDocument(baseUrl?: string) {
             '404': { $ref: '#/components/responses/NotFound' },
           },
         },
+        patch: {
+          tags: ['Saved sentences'],
+          summary: 'Replace the text of one saved sentence',
+          description:
+            'The caller must own the row. The study step reads this text, so the new wording is what they practice. Library’s saved list shows the same text. Missing and other learners’ rows are both 404. Empty text is rejected.',
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          ],
+          security: signedIn,
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/SaveSentence' },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Sentence updated.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/SavedSentence' },
+                },
+              },
+            },
+            '400': { $ref: '#/components/responses/BadRequest' },
+            '401': { $ref: '#/components/responses/Unauthorized' },
+            '404': { $ref: '#/components/responses/NotFound' },
+          },
+        },
       },
       '/api/chunks': {
         get: {
