@@ -308,13 +308,6 @@ export const initialTopicProgress: Record<string, TopicProgress> = {
   school: { done: 0, total: 6 },
 };
 
-export const initialSavedIds = [
-  "travel-station",
-  "travel-passport",
-  "daily-restroom",
-  "shopping-price",
-];
-
 export const libraryFilters = [
   { id: "saved", label: "Saved" },
   { id: "travel", label: "Travel" },

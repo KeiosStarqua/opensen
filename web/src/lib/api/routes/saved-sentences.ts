@@ -30,6 +30,15 @@ export function createSavedSentence(
   });
 }
 
+export function deleteSavedSentence(
+  client: ApiClient,
+  id: string,
+): Promise<ApiResult<void>> {
+  return client.request(`/api/saved-sentences/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+}
+
 export function updateSavedSentence(
   client: ApiClient,
   id: string,

@@ -14,6 +14,8 @@ export type SavedSentencesRepository = {
   create(ownerId: string, text: string): Promise<SavedSentence>
   list(ownerId: string): Promise<SavedSentence[]>
   getById(ownerId: string, id: string): Promise<SavedSentence | null>
+  /** Removes the row when this learner owns it. Returns false for a missing or foreign id. */
+  delete(ownerId: string, id: string): Promise<boolean>
   /** Null when this owner has no row with that id. Does not reveal another learner’s row. */
   update(ownerId: string, id: string, text: string): Promise<SavedSentence | null>
 }
@@ -67,6 +69,16 @@ export function createSavedSentencesRepository(
         )
         .limit(1)
       return row ? toSentence(row) : null
+    },
+
+    async delete(ownerId, id) {
+      const deleted = await database
+        .delete(savedSentences)
+        .where(
+          and(eq(savedSentences.id, id), eq(savedSentences.ownerId, ownerId)),
+        )
+        .returning()
+      return deleted.length > 0
     },
 
     async update(ownerId, id, text) {
